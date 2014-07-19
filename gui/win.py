@@ -8,11 +8,12 @@ from settings import *
 class Win:
     """Abstract window class"""
 
-    def __init__(self, settings, width=None, height=None, x=0, y=0):
+    def __init__(self, settings, canvas, width=None, height=None, x=0, y=0):
         self.settings = settings
-        self.resize(width, height)
-        self.x, self.y = x, y
         self.enabled = True
+        self.g = canvas
+        self.x, self.y = x, y
+        self.resize(width, height)
 
     def enable(self):
         """Enable this window."""
@@ -34,6 +35,22 @@ class Win:
     def draw(self):
         """This draw method needs to be overridden to draw the window content."""
         pass
+
+    # Some draw methods to make sure all my subclasses don't have to bother about tkinters canvas
+    def drawString(self, text, c, x, y):
+        pass
+
+    def drawLine(self, c, x, y, p, q, w=1):
+        self.g.create_line(x, y, p, q, fill=c) # Todo: use the line width
+
+    def drawRect(self, c, x, y, w, h):
+        self.g.create_rectangle(x, y, w, h, fill=c)
+
+    def drawImg(self, x, y):
+        pass
+
+    def clear(self, c):
+        self.drawRect(c, self.x, self.y, self.width, self.height)
 
 #     @staticmethod
 #     def get_coords(lines, pos):
@@ -70,3 +87,8 @@ class Win:
 #         lines = [line[xoffset:xoffset + self.width - 1] for line in lines]
 # 
 #         return '\n'.join(lines)
+
+
+if __name__ == '__main__':
+    import main
+    main.main()
