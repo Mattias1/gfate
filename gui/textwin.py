@@ -1,4 +1,5 @@
 from win import *
+from colors import *
 
 
 class TextWin(Win):
@@ -7,8 +8,14 @@ class TextWin(Win):
     def __init__(self, settings, canvas):
         Win.__init__(self, settings, canvas)
 
+        self.img = self.loadImg("space.png")
+        self.draw()
+
     def draw(self):
-        self.clear("black")
+        self.fullClear("black")
+        self.drawRect("red", 10,10, 80, 200)
+        self.drawString("Hi there", "white", 60, 0)
+        self.drawImg(100, 100, self.img)
 
 
 if __name__ == '__main__':

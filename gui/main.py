@@ -19,7 +19,7 @@ class Application(Frame):
         self.canvas.height = settings.height
         self.canvas.locateInside(self, d=-2)
 
-        textWindow = TextWin(settings, self.canvas)
+        self.textWindow = TextWin(settings, self.canvas)
 
     def leftClick(self, event):
         pass
