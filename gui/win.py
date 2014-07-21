@@ -51,7 +51,10 @@ class Win:
         self.g.create_line(x, y, p, q, fill=c) # Todo: use the line width
 
     def drawRect(self, c, x, y, w, h):
-        self.g.create_rectangle(x, y, w, h, fill=c)
+        self.g.create_rectangle(x, y, x+w, y+h, fill=c, width=0)
+
+    def drawRectBorder(self, c, x, y, w, h, borderw=1):
+        self.g.create_rectangle(x, y, x+w, y+h, fill=c, width=borderw)
 
     def loadImg(self, path):
         return ImageTk.PhotoImage(Image.open("../img/" + path))
@@ -66,6 +69,7 @@ class Win:
     def clear(self, c):
         self.drawRect(c, self.x, self.y, self.width, self.height)
 
+#     Things Chiel used in his win class and might be usefull later on
 #     @staticmethod
 #     def get_coords(lines, pos):
 #         """Compute the coordinates of pos in lines."""

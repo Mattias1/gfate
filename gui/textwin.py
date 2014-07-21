@@ -13,7 +13,7 @@ class TextWin(Win):
 
     def draw(self):
         self.fullClear("black")
-        self.drawRect("red", 10,10, 80, 200)
+        self.drawRect("red", 0, 0, 151, 200)
         self.drawString("Hi there", "white", 60, 0)
         self.drawImg(100, 100, self.img)
 
