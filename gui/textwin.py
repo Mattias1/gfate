@@ -8,14 +8,12 @@ class TextWin(Win):
     def __init__(self, settings, canvas):
         Win.__init__(self, settings, canvas)
 
-        self.img = self.loadImg("space.png")
         self.draw()
 
     def draw(self):
-        self.fullClear("black")
-        self.drawRect("red", 0, 0, 151, 200)
-        self.drawString("Hi there", "white", 60, 0)
-        self.drawImg(100, 100, self.img)
+        self.fullClear()
+        self.drawTabs()
+        self.drawString("The layout of the fate GUI.", self.colors.text, 6, 40)
 
 
 if __name__ == '__main__':

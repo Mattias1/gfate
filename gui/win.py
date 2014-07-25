@@ -5,6 +5,8 @@ The Win class is meant to hide some common interaction with curses.
 from tkinter import *
 from PIL import Image, ImageTk
 from settings import *
+from colors import *
+import copy
 
 
 class Win:
@@ -12,10 +14,12 @@ class Win:
 
     def __init__(self, settings, canvas, width=None, height=None, x=0, y=0):
         self.settings = settings
+        self.colors = settings.colors
         self.enabled = True
         self.g = canvas
         self.x, self.y = x, y
         self.resize(width, height)
+        self.initTabs()
 
     def enable(self):
         """Enable this window."""
@@ -40,34 +44,84 @@ class Win:
     # Some draw methods to make sure all my subclasses don't have to bother about tkinters canvas
     def drawFString(self, text, c, x, y, font, anchor="nw"):
         self.g.create_text(x, y, anchor=anchor, text=text, fill=c, font=font)
-
     def drawUIString(self, text, c, x, y, anchor="nw"):
-        self.drawFString(text, c, x, y, self.settings.uifont)
-
+        self.drawFString(text, c, x, y, self.settings.uifont, anchor=anchor)
     def drawString(self, text, c, x, y, anchor="nw"):
-        self.drawFString(text, c, x, y, self.settings.userfont)
+        self.drawFString(text, c, x, y, self.settings.userfont, anchor=anchor)
 
     def drawLine(self, c, x, y, p, q, w=1):
         self.g.create_line(x, y, p, q, fill=c) # Todo: use the line width
 
     def drawRect(self, c, x, y, w, h):
         self.g.create_rectangle(x, y, x+w, y+h, fill=c, width=0)
-
     def drawRectBorder(self, c, x, y, w, h, borderw=1):
         self.g.create_rectangle(x, y, x+w, y+h, fill=c, width=borderw)
 
+    def loadImgPIL(self, path):
+        return Image.open("../img/" + path)
+    def loadImgTk(self, img):
+        return ImageTk.PhotoImage(img)
     def loadImg(self, path):
-        return ImageTk.PhotoImage(Image.open("../img/" + path))
+        return self.loadImgTk(self.loadImgPIL(path))
 
-    def drawImg(self, x, y, img):
-        self.g.create_image(x, y, image=img)
+    def drawImg(self, x, y, img, anchor="nw"):
+        self.g.create_image(x, y, image=img, anchor=anchor)
 
-    def fullClear(self, c):
+    def fullClear(self):
         self.g.delete(ALL)
-        self.clear(c)
-
+        self.clear(self.colors.bg)
     def clear(self, c):
         self.drawRect(c, self.x, self.y, self.width, self.height)
+
+    # Tabs
+    def initTabs(self):
+        # TAB COLORS TODO: http://stackoverflow.com/questions/3596433/is-it-possible-to-change-the-color-of-one-individual-pixel-in-python
+        # Load all images and their pixel maps
+        tabr  = self.loadImgPIL("tab.png")
+        w, h  = tabr.size
+        tabl  = Image.new("RGBA", tabr.size)
+        tabc  = Image.new("RGBA", (1, h))
+        tabbg = Image.new("RGBA", (1, h))
+        pixr  = tabr.load()
+        pixl  = tabl.load()
+        pixc  = tabc.load()
+        pixbg = tabbg.load()
+
+        # Create the tabl image
+        for x in range(w):
+            for y in range(h):
+                pixl[x, y] = pixr[w - 1 - x, y]
+
+        # Create the tabc and tabbg image
+        for y in range(h):
+            pixc[0, y] = pixr[0, y]
+            pixbg[0, y] = pixr[w - 1, y]
+        tabc = tabc.resize((self.settings.tabwidth, h), Image.NEAREST)
+        tabbg = tabbg.resize((self.settings.width, h), Image.NEAREST)
+
+        # Convert the images to Tk images
+        self.tabImg = [self.loadImgTk(t) for t in [tabl, tabc, tabr, tabbg]]
+
+    def drawTab(self, x, y, text):
+        w, h = self.tabImg[0].width(), self.tabImg[0].height()
+        self.drawImg(x, y, self.tabImg[0])
+        self.drawImg(x + w, y, self.tabImg[1])
+        self.drawImg(x + w + self.settings.tabwidth, y, self.tabImg[2])
+        self.drawUIString(text, self.colors.tabtext, x + w + self.settings.tabwidth // 2, y + h // 2 + 2, "center")
+
+    def drawTabs(self, y=3):
+        # Draw tab background
+        w = self.settings.tabwidth + 30
+        self.drawRect(self.colors.tabbg, 0, 0, self.settings.width, y + self.tabImg[0].height())
+        # Draw inactive tabs
+        self.drawTab(0, y, 'inactive tab')
+        self.drawTab(w, y, 'inactive tab')
+        self.drawTab(3 * w, y, 'inactive tab')
+        # Draw tab bottom
+        self.drawImg(0, y, self.tabImg[3])
+        # Draw the active tab
+        self.drawTab(2 * w, y, 'active tab')
+
 
 #     Things Chiel used in his win class and might be usefull later on
 #     @staticmethod

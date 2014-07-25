@@ -1,10 +1,15 @@
+from colors import *
+
+
 class Settings():
     """The settings class"""
 
     def __init__(self):
         self.width, self.height = 800, 500
-        self.uifont = ('Arial', 12)
-        self.userfont = ('Consolas', 12)
+        self.uifont = ('Consoloas', 10)
+        self.userfont = ('Consolas', 10)
+        self.tabwidth = 100
+        self.colors = Colors()
 
     def load(self):
         """Load all the settings from json file"""

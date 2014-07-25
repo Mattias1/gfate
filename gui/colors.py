@@ -2,7 +2,10 @@ class Colors():
     """The colors class"""
 
     def __init__(self):
-        pass
+        self.bg = "#888"
+        self.tabbg = "#444"
+        self.text = "#fff"
+        self.tabtext = "#fff"
 
     def load(self):
         """Load all the colors from json file"""
