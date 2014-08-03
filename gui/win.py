@@ -75,38 +75,54 @@ class Win:
 
     # Tabs
     def initTabs(self):
-        # TAB COLORS TODO: http://stackoverflow.com/questions/3596433/is-it-possible-to-change-the-color-of-one-individual-pixel-in-python
         # Load all images and their pixel maps
-        tabr  = self.loadImgPIL("tab.png")
-        w, h  = tabr.size
-        tabl  = Image.new("RGBA", tabr.size)
-        tabc  = Image.new("RGBA", (1, h))
-        tabbg = Image.new("RGBA", (1, h))
-        pixr  = tabr.load()
-        pixl  = tabl.load()
-        pixc  = tabc.load()
-        pixbg = tabbg.load()
+        tabr = self.loadImgPIL("tab.png")
+        w, h = tabr.size
+        piltabs = [Image.new("RGBA", tabr.size), Image.new("RGBA", (1, h)), tabr]
+        for i in range(3):
+            piltabs.append(piltabs[i].copy())
+        piltabs.append(Image.new("RGBA", (1, h)))
+        pixs = [t.load() for t in piltabs]
 
-        # Create the tabl image
-        for x in range(w):
+        # Paint the tabr images
+        if tabr.mode == 'RGB' or tabr.mode == 'RGBA':
+            for nr in [2,5]:
+                pixr = pixs[nr]
+                tabColor = self.colors.toTuple(self.colors.bg if nr == 2 else self.colors.inactivetab)
+                diff = [tabColor[i] - pixr[0, h-1][i] for i in range(3)]
+                temp = []
+                for y in range(h):
+                    for x in range(w):
+                        temp = [min(255, max(0, pixr[x, y][i] + diff[i])) for i in range(3)]
+                        temp.append(pixr[x, y][3])
+                        pixr[x, y] = tuple(temp)
+
+        # Create the tabl images
+        for nr in [0, 3]:
+            pixl, pixr = pixs[nr], pixs[nr + 2]
             for y in range(h):
-                pixl[x, y] = pixr[w - 1 - x, y]
+                for x in range(w):
+                    pixl[x, y] = pixr[w - 1 - x, y]
 
-        # Create the tabc and tabbg image
+        # Create the tabc and tabbg images
+        for nr in [1, 4]:
+            pixc, pixr = pixs[nr], pixs[nr + 1]
+            for y in range(h):
+                pixc[0, y] = pixr[0, y]
+            piltabs[nr] = piltabs[nr].resize((self.settings.tabwidth, h), Image.NEAREST)
         for y in range(h):
-            pixc[0, y] = pixr[0, y]
-            pixbg[0, y] = pixr[w - 1, y]
-        tabc = tabc.resize((self.settings.tabwidth, h), Image.NEAREST)
-        tabbg = tabbg.resize((self.settings.width, h), Image.NEAREST)
+            pixs[6][0, y] = pixs[2][w - 1, y]
+        piltabs[6] = piltabs[6].resize((self.settings.width, h), Image.NEAREST)
 
         # Convert the images to Tk images
-        self.tabImg = [self.loadImgTk(t) for t in [tabl, tabc, tabr, tabbg]]
+        self.tabImg = [self.loadImgTk(t) for t in piltabs]
 
-    def drawTab(self, x, y, text):
-        w, h = self.tabImg[0].width(), self.tabImg[0].height()
-        self.drawImg(x, y, self.tabImg[0])
-        self.drawImg(x + w, y, self.tabImg[1])
-        self.drawImg(x + w + self.settings.tabwidth, y, self.tabImg[2])
+    def drawTab(self, x, y, text, active=False):
+        offset = 0 if active else 3
+        w, h = self.tabImg[offset].width(), self.tabImg[offset].height()
+        self.drawImg(x, y, self.tabImg[offset])
+        self.drawImg(x + w, y, self.tabImg[1 + offset])
+        self.drawImg(x + w + self.settings.tabwidth, y, self.tabImg[2 + offset])
         self.drawUIString(text, self.colors.tabtext, x + w + self.settings.tabwidth // 2, y + h // 2 + 2, "center")
 
     def drawTabs(self, y=3):
@@ -118,9 +134,9 @@ class Win:
         self.drawTab(w, y, 'inactive tab')
         self.drawTab(3 * w, y, 'inactive tab')
         # Draw tab bottom
-        self.drawImg(0, y, self.tabImg[3])
+        self.drawImg(0, y, self.tabImg[6])
         # Draw the active tab
-        self.drawTab(2 * w, y, 'active tab')
+        self.drawTab(2 * w, y, 'active tab', True)
 
 
 #     Things Chiel used in his win class and might be usefull later on

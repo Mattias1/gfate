@@ -8,7 +8,7 @@ class Settings():
         self.width, self.height = 800, 500
         self.uifont = ('Consoloas', 10)
         self.userfont = ('Consolas', 10)
-        self.tabwidth = 100
+        self.tabwidth = 110
         self.colors = Colors()
 
     def load(self):
