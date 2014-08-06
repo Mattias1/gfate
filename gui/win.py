@@ -18,8 +18,7 @@ class Win:
         self.enabled = True
         self.g = canvas
         self.x, self.y = x, y
-        self.resize(width, height)
-        self.initTabs()
+        self.resize(width, height, False)
 
     def enable(self):
         """Enable this window."""
@@ -29,13 +28,16 @@ class Win:
         """Disable this window."""
         self.enabled = False
 
-    def resize(self, w=None, h=None):
+    def resize(self, w=None, h=None, draw=True):
         """Resize window."""
         if w == None:
             w = self.settings.width
         if h == None:
             h = self.settings.height
         self.width, self.height = w, h
+        self.initTabs()
+        if draw:
+            self.draw()
 
     def draw(self):
         """This draw method needs to be overridden to draw the window content."""
@@ -112,7 +114,7 @@ class Win:
             piltabs[nr] = piltabs[nr].resize((self.settings.tabwidth, h), Image.NEAREST)
         for y in range(h):
             pixs[6][0, y] = pixs[2][w - 1, y]
-        piltabs[6] = piltabs[6].resize((self.settings.width, h), Image.NEAREST)
+        piltabs[6] = piltabs[6].resize((self.width, h), Image.NEAREST)
 
         # Convert the images to Tk images
         self.tabImg = [self.loadImgTk(t) for t in piltabs]
@@ -128,7 +130,7 @@ class Win:
     def drawTabs(self, y=3):
         # Draw tab background
         w = self.settings.tabwidth + 30
-        self.drawRect(self.colors.tabbg, 0, 0, self.settings.width, y + self.tabImg[0].height())
+        self.drawRect(self.colors.tabbg, 0, 0, self.width, y + self.tabImg[0].height())
         # Draw inactive tabs
         self.drawTab(0, y, 'inactive tab')
         self.drawTab(w, y, 'inactive tab')

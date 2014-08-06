@@ -3,7 +3,10 @@ from colors import *
 
 
 class TextWin(Win):
-    """The settings class"""
+    """The text window class
+    
+    This is the main window for the gfate text editor.
+    """
 
     def __init__(self, settings, canvas):
         Win.__init__(self, settings, canvas)
