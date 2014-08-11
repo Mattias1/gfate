@@ -1,22 +1,19 @@
 from win import *
 from colors import *
 
-
 class TextWin(Win):
     """The text window class
     
-    This is the main window for the gfate text editor.
+    This class represents the window for a single file.
     """
 
-    def __init__(self, settings, canvas):
-        Win.__init__(self, settings, canvas)
+    def __init__(self, settings, app, title):
+        Win.__init__(self, settings, app)
 
-        self.draw()
+        self.title = title
 
     def draw(self):
-        self.fullClear()
-        self.drawTabs()
-        self.drawString("The layout of the fate GUI.", self.colors.text, 6, 40)
+        self.drawString("The layout of the fate GUI.\nThe title of this textwin is '{}'.".format(self.title), self.colors.text, 6, 40)
 
 
 if __name__ == '__main__':

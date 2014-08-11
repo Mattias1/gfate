@@ -12,11 +12,12 @@ import copy
 class Win:
     """Abstract window class"""
 
-    def __init__(self, settings, canvas, width=None, height=None, x=0, y=0):
+    def __init__(self, settings, app, width=None, height=None, x=0, y=0):
         self.settings = settings
         self.colors = settings.colors
         self.enabled = True
-        self.g = canvas
+        self.app = app
+        self.g = app.canvas
         self.x, self.y = x, y
         self.resize(width, height, False)
 
@@ -28,6 +29,20 @@ class Win:
         """Disable this window."""
         self.enabled = False
 
+    def quit(self):
+        """Quit the application"""
+        self.app.quit()
+
+    def inside(self, x, y):
+        return self.x <= x <= self.x + self.width and self.y <= y <= self.y + self.height
+
+    def onMouseDown(self, x, y, btnNr):
+        pass
+    def onMouseMove(self, x, y, btnNr):
+        pass
+    def onMouseUp(self, x, y, btnNr):
+        pass
+
     def resize(self, w=None, h=None, draw=True):
         """Resize window."""
         if w == None:
@@ -35,7 +50,6 @@ class Win:
         if h == None:
             h = self.settings.height
         self.width, self.height = w, h
-        self.initTabs()
         if draw:
             self.draw()
 
@@ -74,71 +88,6 @@ class Win:
         self.clear(self.colors.bg)
     def clear(self, c):
         self.drawRect(c, self.x, self.y, self.width, self.height)
-
-    # Tabs
-    def initTabs(self):
-        # Load all images and their pixel maps
-        tabr = self.loadImgPIL("tab.png")
-        w, h = tabr.size
-        piltabs = [Image.new("RGBA", tabr.size), Image.new("RGBA", (1, h)), tabr]
-        for i in range(3):
-            piltabs.append(piltabs[i].copy())
-        piltabs.append(Image.new("RGBA", (1, h)))
-        pixs = [t.load() for t in piltabs]
-
-        # Paint the tabr images
-        if tabr.mode == 'RGB' or tabr.mode == 'RGBA':
-            for nr in [2,5]:
-                pixr = pixs[nr]
-                tabColor = self.colors.toTuple(self.colors.bg if nr == 2 else self.colors.inactivetab)
-                diff = [tabColor[i] - pixr[0, h-1][i] for i in range(3)]
-                temp = []
-                for y in range(h):
-                    for x in range(w):
-                        temp = [min(255, max(0, pixr[x, y][i] + diff[i])) for i in range(3)]
-                        temp.append(pixr[x, y][3])
-                        pixr[x, y] = tuple(temp)
-
-        # Create the tabl images
-        for nr in [0, 3]:
-            pixl, pixr = pixs[nr], pixs[nr + 2]
-            for y in range(h):
-                for x in range(w):
-                    pixl[x, y] = pixr[w - 1 - x, y]
-
-        # Create the tabc and tabbg images
-        for nr in [1, 4]:
-            pixc, pixr = pixs[nr], pixs[nr + 1]
-            for y in range(h):
-                pixc[0, y] = pixr[0, y]
-            piltabs[nr] = piltabs[nr].resize((self.settings.tabwidth, h), Image.NEAREST)
-        for y in range(h):
-            pixs[6][0, y] = pixs[2][w - 1, y]
-        piltabs[6] = piltabs[6].resize((self.width, h), Image.NEAREST)
-
-        # Convert the images to Tk images
-        self.tabImg = [self.loadImgTk(t) for t in piltabs]
-
-    def drawTab(self, x, y, text, active=False):
-        offset = 0 if active else 3
-        w, h = self.tabImg[offset].width(), self.tabImg[offset].height()
-        self.drawImg(x, y, self.tabImg[offset])
-        self.drawImg(x + w, y, self.tabImg[1 + offset])
-        self.drawImg(x + w + self.settings.tabwidth, y, self.tabImg[2 + offset])
-        self.drawUIString(text, self.colors.tabtext, x + w + self.settings.tabwidth // 2, y + h // 2 + 2, "center")
-
-    def drawTabs(self, y=3):
-        # Draw tab background
-        w = self.settings.tabwidth + 30
-        self.drawRect(self.colors.tabbg, 0, 0, self.width, y + self.tabImg[0].height())
-        # Draw inactive tabs
-        self.drawTab(0, y, 'inactive tab')
-        self.drawTab(w, y, 'inactive tab')
-        self.drawTab(3 * w, y, 'inactive tab')
-        # Draw tab bottom
-        self.drawImg(0, y, self.tabImg[6])
-        # Draw the active tab
-        self.drawTab(2 * w, y, 'active tab', True)
 
 
 #     Things Chiel used in his win class and might be usefull later on
