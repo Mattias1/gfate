@@ -1,6 +1,7 @@
 from win import *
 from colors import *
 
+
 class TextWin(Win):
     """The text window class
     

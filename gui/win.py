@@ -42,6 +42,8 @@ class Win:
         pass
     def onMouseUp(self, x, y, btnNr):
         pass
+    def onKeyDown(self, c):
+        pass
 
     def resize(self, w=None, h=None, draw=True):
         """Resize window."""
@@ -59,19 +61,19 @@ class Win:
 
     # Some draw methods to make sure all my subclasses don't have to bother about tkinters canvas
     def drawFString(self, text, c, x, y, font, anchor="nw"):
-        self.g.create_text(x, y, anchor=anchor, text=text, fill=c, font=font)
+        self.g.create_text(self.x+x, self.y+y, anchor=anchor, text=text, fill=c, font=font)
     def drawUIString(self, text, c, x, y, anchor="nw"):
         self.drawFString(text, c, x, y, self.settings.uifont, anchor=anchor)
     def drawString(self, text, c, x, y, anchor="nw"):
         self.drawFString(text, c, x, y, self.settings.userfont, anchor=anchor)
 
     def drawLine(self, c, x, y, p, q, w=1):
-        self.g.create_line(x, y, p, q, fill=c) # Todo: use the line width
+        self.g.create_line(self.x+x, self.y+y, self.x+p, self.y+q, fill=c) # Todo: use the line width
 
     def drawRect(self, c, x, y, w, h):
-        self.g.create_rectangle(x, y, x+w, y+h, fill=c, width=0)
+        self.drawRectBorder(c, x, y, w, h, 0)
     def drawRectBorder(self, c, x, y, w, h, borderw=1):
-        self.g.create_rectangle(x, y, x+w, y+h, fill=c, width=borderw)
+        self.g.create_rectangle(self.x+x, self.y+y, self.x+x+w, self.y+y+h, fill=c, width=borderw)
 
     def loadImgPIL(self, path):
         return Image.open("../img/" + path)
@@ -87,7 +89,7 @@ class Win:
         self.g.delete(ALL)
         self.clear(self.colors.bg)
     def clear(self, c):
-        self.drawRect(c, self.x, self.y, self.width, self.height)
+        self.drawRect(c, 0, 0, self.width, self.height)
 
 
 #     Things Chiel used in his win class and might be usefull later on

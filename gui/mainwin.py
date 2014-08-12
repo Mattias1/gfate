@@ -1,6 +1,7 @@
 from win import *
 from colors import *
 from textwin import TextWin
+from commandwin import CommandWin
 from PIL import Image, ImageTk
 
 
@@ -16,6 +17,8 @@ class MainWin(Win):
         self.selectedtab = -1 # Mark the tab that is selected by the mouse
 
         self.textwins = []
+        self.commandwin = CommandWin(settings, app)
+
         self.addWin("First window.txt")
         self.addWin("Second.txt")
         self.addWin("Third.txt")
@@ -55,10 +58,12 @@ class MainWin(Win):
         self.fullClear()
         self.drawTabs()
 
-        # Draw my active child
+        # Draw my active children
         for win in self.textwins:
             if win.enabled:
                 win.draw()
+        if self.commandwin.enabled:
+            self.commandwin.draw()
 
     def onMouseDown(self, x, y, btnNr):
         # Hit tabs
@@ -101,12 +106,27 @@ class MainWin(Win):
         for win in self.textwins:
             if win.inside(x, y):
                 win.onMouseUp(x, y, btnNr)
+    def onKeyDown(self, c):
+        if c == ':':
+            self.commandwin.enable()
+        elif c == '\\x08':
+            self.commandwin.disable()
+        elif c == '\\r' and self.commandwin.enabled:
+            self.quit()
+        self.draw()
 
     def resize(self, w=None, h=None, draw=True):
         """Override the resize window"""
         Win.resize(self, w, h, False)
 
         self.initTabs()
+
+        try:
+            for win in self.textwins:
+                win.resize(w, h, False)
+            self.commandwin.resize(w, h, False)
+        except Exception:
+            pass
 
         if draw:
             self.draw()
@@ -167,8 +187,12 @@ class MainWin(Win):
         self.drawImg(x + w + self.settings.tabwidth, y, self.tabImg[2 + offset])
         self.drawUIString(text, self.colors.tabtext, x + w + self.settings.tabwidth // 2, y + h // 2 + 2, "center")
 
-    def drawTabs(self, y=3):
+    def drawTabs(self):
         """Manage the drawing of all the tabs"""
+        y = self.settings.tabheight - self.tabImg[0].height()
+        if y < 0:
+            self.settings.tabheight = self.tabImg[0].height()
+            y = 0
         # Draw tab background
         w = self.settings.tabwidth + self.settings.tabwidthextra
         self.drawRect(self.colors.tabbg, 0, 0, self.width, y + self.tabImg[0].height())

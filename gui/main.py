@@ -64,6 +64,7 @@ class Application(Frame):
         print('OnRightUp: {}, {}'.format(event.x, event.y))
 
     def onKeyDown(self, event):
+        self.mainWindow.onKeyDown(repr(event.char)[1:-1])
         print('OnKeyPress: {}'.format(repr(event.char)))
 
     def onResizeOrMove(self, event):

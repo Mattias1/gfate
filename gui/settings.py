@@ -1,4 +1,4 @@
-from colors import *
+import colors
 
 
 class Settings():
@@ -9,8 +9,11 @@ class Settings():
         self.uifont = ('Consoloas', 10)
         self.userfont = ('Consolas', 10)
         self.tabwidth = 110
+        self.tabheight = 36
         self.tabwidthextra = 30
-        self.colors = Colors()
+        self.colors = colors.Colors()
+        self.commandwidth = 300
+        self.commandheight = 38
 
     def load(self):
         """Load all the settings from json file"""
