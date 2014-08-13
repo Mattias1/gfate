@@ -131,6 +131,21 @@ class MainWin(Win):
         if draw:
             self.draw()
 
+    def loop(self):
+        """This method is being called every X miliseconds"""
+        # Call my (active) children
+        redraw = False
+        for win in self.textwins:
+            if win.enabled:
+                redraw = win.loop()
+        if self.commandwin.enabled:
+            redraw = self.commandwin.loop() or redraw
+        # Draw if nescessary
+        if redraw:
+            self.draw()
+        # No redraw needed
+        return False
+
     #
     # Tabs
     #

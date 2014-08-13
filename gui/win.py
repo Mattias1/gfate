@@ -55,6 +55,10 @@ class Win:
         if draw:
             self.draw()
 
+    def loop(self):
+        """This method is being called every X miliseconds"""
+        return False
+
     def draw(self):
         """This draw method needs to be overridden to draw the window content."""
         pass

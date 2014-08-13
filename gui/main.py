@@ -33,6 +33,8 @@ class Application(Frame):
 
         self.settings = settings
 
+        self.master.after(self.settings.flickertime, self.loop)
+
     def onLeftDown(self, event):
         self.mainWindow.onMouseDown(event.x, event.y, 1)
         print('OnLeftDown: {}, {}'.format(event.x, event.y))
@@ -73,6 +75,11 @@ class Application(Frame):
             self.settings.width, self.settings.height = w, h
             self.canvas.width, self.canvas.height = w, h
             self.mainWindow.resize()
+
+    def loop(self):
+        """Private method to manage the loop method"""
+        self.mainWindow.loop()
+        self.master.after(self.settings.flickertime, self.loop)
 
 
 def main():
