@@ -66,8 +66,9 @@ class Application(Frame):
         print('OnRightUp: {}, {}'.format(event.x, event.y))
 
     def onKeyDown(self, event):
-        self.mainWindow.onKeyDown(repr(event.char)[1:-1])
-        print('OnKeyPress: {}'.format(repr(event.char)))
+        print(event)
+        self.mainWindow.onKeyDown(str(event.char))
+        print('OnKeyPress: {}'.format(str(event.char)))
 
     def onResizeOrMove(self, event):
         w, h = event.width, event.height
@@ -88,5 +89,4 @@ def main():
     root = Tk()
     root.configure(bg=settings.colors.bg)
     root.geometry("{}x{}".format(settings.width, settings.height))
-    app = Application(settings, master=root)
-    app.mainloop()
+    return Application(settings, master=root)

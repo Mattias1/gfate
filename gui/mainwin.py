@@ -2,6 +2,7 @@ from .win import *
 from .colors import *
 from .textwin import TextWin
 from .commandwin import CommandWin
+from collections import deque
 from PIL import Image, ImageTk
 
 
@@ -14,25 +15,27 @@ class MainWin(Win):
     def __init__(self, settings, app):
         Win.__init__(self, settings, app)
 
-        self.selectedtab = -1 # Mark the tab that is selected by the mouse
+        self.selectedtab = -1 # Mark the tab that is selected while a mousekey is down
+        self.queue = deque()
 
         self.textwins = []
         self.commandwin = CommandWin(settings, app)
 
-        self.addWin("First window.txt")
-        self.addWin("Second.txt")
-        self.addWin("Third.txt")
-        self.addWin("Fourth.txt")
-        self.enableTab(2)
+        # self.addWin("First window.txt")
+        # self.addWin("Second.txt")
+        # self.addWin("Third.txt")
+        # self.addWin("Fourth.txt")
+        # self.enableTab(2)
 
         self.draw()
 
-    def addWin(self, filename):
+    def addWin(self, document):
         """Open a new file"""
         for win in self.textwins:
             win.disable()
-        win = TextWin(self.settings, self.app, filename)
+        win = TextWin(self.settings, self.app, document)
         self.textwins.append(win)
+        return win
 
     def enableTab(self, index):
         for win in self.textwins:
@@ -107,12 +110,7 @@ class MainWin(Win):
             if win.inside(x, y):
                 win.onMouseUp(x, y, btnNr)
     def onKeyDown(self, c):
-        if c == ':':
-            self.commandwin.enable()
-        elif c == '\\x08':
-            self.commandwin.disable()
-        elif c == '\\r' and self.commandwin.enabled:
-            self.quit()
+        self.queue.append(c)
         self.draw()
 
     def resize(self, w=None, h=None, draw=True):
@@ -217,9 +215,9 @@ class MainWin(Win):
             if win.enabled:
                 activewin = i
             else:
-                self.drawTab(i * w, y, win.title)
+                self.drawTab(i * w, y, win.getTitle())
         # Draw tab bottom
         self.drawImg(0, y, self.tabImg[6])
         # Draw the active tab
         if activewin > -1:
-            self.drawTab(activewin * w, y, self.textwins[activewin].title, True)
+            self.drawTab(activewin * w, y, self.textwins[activewin].getTitle(), True)

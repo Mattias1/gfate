@@ -14,7 +14,8 @@ class Settings():
         self.colors = colors.Colors()
         self.commandwidth = 300
         self.commandheight = 38
-        self.flickertime = 300
+        self.flickertime = 400
+        self.refresh_rate = 30
 
     def load(self):
         """Load all the settings from json file"""
