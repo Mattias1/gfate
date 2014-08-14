@@ -1,0 +1,20 @@
+#!python
+"""Top level script which runs fate."""
+
+import os
+import sys
+
+# Make sure fate can be imported anywhere (also from the user script).
+# This way we can:
+# - run fate without having it installed
+# - and thus easily test development source
+# - have multiple fate packages, in case we would use multiple user interfaces.
+
+libs_path = os.path.dirname(os.path.abspath(__file__)) + '/libs/'
+sys.path.insert(0, libs_path)
+
+from gui import start
+
+filenames = sys.argv[1:] or ['']
+start(filenames)
+
