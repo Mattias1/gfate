@@ -1,5 +1,5 @@
-from win import *
-from colors import *
+from .win import *
+from .colors import *
 
 
 class CommandWin(Win):
@@ -21,8 +21,3 @@ class CommandWin(Win):
         s = self.settings
         self.width, self.height = s.commandwidth, s.commandheight
         self.x, self.y = max(0, (s.width - s.commandwidth) // 2), s.tabheight
-
-
-if __name__ == '__main__':
-    import main
-    main.main()

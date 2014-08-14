@@ -1,5 +1,5 @@
-from win import *
-from colors import *
+from .win import *
+from .colors import *
 
 
 class TextWin(Win):
@@ -25,8 +25,3 @@ class TextWin(Win):
     def drawcursor(self, x, y):
         if self.cursorvisible:
             self.drawLine(self.colors.text, x, y, x, y+4+self.settings.userfont[1])
-
-
-if __name__ == '__main__':
-    import main
-    main.main()

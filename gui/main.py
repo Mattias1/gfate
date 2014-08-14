@@ -2,8 +2,8 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import *
 from MattyControls import *
-from mainwin import MainWin
-from settings import Settings
+from .mainwin import MainWin
+from .settings import Settings
 
 
 class Application(Frame):
@@ -90,6 +90,3 @@ def main():
     root.geometry("{}x{}".format(settings.width, settings.height))
     app = Application(settings, master=root)
     app.mainloop()
-
-if __name__ == '__main__':
-    main()

@@ -4,9 +4,8 @@ The Win class is meant to hide some common interaction with curses.
 """
 from tkinter import *
 from PIL import Image, ImageTk
-from settings import *
-from colors import *
-import copy
+from .settings import *
+from .colors import *
 
 
 class Win:
@@ -80,7 +79,7 @@ class Win:
         self.g.create_rectangle(self.x+x, self.y+y, self.x+x+w, self.y+y+h, fill=c, width=borderw)
 
     def loadImgPIL(self, path):
-        return Image.open("../img/" + path)
+        return Image.open("img/" + path)
     def loadImgTk(self, img):
         return ImageTk.PhotoImage(img)
     def loadImg(self, path):
@@ -132,8 +131,3 @@ class Win:
 #         lines = [line[xoffset:xoffset + self.width - 1] for line in lines]
 # 
 #         return '\n'.join(lines)
-
-
-if __name__ == '__main__':
-    import main
-    main.main()

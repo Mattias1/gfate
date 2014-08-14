@@ -1,7 +1,7 @@
-from win import *
-from colors import *
-from textwin import TextWin
-from commandwin import CommandWin
+from .win import *
+from .colors import *
+from .textwin import TextWin
+from .commandwin import CommandWin
 from PIL import Image, ImageTk
 
 
@@ -223,8 +223,3 @@ class MainWin(Win):
         # Draw the active tab
         if activewin > -1:
             self.drawTab(activewin * w, y, self.textwins[activewin].title, True)
-
-
-if __name__ == '__main__':
-    import main
-    main.main()

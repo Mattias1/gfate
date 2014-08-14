@@ -1,4 +1,4 @@
-import colors
+from . import colors
 
 
 class Settings():
@@ -23,8 +23,3 @@ class Settings():
     def save(self):
         """Write the settings to a json file"""
         pass
-
-
-if __name__ == '__main__':
-    import main
-    main.main()
