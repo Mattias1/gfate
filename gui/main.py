@@ -12,17 +12,14 @@ class Application(Frame):
         Frame.__init__(self, master)
         master.title("fate - test")
 
+        self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
+
         self.canvas = Cnvs(master, bd=-2)
-        self.canvas.bind("<Button-1>", self.onLeftDown)
-        self.canvas.bind("<Button-2>", self.onScrollDown)
-        self.canvas.bind("<Button-3>", self.onRightDown)
-        self.canvas.bind("<B1-Motion>", self.onLeftMove)
-        self.canvas.bind("<B2-Motion>", self.onScrollMove)
-        self.canvas.bind("<B3-Motion>", self.onRightMove)
-        self.canvas.bind("<ButtonRelease-1>", self.onLeftUp)
-        self.canvas.bind("<ButtonRelease-2>", self.onScrollUp)
-        self.canvas.bind("<ButtonRelease-3>", self.onRightUp)
+        self.canvas.bind("<Button>", self.onMouseDown)
+        self.canvas.bind("<Motion>", self.onMouseMove)
+        self.canvas.bind("<ButtonRelease>", self.onMouseUp)
         self.master.bind("<Key>", self.onKeyDown)
+        self.master.bind("<KeyRelease>", self.onKeyUp)
         self.resize_bind_id = self.master.bind("<Configure>", self.onResizeOrMove)
         self.canvas.highlightthickness = 0
         self.canvas.width = settings.width
@@ -35,40 +32,36 @@ class Application(Frame):
 
         self.master.after(self.settings.flickertime, self.loop)
 
-    def onLeftDown(self, event):
-        self.mainWindow.onMouseDown(event.x, event.y, 1)
-        print('OnLeftDown: {}, {}'.format(event.x, event.y))
-    def onScrollDown(self, event):
-        self.mainWindow.onMouseDown(event.x, event.y, 2)
-        print('OnScrollDown: {}, {}'.format(event.x, event.y))
-    def onRightDown(self, event):
-        self.mainWindow.onMouseDown(event.x, event.y, 3)
-        print('OnRightDown: {}, {}'.format(event.x, event.y))
+    def onMouseDown(self, event):
+        self.mainWindow.onMouseDown(event.x, event.y, event.num)
 
-    def onLeftMove(self, event):
-        self.mainWindow.onMouseMove(event.x, event.y, 1)
-        print('OnLeftMove: {}, {}'.format(event.x, event.y))
-    def onScrollMove(self, event):
-        self.mainWindow.onMouseMove(event.x, event.y, 2)
-        print('OnScrollMove: {}, {}'.format(event.x, event.y))
-    def onRightMove(self, event):
-        self.mainWindow.onMouseMove(event.x, event.y, 3)
-        print('OnRightMove: {}, {}'.format(event.x, event.y))
+    def onMouseMove(self, event):
+        self.mainWindow.onMouseMove(event.x, event.y, event.num)
 
-    def onLeftUp(self, event):
-        self.mainWindow.onMouseUp(event.x, event.y, 1)
-        print('OnLeftUp: {}, {}'.format(event.x, event.y))
-    def onScrollUp(self, event):
-        self.mainWindow.onMouseUp(event.x, event.y, 2)
-        print('OnScrollUp: {}, {}'.format(event.x, event.y))
-    def onRightUp(self, event):
-        self.mainWindow.onMouseUp(event.x, event.y, 3)
-        print('OnRightUp: {}, {}'.format(event.x, event.y))
+    def onMouseUp(self, event):
+        self.mainWindow.onMouseUp(event.x, event.y, event.num)
 
     def onKeyDown(self, event):
-        print(event)
-        self.mainWindow.onKeyDown(str(event.char))
-        print('OnKeyPress: {}'.format(str(event.char)))
+        if self.setModifyKeys(event, True):
+            self.mainWindow.onKeyDown(self.getchar(event))
+            print('"{}"'.format(self.getchar(event)))
+    
+    def onKeyUp(self, event):
+        self.setModifyKeys(event, False)
+
+    def setModifyKeys(self, event, value):
+        # Set the modify keys and return whether or not something has to be done still.
+        if event.keysym_num in {65505, 65506}:
+            self.shift = value
+        elif event.keysym_num in {65507, 65508}:
+            self.ctrl = value
+        elif event.keysym_num in {65513, 65514}:
+            self.alt = value
+        elif event.keysym_num in {65371, 65372, 65515, 65516}:
+            self.superkey = value
+        else:
+            return True
+        return False
 
     def onResizeOrMove(self, event):
         w, h = event.width, event.height
@@ -76,11 +69,33 @@ class Application(Frame):
             self.settings.width, self.settings.height = w, h
             self.canvas.width, self.canvas.height = w, h
             self.mainWindow.resize()
+            print('{}, {}'.format(w, h))
 
     def loop(self):
         """Private method to manage the loop method"""
         self.mainWindow.loop()
         self.master.after(self.settings.flickertime, self.loop)
+
+    def getchar(self, e):
+        """Convert a tkinter event (given these three different representations of the same char)"""
+        # Get prefixes
+        prefix = ('Ctrl-' if self.ctrl else '') + ('Alt-' if self.alt else '') + ('Super-' if self.superkey else '')
+
+        # Some basic key mapping
+        num = e.keysym_num
+        name = e.keysym
+        if 31 < num < 256:
+            c = chr(num)
+        else:
+            c = name
+
+        # Some exceptopns
+        if num == 65307: c = 'Esc'
+        elif num == 65288: c = '\b'
+        elif num == 65293: c = '\n'
+        elif num == 65289: c = 'Backtab' if self.shift else '\t'
+
+        return prefix + c
 
 
 def main():
