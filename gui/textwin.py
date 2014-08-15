@@ -1,4 +1,5 @@
 from .win import *
+from .commandwin import CommandWin
 from .colors import *
 from time import sleep
 import fate.userinterface
@@ -13,17 +14,22 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def __init__(self, settings, app, document):
         Win.__init__(self, settings, app)
 
+        self.commandwin = CommandWin(settings, app)
         self.doc = document
         self.queue = app.mainWindow.queue
         self.cursorvisible = True
 
     def loop(self):
         self.cursorvisible = not self.cursorvisible
+        if self.commandwin.enabled:
+            self.commandwin.loop()
         return True
 
     def draw(self):
         self.drawString(self.doc.text, self.colors.text, 6, 40)
         self.drawcursor(195, 40)
+        if self.commandwin.enabled:
+            self.commandwin.draw()
 
     def drawcursor(self, x, y):
         if self.cursorvisible:
@@ -31,6 +37,21 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def getTitle(self):
         return self.doc.filename
+
+    def onKeyDown(self, c):
+        if self.commandwin.enabled:
+            self.commandwin.onKeyDown(c)
+
+    def resize(self, w=None, h=None, draw=True):
+        assert draw == False
+        Win.resize(self, w, h, draw)
+        try:
+            self.commandwin.resize(w, h, False)
+        except:
+            pass
+
+    def acceptinput(self):
+        return not self.commandwin.enabled
 
     #
     # Implement UserInterface methods
@@ -65,3 +86,15 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def prompt(self, prompt_string='>'):
         # This method is called from a different thread (the one fate runs in)
         pass
+
+    #
+    # Implement UI commands
+    #
+    def command_mode(self, command_string=':'):
+        # This method is called from a different thread (the one fate runs in)
+        self.commandwin.enable()
+        pass
+
+    def activate(self):
+        # This method is called from a different thread (the one fate runs in)
+        self.app.mainWindow.enableTab(self)

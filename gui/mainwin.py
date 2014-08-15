@@ -1,14 +1,14 @@
 from .win import *
 from .colors import *
 from .textwin import TextWin
-from .commandwin import CommandWin
+import fate
 from collections import deque
 from PIL import Image, ImageTk
 
 
 class MainWin(Win):
     """The main window class
-    
+
     This is the main window for the gfate text editor.
     """
 
@@ -19,7 +19,6 @@ class MainWin(Win):
         self.queue = deque()
 
         self.textwins = []
-        self.commandwin = CommandWin(settings, app)
 
         # self.addWin("First window.txt")
         # self.addWin("Second.txt")
@@ -29,6 +28,14 @@ class MainWin(Win):
 
         self.draw()
 
+    @property
+    def activewin(self):
+        try:
+            if fate.document.activedocument.ui:
+                return fate.document.activedocument.ui
+        except:
+            return None
+
     def addWin(self, document):
         """Open a new file"""
         for win in self.textwins:
@@ -37,10 +44,13 @@ class MainWin(Win):
         self.textwins.append(win)
         return win
 
-    def enableTab(self, index):
+    def enableTab(self, tab):
         for win in self.textwins:
             win.disable()
-        self.textwins[index].enable()
+        try:
+            self.textwins[tab].enable()
+        except:
+            tab.enable()
 
     def swapTabs(self, a, b):
         self.textwins[a], self.textwins[b] = self.textwins[b], self.textwins[a]
@@ -61,12 +71,9 @@ class MainWin(Win):
         self.fullClear()
         self.drawTabs()
 
-        # Draw my active children
-        for win in self.textwins:
-            if win.enabled:
-                win.draw()
-        if self.commandwin.enabled:
-            self.commandwin.draw()
+        # Draw my active child
+        if self.activewin != None:
+            self.activewin.draw()
 
     def onMouseDown(self, x, y, btnNr):
         # Hit tabs
@@ -84,10 +91,9 @@ class MainWin(Win):
                 self.closeTab(i)
             self.draw()
 
-        # Pass the event on to all my children
-        for win in self.textwins:
-            if win.inside(x, y):
-                win.onMouseDown(x, y, btnNr)
+        # Pass the event on to my active child
+        if self.activewin.inside(x, y):
+            self.activewin.onMouseDown(x, y, btnNr)
     def onMouseMove(self, x, y, btnNr):
         # Move the tabs
         i = x // (self.settings.tabwidth + self.settings.tabwidthextra)
@@ -97,20 +103,20 @@ class MainWin(Win):
                 self.selectedtab = i
                 self.draw()
 
-        # Pass the event on to all my children
-        for win in self.textwins:
-            if win.inside(x, y):
-                win.onMouseMove(x, y, btnNr)
+        # Pass the event on to my active child
+        if self.activewin.inside(x, y):
+            self.activewin.onMouseMove(x, y, btnNr)
     def onMouseUp(self, x, y, btnNr):
         # Deselect
         self.selectedtab = -1
 
-        # Pass the event on to all my children
-        for win in self.textwins:
-            if win.inside(x, y):
-                win.onMouseUp(x, y, btnNr)
+        # Pass the event on to my active child
+        if self.activewin.inside(x, y):
+            self.activewin.onMouseUp(x, y, btnNr)
     def onKeyDown(self, c):
-        self.queue.append(c)
+        if self.activewin.acceptinput() and c:
+            self.queue.append(c)
+        self.activewin.onKeyDown(c)
         self.draw()
 
     def resize(self, w=None, h=None, draw=True):
@@ -122,8 +128,7 @@ class MainWin(Win):
         try:
             for win in self.textwins:
                 win.resize(w, h, False)
-            self.commandwin.resize(w, h, False)
-        except Exception:
+        except:
             pass
 
         if draw:
@@ -131,13 +136,9 @@ class MainWin(Win):
 
     def loop(self):
         """This method is being called every X miliseconds"""
-        # Call my (active) children
+        # Call my active child
         redraw = False
-        for win in self.textwins:
-            if win.enabled:
-                redraw = win.loop()
-        if self.commandwin.enabled:
-            redraw = self.commandwin.loop() or redraw
+        redraw = self.activewin.loop()
         # Draw if nescessary
         if redraw:
             self.draw()

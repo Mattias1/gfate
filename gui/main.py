@@ -45,7 +45,7 @@ class Application(Frame):
         if self.setModifyKeys(event, True):
             self.mainWindow.onKeyDown(self.getchar(event))
             print('"{}"'.format(self.getchar(event)))
-    
+
     def onKeyUp(self, event):
         self.setModifyKeys(event, False)
 
