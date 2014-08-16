@@ -4,6 +4,7 @@ class Colors():
     def __init__(self):
         self.bg = "#272822"
         self.text = "#eeeeee"
+        self.selectionbg = "#575852"
         self.inactivetab = "#474842"
         self.tabbg = "#171714"
         self.tabtext = "#eeeeee"

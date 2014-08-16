@@ -100,8 +100,8 @@ class Application(Frame):
 
 def main():
     """The main entrypoint for this application"""
-    settings = Settings()
     root = Tk()
+    settings = Settings()
     root.configure(bg=settings.colors.bg)
     root.geometry("{}x{}".format(settings.width, settings.height))
     return Application(settings, master=root)

@@ -18,6 +18,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.doc = document
         self.queue = app.mainWindow.queue
         self.cursorvisible = True
+        self.textoffset = (6, 40)
 
     def loop(self):
         self.cursorvisible = not self.cursorvisible
@@ -26,14 +27,18 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return True
 
     def draw(self):
-        self.drawString(self.doc.text, self.colors.text, 6, 40)
-        self.drawcursor(195, 40)
+        w, h = self.settings.userfontsize
+        for b, e in self.doc.selection:
+            if b == e:
+                x, y = self.getCharCoord(b)
+                self.drawcursor(self.textoffset[0] + x, self.textoffset[1] + y, self.cursorvisible)
+            else:
+                (bx, by), (ex, ey) = self.getCharCoord(b), self.getCharCoord(e)
+                if by == ey:
+                    self.drawRect(self.colors.selectionbg, self.textoffset[0] + w * bx, self.textoffset[1] + by * h, w * (ex - bx), h)
+        self.drawString(self.doc.text, self.colors.text, self.textoffset)
         if self.commandwin.enabled:
             self.commandwin.draw()
-
-    def drawcursor(self, x, y):
-        if self.cursorvisible:
-            self.drawLine(self.colors.text, x, y, x, y+4+self.settings.userfont[1])
 
     def getTitle(self):
         return self.doc.filename
@@ -53,6 +58,20 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def acceptinput(self):
         return not self.commandwin.enabled
 
+    def getCharCoord(self, p):
+        """Return (x, y) coordinates of the p-th character. This is a truly terrible method."""
+        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
+        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
+        x, y = 0, 0
+        text = self.doc.text
+        for i in range(p):
+            c = text[i]
+            x += 1
+            if c == '\n': # Can't deal with OSX line endings... (also: can't deal with word wrap (TODO !))
+                y += 1
+                x = 0
+        return (x, y)
+
     #
     # Implement UserInterface methods
     #
@@ -67,7 +86,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def activate(self):
         # This method is called from a different thread (the one fate runs in)
-        pass
+        self.app.mainWindow.enableTab(self)
 
     def getinput(self):
         # This method is called from a different thread (the one fate runs in)
@@ -94,7 +113,3 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # This method is called from a different thread (the one fate runs in)
         self.commandwin.enable()
         pass
-
-    def activate(self):
-        # This method is called from a different thread (the one fate runs in)
-        self.app.mainWindow.enableTab(self)

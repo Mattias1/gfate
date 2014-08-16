@@ -69,6 +69,8 @@ class Win:
         self.drawFString(text, c, x, y, self.settings.uifont, anchor=anchor)
     def drawString(self, text, c, x, y, anchor="nw"):
         self.drawFString(text, c, x, y, self.settings.userfont, anchor=anchor)
+    def drawString(self, text, c, t, anchor="nw"):
+        self.drawFString(text, c, t[0], t[1], self.settings.userfont, anchor=anchor)
 
     def drawLine(self, c, x, y, p, q, w=1):
         self.g.create_line(self.x+x, self.y+y, self.x+p, self.y+q, fill=c) # Todo: use the line width
@@ -93,6 +95,11 @@ class Win:
         self.clear(self.colors.bg)
     def clear(self, c):
         self.drawRect(c, 0, 0, self.width, self.height)
+
+    def drawcursor(self, x, y, cursorvisible):
+        if cursorvisible:
+            _, h = self.settings.userfontsize
+            self.drawLine(self.colors.text, x, y, x, y+h)
 
 
 #     Things Chiel used in his win class and might be usefull later on

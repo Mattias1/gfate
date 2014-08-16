@@ -18,7 +18,7 @@ class CommandWin(Win):
         self.drawString(self.text, self.colors.text, 10, 10)
 
     def onKeyDown(self, c):
-        if c == 'Ctrl-c':
+        if c == '\n':
             self.disable()
         else:
             self.text += c

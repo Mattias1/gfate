@@ -1,4 +1,5 @@
 from . import colors
+import tkinter.font
 
 
 class Settings():
@@ -16,6 +17,12 @@ class Settings():
         self.commandheight = 38
         self.flickertime = 400
         self.refresh_rate = 30
+        self.calcFontWidths()
+
+    def calcFontWidths(self):
+        fonts = [tkinter.font.Font(family=fam, size=pt) for fam, pt in [self.uifont, self.userfont]]
+        self.uifontsize = (fonts[0].measure('a'), fonts[0].metrics("linespace"))
+        self.userfontsize = (fonts[1].measure('a') , fonts[1].metrics("linespace"))
 
     def load(self):
         """Load all the settings from json file"""
