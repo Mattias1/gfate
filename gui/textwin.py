@@ -36,6 +36,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 (bx, by), (ex, ey) = self.getCharCoord(b), self.getCharCoord(e)
                 if by == ey:
                     self.drawRect(self.colors.selectionbg, self.textoffset[0] + w * bx, self.textoffset[1] + by * h, w * (ex - bx), h)
+                else:
+                    pass
         self.drawString(self.doc.text, self.colors.text, self.textoffset)
         if self.commandwin.enabled:
             self.commandwin.draw()

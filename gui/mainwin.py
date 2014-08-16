@@ -78,11 +78,13 @@ class MainWin(Win):
     def onMouseDown(self, x, y, btnNr):
         # Hit tabs
         self.selectedtab = -1
-        w, h = self.settings.tabwidth + self.settings.tabwidthextra, self.tabImg[0].height()
-        if 3 <= y <= h:
+        w, h = self.settings.tabwidth + self.settings.tabwidthextra, self.settings.tabheight
+        if 0 <= y <= h:
             i = x // w
             if i < len(self.textwins):
-                self.selectedtab = i
+                # self.selectedtab = i
+                import fate.document
+                self.queue.append(fate.document.goto_document(i))
 
         if self.selectedtab > -1:
             if btnNr == 1:
