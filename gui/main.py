@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import *
-from MattyControls import *
+from mattycontrols.MattyControls import *
 from .mainwin import MainWin
 from .settings import Settings
 
