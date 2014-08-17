@@ -3,7 +3,7 @@ Module containing Win class.
 The Win class is meant to hide some common interaction with curses.
 """
 from tkinter import *
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 from .settings import *
 from .colors import *
 
@@ -11,14 +11,19 @@ from .colors import *
 class Win:
     """Abstract window class"""
 
-    def __init__(self, settings, app, width=None, height=None, x=0, y=0):
+    def __init__(self, settings, app, s=None, p=Pos(0,0)):
         self.settings = settings
         self.colors = settings.colors
         self.enabled = True
         self.app = app
-        self.g = app.canvas
-        self.x, self.y = x, y
-        self.resize(width, height, False)
+        self.canvas = app.canvas
+        self.pos = p
+        self.size = None
+        self.resize(s, False)
+
+    @property
+    def g(self):
+        return self.app.mainWindow.gfx
 
     def enable(self):
         """Enable this window."""
@@ -32,25 +37,23 @@ class Win:
         """Quit the application"""
         self.app.quit()
 
-    def inside(self, x, y):
-        return self.x <= x <= self.x + self.width and self.y <= y <= self.y + self.height
+    def inside(self, p):
+        return self.pos.x <= p.x <= self.pos.x + self.size.w and self.pos.y <= p.y <= self.pos.y + self.size.h
 
-    def onMouseDown(self, x, y, btnNr):
+    def onMouseDown(self, p, btnNr):
         pass
-    def onMouseMove(self, x, y, btnNr):
+    def onMouseMove(self, p, btnNr):
         pass
-    def onMouseUp(self, x, y, btnNr):
+    def onMouseUp(self, p, btnNr):
         pass
     def onKeyDown(self, c):
         pass
 
-    def resize(self, w=None, h=None, draw=True):
+    def resize(self, s=None, draw=True):
         """Resize window."""
-        if w == None:
-            w = self.settings.width
-        if h == None:
-            h = self.settings.height
-        self.width, self.height = w, h
+        if s == None:
+            s = self.settings.size
+        self.size = s
         if draw:
             self.draw()
 
@@ -63,22 +66,24 @@ class Win:
         pass
 
     # Some draw methods to make sure all my subclasses don't have to bother about tkinters canvas
-    def drawFString(self, text, c, x, y, font, anchor="nw"):
-        self.g.create_text(self.x+x, self.y+y, anchor=anchor, text=text, fill=c, font=font)
-    def drawUIString(self, text, c, x, y, anchor="nw"):
-        self.drawFString(text, c, x, y, self.settings.uifont, anchor=anchor)
-    def drawString(self, text, c, x, y, anchor="nw"):
-        self.drawFString(text, c, x, y, self.settings.userfont, anchor=anchor)
-    def drawString(self, text, c, t, anchor="nw"):
-        self.drawFString(text, c, t[0], t[1], self.settings.userfont, anchor=anchor)
+    def drawFString(self, text, c, p, font, anchor="nw"):
+        # self.g.create_text((self.pos + p).t, anchor=anchor, text=text, fill=c, font=font)
+        pass
+    def drawUIString(self, text, c, p, anchor="nw"):
+        self.drawFString(text, c, p, self.settings.uifont, anchor=anchor)
+    def drawString(self, text, c, p, anchor="nw"):
+        self.drawFString(text, c, p, self.settings.userfont, anchor=anchor)
 
-    def drawLine(self, c, x, y, p, q, w=1):
-        self.g.create_line(self.x+x, self.y+y, self.x+p, self.y+q, fill=c) # Todo: use the line width
+    def drawLine(self, c, p, q, w=1):
+        # self.g.create_line((self.pos + p).t, (self.pos + q).t, fill=c) # Todo: use the line width
+        pass
 
-    def drawRect(self, c, x, y, w, h):
-        self.drawRectBorder(c, x, y, w, h, 0)
-    def drawRectBorder(self, c, x, y, w, h, borderw=1):
-        self.g.create_rectangle(self.x+x, self.y+y, self.x+x+w, self.y+y+h, fill=c, width=borderw)
+    def drawRect(self, c, p, s):
+        self.drawRectBorder(c, p, s, 0)
+    def drawRectBorder(self, c, p, s, borderw=1):
+        self.g.rectangle([(self.pos + p).t, (self.pos + p + s).t], fill=c)
+        # self.g.create_rectangle((self.pos + p).t, (self.pos + p + s).t, fill=c, width=borderw)
+        # TODO: use the border width
 
     def loadImgPIL(self, path):
         return Image.open("img/" + path)
@@ -87,19 +92,17 @@ class Win:
     def loadImg(self, path):
         return self.loadImgTk(self.loadImgPIL(path))
 
-    def drawImg(self, x, y, img, anchor="nw"):
-        self.g.create_image(x, y, image=img, anchor=anchor)
+    def drawImg(self, p, img, anchor="nw"):
+        # self.g.create_image((self.pos + p).t, image=img, anchor=anchor)
+        pass
 
-    def fullClear(self):
-        self.g.delete(ALL)
-        self.clear(self.colors.bg)
     def clear(self, c):
-        self.drawRect(c, 0, 0, self.width, self.height)
+        self.drawRect(c, Pos(0, 0), self.size)
 
-    def drawcursor(self, x, y, cursorvisible):
+    def drawcursor(self, p, cursorvisible):
         if cursorvisible:
-            _, h = self.settings.userfontsize
-            self.drawLine(self.colors.text, x, y, x, y+h)
+            _, h = self.settings.userfontsize.t
+            self.drawLine(self.colors.text, p, p + (0, h))
 
 
 #     Things Chiel used in his win class and might be usefull later on

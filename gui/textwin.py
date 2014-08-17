@@ -18,7 +18,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.doc = document
         self.queue = app.mainWindow.queue
         self.cursorvisible = True
-        self.textoffset = (6, 40)
+        self.textoffset = Pos(6, 40)
 
     def loop(self):
         self.cursorvisible = not self.cursorvisible
@@ -27,15 +27,15 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return True
 
     def draw(self):
-        w, h = self.settings.userfontsize
+        w, h = self.settings.userfontsize.t
         for b, e in self.doc.selection:
             if b == e:
-                x, y = self.getCharCoord(b)
-                self.drawcursor(self.textoffset[0] + x, self.textoffset[1] + y, self.cursorvisible)
+                p = self.getCharCoord(b)
+                self.drawcursor(self.textoffset + p, self.cursorvisible)
             else:
                 (bx, by), (ex, ey) = self.getCharCoord(b), self.getCharCoord(e)
                 if by == ey:
-                    self.drawRect(self.colors.selectionbg, self.textoffset[0] + w * bx, self.textoffset[1] + by * h, w * (ex - bx), h)
+                    self.drawRect(self.colors.selectionbg, self.textoffset + (w * bx,  + by * h), Size(w * (ex - bx), h))
                 else:
                     pass
         self.drawString(self.doc.text, self.colors.text, self.textoffset)
@@ -49,30 +49,30 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if self.commandwin.enabled:
             self.commandwin.onKeyDown(c)
 
-    def resize(self, w=None, h=None, draw=True):
+    def resize(self, size=None, draw=True):
         assert draw == False
-        Win.resize(self, w, h, draw)
+        Win.resize(self, size, draw)
         try:
-            self.commandwin.resize(w, h, False)
+            self.commandwin.resize(size, False)
         except:
             pass
 
     def acceptinput(self):
         return not self.commandwin.enabled
 
-    def getCharCoord(self, p):
-        """Return (x, y) coordinates of the p-th character. This is a truly terrible method."""
+    def getCharCoord(self, n):
+        """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
         x, y = 0, 0
         text = self.doc.text
-        for i in range(p):
+        for i in range(n):
             c = text[i]
             x += 1
-            if c == '\n': # Can't deal with OSX line endings... (also: can't deal with word wrap (TODO !))
+            if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
                 y += 1
                 x = 0
-        return (x, y)
+        return Pos(x, y)
 
     #
     # Implement UserInterface methods

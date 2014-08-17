@@ -9,7 +9,7 @@ class CommandWin(Win):
     """
 
     def __init__(self, settings, app):
-        Win.__init__(self, settings, app, 0, 0, 0, 0)
+        Win.__init__(self, settings, app, Pos(0, 0), Pos(0, 0))
         self.text = ''
         self.disable()
 
@@ -23,9 +23,9 @@ class CommandWin(Win):
         else:
             self.text += c
 
-    def resize(self, w=None, h=None, draw=True):
+    def resize(self, size=None, draw=True):
         """Override the resize window"""
         assert draw == False
         s = self.settings
-        self.width, self.height = s.commandwidth, s.commandheight
-        self.x, self.y = max(0, (s.width - s.commandwidth) // 2), s.tabheight
+        self.size = s.commandsize
+        self.pos = Pos(max(0, (s.size.w - s.commandsize.w) // 2), s.tabsize.h)

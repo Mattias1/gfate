@@ -6,23 +6,21 @@ class Settings():
     """The settings class"""
 
     def __init__(self):
-        self.width, self.height = 800, 500
+        self.size = Size(800, 500)
         self.uifont = ('Consoloas', 10)
         self.userfont = ('Consolas', 10)
-        self.tabwidth = 110
-        self.tabheight = 36
+        self.tabsize = Size(110, 36)
         self.tabwidthextra = 30
         self.colors = colors.Colors()
-        self.commandwidth = 300
-        self.commandheight = 38
+        self.commandsize = Size(300, 38)
         self.flickertime = 400
         self.refresh_rate = 30
         self.calcFontWidths()
 
     def calcFontWidths(self):
         fonts = [tkinter.font.Font(family=fam, size=pt) for fam, pt in [self.uifont, self.userfont]]
-        self.uifontsize = (fonts[0].measure('a'), fonts[0].metrics("linespace"))
-        self.userfontsize = (fonts[1].measure('a') , fonts[1].metrics("linespace"))
+        self.uifontsize = Size(fonts[0].measure('a'), fonts[0].metrics("linespace"))
+        self.userfontsize = Size(fonts[1].measure('a') , fonts[1].metrics("linespace"))
 
     def load(self):
         """Load all the settings from json file"""
@@ -31,3 +29,52 @@ class Settings():
     def save(self):
         """Write the settings to a json file"""
         pass
+
+class Pos():
+    """A position class just to make things a bit easier."""
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+    @property
+    def t(self):
+        return (self.x, self.y)
+
+    def __getitem__(self, i):
+        if i==0:
+            return self.x
+        return self.y
+
+    def __add__(self, other):
+        return Pos(self.x + other[0], self.y + other[1])
+    def __radd__(self, other):
+        return other + self
+
+    def __eq__(self, other):
+        return self.x == other[0] and self.y == other[1]
+    def __neq__(self, other):
+        return not self == other
+
+class Size():
+    """A size class just to make things a bit easier."""
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+
+    @property
+    def t(self):
+        return (self.w, self.h)
+
+    def __getitem__(self, i):
+        if i==0:
+            return self.w
+        return self.h
+
+    def __add__(self, other):
+        return Size(self.w + other[0], self.h + other[1])
+    def __radd__(self, other):
+        return other + self
+
+    def __eq__(self, other):
+        return self.w == other[0] and self.h == other[1]
+    def __neq__(self, other):
+        return not a == other
+

@@ -3,7 +3,7 @@ from tkinter import messagebox
 from tkinter.ttk import *
 from mattycontrols.MattyControls import *
 from .mainwin import MainWin
-from .settings import Settings
+from .settings import Settings, Pos, Size
 
 
 class Application(Frame):
@@ -22,24 +22,25 @@ class Application(Frame):
         self.master.bind("<KeyRelease>", self.onKeyUp)
         self.resize_bind_id = self.master.bind("<Configure>", self.onResizeOrMove)
         self.canvas.highlightthickness = 0
-        self.canvas.width = settings.width
-        self.canvas.height = settings.height
+        self.canvas.width = settings.size.w
+        self.canvas.height = settings.size.h
         self.canvas.locateInside(self, d=0)
 
         self.mainWindow = MainWin(settings, self)
+        self.mainWindow.draw()
 
         self.settings = settings
 
         self.master.after(self.settings.flickertime, self.loop)
 
     def onMouseDown(self, event):
-        self.mainWindow.onMouseDown(event.x, event.y, event.num)
+        self.mainWindow.onMouseDown(Pos(event.x, event.y), event.num)
 
     def onMouseMove(self, event):
-        self.mainWindow.onMouseMove(event.x, event.y, event.num)
+        self.mainWindow.onMouseMove(Pos(event.x, event.y), event.num)
 
     def onMouseUp(self, event):
-        self.mainWindow.onMouseUp(event.x, event.y, event.num)
+        self.mainWindow.onMouseUp(Pos(event.x, event.y), event.num)
 
     def onKeyDown(self, event):
         if self.setModifyKeys(event, True):
@@ -64,12 +65,11 @@ class Application(Frame):
         return False
 
     def onResizeOrMove(self, event):
-        w, h = event.width, event.height
-        if w != self.settings.width or h != self.settings.height:
-            self.settings.width, self.settings.height = w, h
-            self.canvas.width, self.canvas.height = w, h
-            self.mainWindow.resize()
-            print('{}, {}'.format(w, h))
+        s = Size(event.width, event.height)
+        if s != self.settings.size:
+            self.settings.size = s
+            self.canvas.width, self.canvas.height = s.w, s.h
+            self.mainWindow.resize(s)
 
     def loop(self):
         """Private method to manage the loop method"""
@@ -103,5 +103,5 @@ def main():
     root = Tk()
     settings = Settings()
     root.configure(bg=settings.colors.bg)
-    root.geometry("{}x{}".format(settings.width, settings.height))
+    root.geometry("{}x{}".format(settings.size.w, settings.size.h))
     return Application(settings, master=root)
