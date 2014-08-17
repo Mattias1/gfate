@@ -1,3 +1,6 @@
 [submodule "libs/fate"]
 	path = libs/fate
 	url = https://github.com/Chiel92/fate.git
+[submodule "libs/mattycontrols"]
+	path = libs/mattycontrols
+	url = http://github.com/Mattias1/mattycontrols.git
