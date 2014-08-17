@@ -80,7 +80,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def touch(self):
         # This method is called from a different thread (the one fate runs in)
         # TODO: this should be asynchronuous, so don't call draw, but mark it to be drawn later!!!
-        self.draw()
+        self.app.mainWindow.draw()
 
     def notify(self, message):
         # This method is called from a different thread (the one fate runs in)
