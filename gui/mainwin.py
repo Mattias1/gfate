@@ -20,11 +20,6 @@ class MainWin(Win):
         self.queue = deque()
 
         self.textwins = []
-        self.im = Image.new("RGBA", self.size.t)
-        self.tkim = self.loadImgTk(self.im)
-        self.canvasImgId = self.canvas.create_image(self.pos.t, image=self.tkim, anchor="nw")
-        self.useim1 = True
-        self.gfx = None
 
     @property
     def activewin(self):
@@ -65,23 +60,13 @@ class MainWin(Win):
 
     def draw(self):
         """Draw the main window"""
-        # Initialise drawing
-        if not self.im:
-            return
-        self.gfx = ImageDraw.Draw(self.im) # No import needed?
-
         # Draw myself
-        self.clear(self.colors.bg)
+        self.fullClear()
         self.drawTabs()
 
         # Draw my active child
         if self.activewin != None:
             self.activewin.draw()
-
-        # Now display the image on the canvas
-        self.tkim = self.loadImgTk(self.im)
-        self.canvas.itemconfig(self.canvasImgId, image=self.tkim)
-        self.gfx = None
 
     def onMouseDown(self, p, btnNr):
         # Hit tabs
@@ -202,20 +187,20 @@ class MainWin(Win):
         piltabs[6] = piltabs[6].resize((self.size.w, h), Image.NEAREST)
 
         # Convert the images to Tk images
-        self.tabImgs = [t.copy() for t in piltabs] # piltabs # [self.loadImgTk(t) for t in piltabs]
+        self.tabImgs = [self.loadImgTk(t) for t in piltabs]
 
     def drawTab(self, p, text, active=False):
         """Draw a single tab"""
         offset = 0 if active else 3
-        w, h = self.tabImgs[offset].size
+        w, h = self.tabImgs[offset].width(), self.tabImgs[offset].height()
         self.drawImg(p, self.tabImgs[offset])
         self.drawImg(p + (w, 0), self.tabImgs[1 + offset])
         self.drawImg(p + (w + self.settings.tabsize.w, 0), self.tabImgs[2 + offset])
-        self.drawUIString(text, self.colors.tabtext, self.pos + p + (0, 12) + (self.settings.tabwidthextra, 0))
+        self.drawUIString(text, self.colors.tabtext, self.pos + p + (0, 9) + (self.settings.tabwidthextra, 0))
 
     def drawTabs(self):
         """Manage the drawing of all the tabs"""
-        h = self.tabImgs[0].size[1]
+        h = self.tabImgs[0].height()
         y = self.settings.tabsize.h - h
         if y < 0:
             self.settings.tabsize.h = h

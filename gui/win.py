@@ -16,14 +16,10 @@ class Win:
         self.colors = settings.colors
         self.enabled = True
         self.app = app
-        self.canvas = app.canvas
+        self.g = app.canvas
         self.pos = p
         self.size = None
         self.resize(s, False)
-
-    @property
-    def g(self):
-        return self.app.mainWindow.gfx
 
     def enable(self):
         """Enable this window."""
@@ -67,23 +63,20 @@ class Win:
 
     # Some draw methods to make sure all my subclasses don't have to bother about tkinters canvas
     def drawFString(self, text, c, p, font, anchor="nw"):
-        self.g.text((self.pos + p).t, text, font=font)
-        # self.g.create_text((self.pos + p).t, anchor=anchor, text=text, fill=c, font=font)
+        self.g.create_text((self.pos + p).t, anchor=anchor, text=text, fill=c, font=font)
     def drawUIString(self, text, c, p, anchor="nw"):
         self.drawFString(text, c, p, self.settings.uifont, anchor=anchor)
     def drawString(self, text, c, p, anchor="nw"):
         self.drawFString(text, c, p, self.settings.userfont, anchor=anchor)
 
     def drawLine(self, c, p, q, w=1):
-        self.g.line([(self.pos + p).t, (self.pos + q).t], fill=c, width=w)
-        # self.g.create_line((self.pos + p).t, (self.pos + q).t, fill=c)
+        self.g.create_line((self.pos + p).t, (self.pos + q).t, fill=c)
+        # TODO: Use width
 
     def drawRect(self, c, p, s):
         self.drawRectBorder(c, p, s, 0)
     def drawRectBorder(self, c, p, s, borderw=1):
-        self.g.rectangle([(self.pos + p).t, (self.pos + p + s - (1, 1)).t], fill=c)
-        # self.g.create_rectangle((self.pos + p).t, (self.pos + p + s).t, fill=c, width=borderw)
-        # TODO: use the border width
+        self.g.create_rectangle((self.pos + p).t, (self.pos + p + s).t, fill=c, width=borderw)
 
     def loadImgPIL(self, path):
         return Image.open("img/" + path)
@@ -93,19 +86,17 @@ class Win:
         return self.loadImgTk(self.loadImgPIL(path))
 
     def drawImg(self, p, img, anchor="nw"):
-        r, g, b, a = img.split()
-        top = Image.merge('RGB', (r, g, b))
-        mask = Image.merge('L', (a, ))
-        self.app.mainWindow.im.paste(top, (self.pos + p).t, mask)
-        # self.g.create_image((self.pos + p).t, image=img, anchor=anchor)
+        self.g.create_image((self.pos + p).t, image=img, anchor=anchor)
 
+    def fullClear(self):
+        self.g.delete(ALL)
+        self.clear(self.colors.bg)
     def clear(self, c):
         self.drawRect(c, Pos(0, 0), self.size)
 
     def drawcursor(self, p, cursorvisible):
         if cursorvisible:
-            _, h = self.settings.userfontsize.t
-            self.drawLine(self.colors.text, p, p + (0, h))
+            self.drawLine(self.colors.text, p, p + (0, self.settings.userfontsize.h))
 
 
 #     Things Chiel used in his win class and might be usefull later on

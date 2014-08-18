@@ -114,4 +114,3 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def command_mode(self, command_string=':'):
         # This method is called from a different thread (the one fate runs in)
         self.commandwin.enable()
-        pass

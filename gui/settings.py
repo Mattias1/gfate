@@ -1,6 +1,5 @@
 from . import colors
-# import tkinter.font
-from PIL import ImageFont
+import tkinter.font
 
 
 class Settings():
@@ -8,10 +7,8 @@ class Settings():
 
     def __init__(self):
         self.size = Size(800, 500)
-        # self.uifont = ('Consolas', 10)
-        # self.userfont = ('Consolas', 10)
-        self.uifont = ImageFont.truetype('Consola.ttf', 13)
-        self.userfont = ImageFont.truetype('Consola.ttf', 13)
+        self.uifont = ('Consolas', 10)
+        self.userfont = ('Consolas', 10)
         self.tabsize = Size(110, 36)
         self.tabwidthextra = 30
         self.colors = colors.Colors()
@@ -21,11 +18,9 @@ class Settings():
         self.calcFontWidths()
 
     def calcFontWidths(self):
-        self.uifontsize = Size(self.uifont.getsize('a'))
-        self.userfontsize = Size(self.userfont.getsize('a'))
-        # fonts = [tkinter.font.Font(family=fam, size=pt) for fam, pt in [self.uifont, self.userfont]]
-        # self.uifontsize = Size(fonts[0].measure('a'), fonts[0].metrics("linespace"))
-        # self.userfontsize = Size(fonts[1].measure('a') , fonts[1].metrics("linespace"))
+        fonts = [tkinter.font.Font(family=fam, size=pt) for fam, pt in [self.uifont, self.userfont]]
+        self.uifontsize = Size(fonts[0].measure('a'), fonts[0].metrics("linespace"))
+        self.userfontsize = Size(fonts[1].measure('a') , fonts[1].metrics("linespace"))
 
     def load(self):
         """Load all the settings from json file"""
