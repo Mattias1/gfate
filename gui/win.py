@@ -1,6 +1,7 @@
 """
 Module containing Win class.
-The Win class is meant to hide some common interaction with curses.
+The Win class is meant to hide some common interaction with the canvas
+and provide some default or needed functionality for all window objects.
 """
 from tkinter import *
 from PIL import Image, ImageTk, ImageDraw
