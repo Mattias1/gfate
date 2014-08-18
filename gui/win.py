@@ -67,21 +67,21 @@ class Win:
 
     # Some draw methods to make sure all my subclasses don't have to bother about tkinters canvas
     def drawFString(self, text, c, p, font, anchor="nw"):
+        self.g.text((self.pos + p).t, text, font=font)
         # self.g.create_text((self.pos + p).t, anchor=anchor, text=text, fill=c, font=font)
-        pass
     def drawUIString(self, text, c, p, anchor="nw"):
         self.drawFString(text, c, p, self.settings.uifont, anchor=anchor)
     def drawString(self, text, c, p, anchor="nw"):
         self.drawFString(text, c, p, self.settings.userfont, anchor=anchor)
 
     def drawLine(self, c, p, q, w=1):
-        # self.g.create_line((self.pos + p).t, (self.pos + q).t, fill=c) # Todo: use the line width
-        pass
+        self.g.line([(self.pos + p).t, (self.pos + q).t], fill=c, width=w)
+        # self.g.create_line((self.pos + p).t, (self.pos + q).t, fill=c)
 
     def drawRect(self, c, p, s):
         self.drawRectBorder(c, p, s, 0)
     def drawRectBorder(self, c, p, s, borderw=1):
-        self.g.rectangle([(self.pos + p).t, (self.pos + p + s).t], fill=c)
+        self.g.rectangle([(self.pos + p).t, (self.pos + p + s - (1, 1)).t], fill=c)
         # self.g.create_rectangle((self.pos + p).t, (self.pos + p + s).t, fill=c, width=borderw)
         # TODO: use the border width
 
@@ -93,8 +93,11 @@ class Win:
         return self.loadImgTk(self.loadImgPIL(path))
 
     def drawImg(self, p, img, anchor="nw"):
+        r, g, b, a = img.split()
+        top = Image.merge('RGB', (r, g, b))
+        mask = Image.merge('L', (a, ))
+        self.app.mainWindow.im.paste(top, (self.pos + p).t, mask)
         # self.g.create_image((self.pos + p).t, image=img, anchor=anchor)
-        pass
 
     def clear(self, c):
         self.drawRect(c, Pos(0, 0), self.size)

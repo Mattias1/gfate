@@ -33,7 +33,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 p = self.getCharCoord(b)
                 self.drawcursor(self.textoffset + p, self.cursorvisible)
             else:
-                (bx, by), (ex, ey) = self.getCharCoord(b), self.getCharCoord(e)
+                (bx, by), (ex, ey) = self.getCharCoord(b).t, self.getCharCoord(e).t
                 if by == ey:
                     self.drawRect(self.colors.selectionbg, self.textoffset + (w * bx,  + by * h), Size(w * (ex - bx), h))
                 else:

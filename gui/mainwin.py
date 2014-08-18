@@ -21,7 +21,8 @@ class MainWin(Win):
 
         self.textwins = []
         self.im = Image.new("RGBA", self.size.t)
-        self.canvasimg = self.canvas.create_image(self.pos.t, image=self.loadImgTk(self.im), anchor="nw")
+        self.tkim = self.loadImgTk(self.im)
+        self.canvasImgId = self.canvas.create_image(self.pos.t, image=self.tkim, anchor="nw")
         self.useim1 = True
         self.gfx = None
 
@@ -78,14 +79,15 @@ class MainWin(Win):
             self.activewin.draw()
 
         # Now display the image on the canvas
-        self.canvas.itemconfig(self.canvasimg, image=self.loadImgTk(self.im))
+        self.tkim = self.loadImgTk(self.im)
+        self.canvas.itemconfig(self.canvasImgId, image=self.tkim)
         self.gfx = None
 
     def onMouseDown(self, p, btnNr):
         # Hit tabs
         self.selectedtab = -1
-        s = self.settings.tabsize + (self.settings.tabwidthextra, 0)
-        if 0 <= p.y <= s.h:
+        w, h = (self.settings.tabsize + (self.settings.tabwidthextra, 0)).t
+        if 0 <= p.y <= h:
             i = p.x // w
             if i < len(self.textwins):
                 # self.selectedtab = i
@@ -200,26 +202,27 @@ class MainWin(Win):
         piltabs[6] = piltabs[6].resize((self.size.w, h), Image.NEAREST)
 
         # Convert the images to Tk images
-        self.tabImg = [self.loadImgTk(t) for t in piltabs]
+        self.tabImgs = [t.copy() for t in piltabs] # piltabs # [self.loadImgTk(t) for t in piltabs]
 
     def drawTab(self, p, text, active=False):
         """Draw a single tab"""
         offset = 0 if active else 3
-        w, h = (self.tabImg[offset].width(), self.tabImg[offset].height())
-        self.drawImg(p, self.tabImg[offset])
-        self.drawImg(p + (w, 0), self.tabImg[1 + offset])
-        self.drawImg(p + (w + self.settings.tabsize.w, 0), self.tabImg[2 + offset])
-        self.drawUIString(text, self.colors.tabtext, self.pos + (3, 3))
+        w, h = self.tabImgs[offset].size
+        self.drawImg(p, self.tabImgs[offset])
+        self.drawImg(p + (w, 0), self.tabImgs[1 + offset])
+        self.drawImg(p + (w + self.settings.tabsize.w, 0), self.tabImgs[2 + offset])
+        self.drawUIString(text, self.colors.tabtext, self.pos + p + (0, 12) + (self.settings.tabwidthextra, 0))
 
     def drawTabs(self):
         """Manage the drawing of all the tabs"""
-        y = self.settings.tabsize.h - self.tabImg[0].height()
+        h = self.tabImgs[0].size[1]
+        y = self.settings.tabsize.h - h
         if y < 0:
-            self.settings.tabsize.h = self.tabImg[0].height()
+            self.settings.tabsize.h = h
             y = 0
         # Draw tab background
         w = self.settings.tabsize.w + self.settings.tabwidthextra
-        self.drawRect(self.colors.tabbg, Pos(0, 0), Pos(self.size.w, y + self.tabImg[0].height()))
+        self.drawRect(self.colors.tabbg, Pos(0, 0), Pos(self.size.w, y + h))
         activewin = -1
         # Draw inactive tabs
         for i, win in enumerate(self.textwins):
@@ -228,7 +231,7 @@ class MainWin(Win):
             else:
                 self.drawTab(Pos(i * w, y), win.getTitle())
         # Draw tab bottom
-        self.drawImg(Pos(0, y), self.tabImg[6])
+        self.drawImg(Pos(0, y), self.tabImgs[6])
         # Draw the active tab
         if activewin > -1:
             self.drawTab(Pos(activewin * w, y), self.textwins[activewin].getTitle(), True)
