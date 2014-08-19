@@ -73,6 +73,8 @@ class Win:
     def drawLine(self, c, p, q, w=1):
         self.g.create_line((self.pos + p).t, (self.pos + q).t, fill=c)
         # TODO: Use width
+    def drawHorizontalLine(self, c, h, w=1):
+        self.drawLine(c, Pos(0, h), Pos(self.size.w, h), w)
 
     def drawRect(self, c, p, s):
         self.drawRectBorder(c, p, s, 0)

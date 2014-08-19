@@ -34,6 +34,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return result
 
     def draw(self):
+        # Draw selection
         w, h = self.settings.userfontsize.t
         for b, e in self.doc.selection:
             if b == e:
@@ -45,7 +46,21 @@ class TextWin(Win, fate.userinterface.UserInterface):
                     self.drawRect(self.colors.selectionbg, self.textoffset + (w * bx,  + by * h), Size(w * (ex - bx), h))
                 else:
                     pass
+
+        # Draw text
         self.drawString(self.doc.text, self.colors.text, self.textoffset)
+
+        # Draw statuswin
+        h = self.settings.uifontsize.h + 6
+        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.7), self.size.h - h - 1)
+        self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
+        selectionstext = ''
+        for sel in self.doc.selection:
+            selectionstext += str(sel) + ', '
+        for i, stat in enumerate(['file: ' + self.doc.filename + '' if self.doc.saved else '*', 'mode: ' + str(self.doc.mode), 'selection: ' + selectionstext[:-2]]):
+            self.drawString(stat, self.colors.tabtext, Pos(self.textoffset.x + 300 * i, self.size.h - h + 2))
+
+        # Draw commandwin
         if self.commandwin.enabled:
             self.commandwin.draw()
 

@@ -35,8 +35,8 @@ thread.start()
 try:
     app.mainloop()
 except:
-    for doc in fate.document.documentlist:
-        fate.actions.quit_document(doc)
+    # fate.commands.force_quit(None)
+    fate.document.activedocument = None
     raise
 
 # TODO: at crash close eachother (double try catch)

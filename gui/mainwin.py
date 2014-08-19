@@ -3,6 +3,7 @@ from .colors import *
 from .textwin import TextWin
 import fate
 import fate.document
+import fate.commands
 from collections import deque
 from PIL import Image, ImageTk, ImageDraw
 
@@ -20,6 +21,7 @@ class MainWin(Win):
         self.queue = deque()
 
         self.textwins = []
+        self.doclist = fate.document.documentlist
 
     @property
     def activewin(self):
@@ -47,6 +49,7 @@ class MainWin(Win):
 
     def swapTabs(self, a, b):
         self.textwins[a], self.textwins[b] = self.textwins[b], self.textwins[a]
+        self.doclist[a], self.doclist[b] = self.doclist[b], self.doclist[a]
 
     def closeTab(self, index):
         win = self.textwins.pop(index)
@@ -75,14 +78,14 @@ class MainWin(Win):
         if 0 <= p.y <= h:
             i = p.x // w
             if i < len(self.textwins):
-                # self.selectedtab = i
+                self.selectedtab = i
                 self.queue.append(fate.document.goto_document(i))
 
         if self.selectedtab > -1:
             if btnNr == 1:
-                self.enableTab(i)
+                self.enableTab(self.selectedtab)
             elif btnNr == 2:
-                self.closeTab(i)
+                fate.commands.quit_document(self.doclist[self.selectedtab])
             self.draw()
 
         # Pass the event on to my active child
@@ -107,6 +110,7 @@ class MainWin(Win):
         # Pass the event on to my active child
         if self.activewin.inside(p):
             self.activewin.onMouseUp(p, btnNr)
+
     def onKeyDown(self, c):
         if self.activewin.acceptinput() and c:
             self.queue.append(c)
