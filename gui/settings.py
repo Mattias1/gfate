@@ -13,8 +13,8 @@ class Settings():
         self.tabwidthextra = 30
         self.colors = colors.Colors()
         self.commandsize = Size(300, 38)
-        self.flickertime = 400
-        self.refresh_rate = 30
+        self.fps_inv = 1/30                       # seconds per frame
+        self.flickercount = 0.400 // self.fps_inv # frames per cursor flicker change
         self.calcFontWidths()
 
     def calcFontWidths(self):

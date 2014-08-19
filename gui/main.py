@@ -31,7 +31,7 @@ class Application(Frame):
 
         self.settings = settings
 
-        self.master.after(self.settings.flickertime, self.loop)
+        self.master.after(int(self.settings.fps_inv * 1000), self.loop)
 
     def onMouseDown(self, event):
         self.mainWindow.onMouseDown(Pos(event.x, event.y), event.num)
@@ -74,7 +74,7 @@ class Application(Frame):
     def loop(self):
         """Private method to manage the loop method"""
         self.mainWindow.loop()
-        self.master.after(self.settings.flickertime, self.loop)
+        self.master.after(int(self.settings.fps_inv * 1000), self.loop)
 
     def getchar(self, e):
         """Convert a tkinter event (given these three different representations of the same char)"""

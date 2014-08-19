@@ -133,7 +133,6 @@ class MainWin(Win):
     def loop(self):
         """This method is being called every X miliseconds"""
         # Call my active child
-        redraw = False
         redraw = self.activewin.loop()
         # Draw if nescessary
         if redraw:
