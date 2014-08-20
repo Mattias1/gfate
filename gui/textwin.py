@@ -6,17 +6,18 @@ import fate.userinterface
 
 
 class TextWin(Win, fate.userinterface.UserInterface):
-    """The text window class
-    
+    """
+    The text window class
     This class represents the window for a single file.
     """
 
-    def __init__(self, settings, app, document):
+    def __init__(self, settings, app, doc):
         Win.__init__(self, settings, app)
+        fate.userinterface.UserInterface.__init__(self, doc)
 
         self.commandwin = CommandWin(settings, app)
-        self.doc = document
-        self.queue = app.mainWindow.queue
+        self.doc = doc
+        self.doc.OnQuit.add(self.onQuit)
         self.flickercountleft = 1
         self.redraw = False
         self.textoffset = Pos(6, 40)
@@ -24,47 +25,66 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def loop(self):
         result = self.redraw
         self.redraw = False
+        # Draw cursor
         self.flickercountleft -= 1
         if self.flickercountleft in {0, self.settings.flickercount}:
             if self.flickercountleft == 0:
                 self.flickercountleft = self.settings.flickercount * 2
             result = True
+        # Draw commandwindow
         if self.commandwin.enabled:
             result = result or self.commandwin.loop()
+        # Redraw needed
         return result
 
     def draw(self):
         # Draw selection (and get the selections text already)
         selectionstext = ''
         w, h = self.settings.userfontsize.t
-        for b, e in self.doc.selection:
+        for i, (b, e) in enumerate(self.doc.selection):
             if b == e:
-                p = self.getCharCoord(b)
-                self.drawcursor(self.textoffset + p, self.flickercountleft <= self.settings.flickercount)
-                selectionstext += '{}, {}: 0, '.format(p.y, p.x)
+                bx, by = self.getCharCoord(b).t
+                self.drawcursor(bx, by)
+                selectionstext += '{}, {}: 0, '.format(by, bx)
             else:
                 (bx, by), (ex, ey) = self.getCharCoord(b).t, self.getCharCoord(e).t
                 selectionstext += '{}, {}: {}, '.format(by, bx, e - b)
                 if by == ey:
-                    self.drawRect(self.colors.selectionbg, self.textoffset + (w * bx,  + by * h), Size(w * (ex - bx), h))
+                    self.drawRect(self.colors.selectionbg, self.textoffset + (w*bx, by*h), Size(w*(ex - bx), h))
                 else:
                     pass
+                if str(self.doc.mode) == 'INSERT':
+                    self.drawcursor(bx + len(self.doc.mode.insertions[i]), by)
+                elif str(self.doc.mode) == 'SURROUND':
+                    self.drawcursor(bx, by)
+                    self.drawcursor(ex, ey)
+                elif str(self.doc.mode) == 'APPEND':
+                    self.drawcursor(ex, ey)
 
         # Draw text
         self.drawString(self.doc.text, self.colors.text, self.textoffset)
 
         # Draw statuswin
-        h = self.settings.uifontsize.h + 6
-        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h - 1)
-        self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
-        h = self.size.h - h + 2
-        self.drawString(self.doc.filename + '' if self.doc.saved else '*', self.colors.tabtext, Pos(self.textoffset.x, h))
-        self.drawString(str(self.doc.mode), self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
-        self.drawString(selectionstext[:-2], self.colors.tabtext, Pos(self.size.w - self.textoffset.x - (len(selectionstext) - 2) * self.settings.uifontsize.w, h))
+        self.drawStatusWin(selectionstext)
 
         # Draw commandwin
         if self.commandwin.enabled:
             self.commandwin.draw()
+
+    def drawcursor(self, cx, cy):
+        w, h = self.settings.userfontsize.t
+        self.drawcursorline(self.textoffset + (w*cx, h*cy), self.flickercountleft <= self.settings.flickercount)
+
+    def drawStatusWin(self, selectionstext):
+        h = self.settings.uifontsize.h + 6
+        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h - 1)
+        self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
+        h = self.size.h - h + 2
+        modestr = 'NORMAL' if not self.doc.mode else str(self.doc.mode)
+        selpos = Pos(self.size.w - self.textoffset.x - (len(selectionstext) - 2) * self.settings.uifontsize.w, h)
+        self.drawString(self.doc.filename + '' if self.doc.saved else '*', self.colors.tabtext, Pos(self.textoffset.x, h))
+        self.drawString(modestr, self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
+        self.drawString(selectionstext[:-2], self.colors.tabtext, selpos)
 
     def getTitle(self):
         return self.doc.filename
@@ -113,23 +133,23 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # This method is called from a different thread (the one fate runs in)
         self.app.mainWindow.enableTab(self)
 
-    def getinput(self):
+    def _getuserinput(self):
         # This method is called from a different thread (the one fate runs in)
         # Block untill you have something
-        while not self.queue:
+        while not self.inputqueue:
             sleep(self.settings.fps_inv)
-        return self.queue.popleft()
-
-    def peekinput(self):
-        # This method is called from a different thread (the one fate runs in)
-        # Block untill you have something
-        while not self.queue:
-            sleep(self.settings.fps_inv)
-        return self.queue[0]
+        return self.inputqueue.popleft()
 
     def prompt(self, prompt_string='>'):
         # This method is called from a different thread (the one fate runs in)
         pass
+
+    #
+    # Some event handlers
+    #
+    def onQuit(self, doc):
+        me = doc.ui
+        me.app.mainWindow.closeTab(fate.document.documentlist.index(doc))
 
     #
     # Implement UI commands

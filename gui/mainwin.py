@@ -18,7 +18,6 @@ class MainWin(Win):
         Win.__init__(self, settings, app)
 
         self.selectedtab = -1 # Mark the tab that is selected while a mousekey is down
-        self.queue = deque()
 
         self.textwins = []
         self.doclist = fate.document.documentlist
@@ -31,21 +30,22 @@ class MainWin(Win):
         except:
             return None
 
-    def addWin(self, document):
+    @property
+    def queue(self):
+        return self.activewin.inputqueue
+
+    def addWin(self, doc):
         """Open a new file"""
         for win in self.textwins:
             win.disable()
-        win = TextWin(self.settings, self.app, document)
+        win = TextWin(self.settings, self.app, doc)
         self.textwins.append(win)
         return win
 
-    def enableTab(self, tab):
+    def enableTab(self, newWin):
         for win in self.textwins:
             win.disable()
-        try:
-            self.textwins[tab].enable()
-        except:
-            tab.enable()
+        newWin.enable()
 
     def swapTabs(self, a, b):
         self.textwins[a], self.textwins[b] = self.textwins[b], self.textwins[a]
@@ -55,11 +55,12 @@ class MainWin(Win):
         win = self.textwins.pop(index)
         if win.enabled:
             if index < len(self.textwins):
-                self.textwins[index].enable()
+                self.textwins[index].activate()
             elif self.textwins:
-                self.textwins[index - 1].enable()
+                self.textwins[index - 1].activate()
             else:
-                self.quit()
+                self.app.master.quit()
+        self.draw()
 
     def draw(self):
         """Draw the main window"""
@@ -79,17 +80,16 @@ class MainWin(Win):
             i = p.x // w
             if i < len(self.textwins):
                 self.selectedtab = i
-                self.queue.append(fate.document.goto_document(i))
 
         if self.selectedtab > -1:
             if btnNr == 1:
-                self.enableTab(self.selectedtab)
+                self.queue.append(fate.document.goto_document(i))
             elif btnNr == 2:
                 fate.commands.quit_document(self.doclist[self.selectedtab])
             self.draw()
 
         # Pass the event on to my active child
-        if self.activewin.inside(p):
+        if self.activewin and self.activewin.inside(p):
             self.activewin.onMouseDown(p, btnNr)
     def onMouseMove(self, p, btnNr):
         # Move the tabs
@@ -135,7 +135,7 @@ class MainWin(Win):
             self.draw()
 
     def loop(self):
-        """This method is being called every X miliseconds"""
+        """This method is being called every n miliseconds (depending on the fps)"""
         # Call my active child
         redraw = self.activewin.loop()
         # Draw if nescessary

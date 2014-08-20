@@ -97,7 +97,7 @@ class Win:
     def clear(self, c):
         self.drawRect(c, Pos(0, 0), self.size)
 
-    def drawcursor(self, p, cursorvisible):
+    def drawcursorline(self, p, cursorvisible):
         if cursorvisible:
             self.drawLine(self.colors.text, p, p + (0, self.settings.userfontsize.h))
 
