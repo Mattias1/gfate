@@ -57,6 +57,8 @@ class Pos():
         return self + (-other[0], -other[1])
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return self.x == other[0] and self.y == other[1]
     def __neq__(self, other):
         return not self == other
@@ -87,6 +89,8 @@ class Size():
         return self + (-other[0], -other[1])
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return self.w == other[0] and self.h == other[1]
     def __neq__(self, other):
         return not a == other

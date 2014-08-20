@@ -34,14 +34,17 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return result
 
     def draw(self):
-        # Draw selection
+        # Draw selection (and get the selections text already)
+        selectionstext = ''
         w, h = self.settings.userfontsize.t
         for b, e in self.doc.selection:
             if b == e:
                 p = self.getCharCoord(b)
                 self.drawcursor(self.textoffset + p, self.flickercountleft <= self.settings.flickercount)
+                selectionstext += '{}, {}: 0, '.format(p.y, p.x)
             else:
                 (bx, by), (ex, ey) = self.getCharCoord(b).t, self.getCharCoord(e).t
+                selectionstext += '{}, {}: {}, '.format(by, bx, e - b)
                 if by == ey:
                     self.drawRect(self.colors.selectionbg, self.textoffset + (w * bx,  + by * h), Size(w * (ex - bx), h))
                 else:
@@ -52,13 +55,12 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
         # Draw statuswin
         h = self.settings.uifontsize.h + 6
-        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.7), self.size.h - h - 1)
+        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h - 1)
         self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
-        selectionstext = ''
-        for sel in self.doc.selection:
-            selectionstext += str(sel) + ', '
-        for i, stat in enumerate(['file: ' + self.doc.filename + '' if self.doc.saved else '*', 'mode: ' + str(self.doc.mode), 'selection: ' + selectionstext[:-2]]):
-            self.drawString(stat, self.colors.tabtext, Pos(self.textoffset.x + 300 * i, self.size.h - h + 2))
+        h = self.size.h - h + 2
+        self.drawString(self.doc.filename + '' if self.doc.saved else '*', self.colors.tabtext, Pos(self.textoffset.x, h))
+        self.drawString(str(self.doc.mode), self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
+        self.drawString(selectionstext[:-2], self.colors.tabtext, Pos(self.size.w - self.textoffset.x - (len(selectionstext) - 2) * self.settings.uifontsize.w, h))
 
         # Draw commandwin
         if self.commandwin.enabled:
