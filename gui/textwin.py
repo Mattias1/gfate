@@ -18,6 +18,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.commandwin = CommandWin(settings, app)
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
+        self.doc.OnActivate.add(self.onActivate)
         self.flickercountleft = 1
         self.redraw = False
         self.textoffset = Pos(6, 40)
@@ -129,10 +130,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # This method is called from a different thread (the one fate runs in)
         pass
 
-    def activate(self):
-        # This method is called from a different thread (the one fate runs in)
-        self.app.mainWindow.enableTab(self)
-
     def _getuserinput(self):
         # This method is called from a different thread (the one fate runs in)
         # Block untill you have something
@@ -148,8 +145,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
     # Some event handlers
     #
     def onQuit(self, doc):
-        me = doc.ui
-        me.app.mainWindow.closeTab(fate.document.documentlist.index(doc))
+        doc.ui.app.mainWindow.closeTab(fate.document.documentlist.index(doc))
+
+    def onActivate(self, doc):
+        doc.ui.app.mainWindow.enableTab(doc.ui)
 
     #
     # Implement UI commands
