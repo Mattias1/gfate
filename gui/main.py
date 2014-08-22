@@ -105,3 +105,4 @@ def main():
     root.configure(bg=settings.colors.bg)
     root.geometry("{}x{}".format(settings.size.w, settings.size.h))
     return Application(settings, master=root)
+

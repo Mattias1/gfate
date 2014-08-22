@@ -30,6 +30,3 @@ class Colors():
         c, d = self.toTuple(a), self.toTuple(b)
         return self.toHex([int(c[i] + (d[i] - c[i]) * v) for i in range(3)])
 
-if __name__ == '__main__':
-    import main
-    main.main()

@@ -15,26 +15,26 @@ class TextWin(Win, fate.userinterface.UserInterface):
         Win.__init__(self, settings, app)
         fate.userinterface.UserInterface.__init__(self, doc)
 
-        self.commandwin = CommandWin(settings, app)
+        self.commandWin = CommandWin(settings, app)
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
         self.doc.OnActivate.add(self.onActivate)
-        self.flickercountleft = 1
+        self.flickerCountLeft = 1
         self.redraw = False
-        self.textoffset = Pos(6, 40)
+        self.textOffset = Pos(6, 40)
 
     def loop(self):
         result = self.redraw
         self.redraw = False
         # Draw cursor
-        self.flickercountleft -= 1
-        if self.flickercountleft in {0, self.settings.flickercount}:
-            if self.flickercountleft == 0:
-                self.flickercountleft = self.settings.flickercount * 2
+        self.flickerCountLeft -= 1
+        if self.flickerCountLeft in {0, self.settings.flickercount}:
+            if self.flickerCountLeft == 0:
+                self.flickerCountLeft = self.settings.flickercount * 2
             result = True
-        # Draw commandwindow
-        if self.commandwin.enabled:
-            result = result or self.commandwin.loop()
+        # Draw commandWindow
+        if self.commandWin.enabled:
+            result = result or self.commandWin.loop()
         # Redraw needed
         return result
 
@@ -43,17 +43,14 @@ class TextWin(Win, fate.userinterface.UserInterface):
         selectionstext = ''
         w, h = self.settings.userfontsize.t
         for i, (b, e) in enumerate(self.doc.selection):
-            if b == e:
+            if b >= e:
                 bx, by = self.getCharCoord(b).t
                 self.drawcursor(bx, by)
                 selectionstext += '{}, {}: 0, '.format(by, bx)
             else:
-                (bx, by), (ex, ey) = self.getCharCoord(b).t, self.getCharCoord(e).t
+                bx, by = self.getCharCoord(b).t
+                ex, ey = self.drawSelection(w, h, b, e, bx, by)
                 selectionstext += '{}, {}: {}, '.format(by, bx, e - b)
-                if by == ey:
-                    self.drawRect(self.colors.selectionbg, self.textoffset + (w*bx, by*h), Size(w*(ex - bx), h))
-                else:
-                    pass
                 if str(self.doc.mode) == 'INSERT':
                     self.drawcursor(bx + len(self.doc.mode.insertions[i]), by)
                 elif str(self.doc.mode) == 'SURROUND':
@@ -63,18 +60,31 @@ class TextWin(Win, fate.userinterface.UserInterface):
                     self.drawcursor(ex, ey)
 
         # Draw text
-        self.drawString(self.doc.text, self.colors.text, self.textoffset)
+        self.drawString(self.doc.text, self.colors.text, self.textOffset)
 
         # Draw statuswin
         self.drawStatusWin(selectionstext)
 
-        # Draw commandwin
-        if self.commandwin.enabled:
-            self.commandwin.draw()
+        # Draw commandWin
+        if self.commandWin.enabled:
+            self.commandWin.draw()
 
     def drawcursor(self, cx, cy):
         w, h = self.settings.userfontsize.t
-        self.drawcursorline(self.textoffset + (w*cx, h*cy), self.flickercountleft <= self.settings.flickercount)
+        self.drawcursorline(self.textOffset + (w*cx, h*cy), self.flickerCountLeft <= self.settings.flickercount)
+
+    def drawSelection(self, w, h, b, e, bx, by):
+        i = b
+        while i < e:
+            c = self.doc.text[i]
+            if i == e - 1 or c == '\n': # TODO: manage different newline options
+                self.drawRect(self.colors.selectionbg, self.textOffset + (w*bx, by*h), Size(w*(i + 1 - b), h))
+                if i == e - 1:
+                    return (bx + i + 1 - b, by)
+                bx, by = 0, by + 1
+                b = i # Mark the character no. of the selection beginning
+            i += 1
+        raise Exception('Character at end of selection not found')
 
     def drawStatusWin(self, selectionstext):
         h = self.settings.uifontsize.h + 6
@@ -82,8 +92,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
         h = self.size.h - h + 2
         modestr = 'NORMAL' if not self.doc.mode else str(self.doc.mode)
-        selpos = Pos(self.size.w - self.textoffset.x - (len(selectionstext) - 2) * self.settings.uifontsize.w, h)
-        self.drawString(self.doc.filename + '' if self.doc.saved else '*', self.colors.tabtext, Pos(self.textoffset.x, h))
+        selpos = Pos(self.size.w - self.textOffset.x - (len(selectionstext) - 2) * self.settings.uifontsize.w, h)
+        self.drawString(self.doc.filename + '' if self.doc.saved else '*', self.colors.tabtext, Pos(self.textOffset.x, h))
         self.drawString(modestr, self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
         self.drawString(selectionstext[:-2], self.colors.tabtext, selpos)
 
@@ -91,19 +101,25 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return self.doc.filename
 
     def onKeyDown(self, c):
-        if self.commandwin.enabled:
-            self.commandwin.onKeyDown(c)
+        if self.commandWin.enabled:
+            self.commandWin.onKeyDown(c)
 
     def resize(self, size=None, draw=True):
         assert draw == False
         Win.resize(self, size, draw)
         try:
-            self.commandwin.resize(size, False)
+            self.commandWin.resize(size, False)
         except:
             pass
 
     def acceptinput(self):
-        return not self.commandwin.enabled
+        return not self.commandWin.enabled
+
+    def showCmdWin(self, descr='', inpt='', callback=None):
+        self.commandWin.descr = descr
+        self.commandWin.test = inpt
+        self.commandWin.callback = callback
+        self.commandWin.enable()
 
     def getCharCoord(self, n):
         """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
@@ -128,7 +144,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def notify(self, message):
         # This method is called from a different thread (the one fate runs in)
-        pass
+        self.showCmdWin('Notification:\n' + message)
 
     def _getuserinput(self):
         # This method is called from a different thread (the one fate runs in)
@@ -139,7 +155,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def prompt(self, prompt_string='>'):
         # This method is called from a different thread (the one fate runs in)
-        pass
+        self.showCmdWin('', prompt_string, lambda result: print('Prompt result: ' + result))
 
     #
     # Some event handlers
@@ -155,4 +171,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
     #
     def command_mode(self, command_string=':'):
         # This method is called from a different thread (the one fate runs in)
-        self.commandwin.enable()
+        print('THIS METHOD IS ACTUALLY BEING CALLED!!! - def command_mode(...) in textwin.py (bottom of the file)')
+        self.showCmdWin('', command_string, lambda result: print(result))
+

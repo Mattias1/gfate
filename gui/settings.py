@@ -13,7 +13,7 @@ class Settings():
         self.tabwidthextra = 30
         self.colors = colors.Colors()
         self.statuswinenabled = True
-        self.commandsize = Size(300, 38)
+        self.commandsize = Size(300, 58)
         self.fps_inv = 1/30                       # seconds per frame
         self.flickercount = 0.400 // self.fps_inv # frames per cursor flicker change
         self.calcFontWidths()

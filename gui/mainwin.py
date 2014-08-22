@@ -17,13 +17,13 @@ class MainWin(Win):
     def __init__(self, settings, app):
         Win.__init__(self, settings, app)
 
-        self.selectedtab = -1 # Mark the tab that is selected while a mousekey is down
+        self.selectedTab = -1 # Mark the tab that is selected while a mousekey is down
 
-        self.textwins = []
-        self.doclist = fate.document.documentlist
+        self.textWins = []
+        self.docList = fate.document.documentlist
 
     @property
-    def activewin(self):
+    def activeWin(self):
         try:
             if fate.document.activedocument.ui:
                 return fate.document.activedocument.ui
@@ -32,32 +32,32 @@ class MainWin(Win):
 
     @property
     def queue(self):
-        return self.activewin.inputqueue
+        return self.activeWin.inputqueue
 
     def addWin(self, doc):
         """Open a new file"""
-        for win in self.textwins:
+        for win in self.textWins:
             win.disable()
         win = TextWin(self.settings, self.app, doc)
-        self.textwins.append(win)
+        self.textWins.append(win)
         return win
 
     def enableTab(self, newWin):
-        for win in self.textwins:
+        for win in self.textWins:
             win.disable()
         newWin.enable()
 
     def swapTabs(self, a, b):
-        self.textwins[a], self.textwins[b] = self.textwins[b], self.textwins[a]
-        self.doclist[a], self.doclist[b] = self.doclist[b], self.doclist[a]
+        self.textWins[a], self.textWins[b] = self.textWins[b], self.textWins[a]
+        self.docList[a], self.docList[b] = self.docList[b], self.docList[a]
 
     def closeTab(self, index):
-        win = self.textwins.pop(index)
+        win = self.textWins.pop(index)
         if win.enabled:
-            if index < len(self.textwins):
-                self.textwins[index].activate()
-            elif self.textwins:
-                self.textwins[index - 1].activate()
+            if index < len(self.textWins):
+                self.textWins[index].activate()
+            elif self.textWins:
+                self.textWins[index - 1].activate()
             else:
                 self.app.master.quit()
         self.draw()
@@ -69,52 +69,54 @@ class MainWin(Win):
         self.drawTabs()
 
         # Draw my active child
-        if self.activewin != None:
-            self.activewin.draw()
+        if self.activeWin != None:
+            self.activeWin.draw()
 
     def onMouseDown(self, p, btnNr):
         # Hit tabs
-        self.selectedtab = -1
+        self.selectedTab = -1
         w, h = (self.settings.tabsize + (self.settings.tabwidthextra, 0)).t
         if 0 <= p.y <= h:
             i = p.x // w
-            if i < len(self.textwins):
-                self.selectedtab = i
+            if i < len(self.textWins):
+                self.selectedTab = i
 
-        if self.selectedtab > -1:
+        if self.selectedTab > -1:
             if btnNr == 1:
                 self.queue.append(fate.document.goto_document(i))
             elif btnNr == 2:
-                fate.commands.quit_document(self.doclist[self.selectedtab])
+                fate.commands.quit_document(self.docList[self.selectedTab])
             self.draw()
 
         # Pass the event on to my active child
-        if self.activewin and self.activewin.inside(p):
-            self.activewin.onMouseDown(p, btnNr)
+        if self.activeWin and self.activeWin.inside(p):
+            self.activeWin.onMouseDown(p, btnNr)
     def onMouseMove(self, p, btnNr):
         # Move the tabs
         i = p.x // (self.settings.tabsize.w + self.settings.tabwidthextra)
-        if i != self.selectedtab and btnNr == 1:
-            if i < len(self.textwins):
-                self.swapTabs(i, self.selectedtab)
-                self.selectedtab = i
+        if i != self.selectedTab and btnNr == 1:
+            if i < len(self.textWins):
+                self.swapTabs(i, self.selectedTab)
+                self.selectedTab = i
                 self.draw()
 
         # Pass the event on to my active child
-        if self.activewin.inside(p):
-            self.activewin.onMouseMove(p, btnNr)
+        if self.activeWin.inside(p):
+            self.activeWin.onMouseMove(p, btnNr)
     def onMouseUp(self, p, btnNr):
         # Deselect
-        self.selectedtab = -1
+        self.selectedTab = -1
 
         # Pass the event on to my active child
-        if self.activewin.inside(p):
-            self.activewin.onMouseUp(p, btnNr)
+        if self.activeWin.inside(p):
+            self.activeWin.onMouseUp(p, btnNr)
 
     def onKeyDown(self, c):
-        if self.activewin.acceptinput() and c:
+        if c == 'Ctrl-c':
+            self.activeWin.notify('Ctrl-c is pressed, this is a gfate test message (mainWin.py - def onKeyDown).')
+        if self.activeWin.acceptinput() and c:
             self.queue.append(c)
-        self.activewin.onKeyDown(c)
+        self.activeWin.onKeyDown(c)
         self.draw()
 
     def resize(self, s=None, draw=True):
@@ -126,7 +128,7 @@ class MainWin(Win):
         self.initTabs()
 
         try:
-            for win in self.textwins:
+            for win in self.textWins:
                 win.resize(s, False)
         except:
             pass
@@ -137,7 +139,7 @@ class MainWin(Win):
     def loop(self):
         """This method is being called every n miliseconds (depending on the fps)"""
         # Call my active child
-        redraw = self.activewin.loop()
+        redraw = self.activeWin.loop()
         # Draw if nescessary
         if redraw:
             self.draw()
@@ -211,15 +213,16 @@ class MainWin(Win):
         # Draw tab background
         w = self.settings.tabsize.w + self.settings.tabwidthextra
         self.drawRect(self.colors.tabbg, Pos(0, 0), Pos(self.size.w, y + h))
-        activewin = -1
+        activeWin = -1
         # Draw inactive tabs
-        for i, win in enumerate(self.textwins):
+        for i, win in enumerate(self.textWins):
             if win.enabled:
-                activewin = i
+                activeWin = i
             else:
                 self.drawTab(Pos(i * w, y), win.getTitle())
         # Draw tab bottom
         self.drawImg(Pos(0, y), self.tabImgs[6])
         # Draw the active tab
-        if activewin > -1:
-            self.drawTab(Pos(activewin * w, y), self.textwins[activewin].getTitle(), True)
+        if activeWin > -1:
+            self.drawTab(Pos(activeWin * w, y), self.textWins[activeWin].getTitle(), True)
+
