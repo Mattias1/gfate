@@ -55,11 +55,12 @@ class MainWin(Win):
         win = self.textWins.pop(index)
         if win.enabled:
             if index < len(self.textWins):
-                self.textWins[index].activate()
+                self.textWins[index].enable()
             elif self.textWins:
-                self.textWins[index - 1].activate()
+                self.textWins[index - 1].enable()
             else:
                 self.app.master.quit()
+                return
         self.draw()
 
     def draw(self):
@@ -139,6 +140,8 @@ class MainWin(Win):
     def loop(self):
         """This method is being called every n miliseconds (depending on the fps)"""
         # Call my active child
+        if not self.activeWin:
+            return False
         redraw = self.activeWin.loop()
         # Draw if nescessary
         if redraw:
