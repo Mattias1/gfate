@@ -9,8 +9,8 @@ from PIL import Image, ImageTk, ImageDraw
 
 
 class MainWin(Win):
-    """The main window class
-
+    """
+    The main window class
     This is the main window for the gfate text editor.
     """
 
@@ -123,8 +123,6 @@ class MainWin(Win):
     def resize(self, s=None, draw=True):
         """Override the resize window"""
         Win.resize(self, s, False)
-
-        self.im = Image.new("RGBA", self.size.t)
 
         self.initTabs()
 

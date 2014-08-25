@@ -63,6 +63,9 @@ class Pos():
     def __neq__(self, other):
         return not self == other
 
+    def __str__(self):
+        return '({}, {})'.format(self.x, self.y)
+
 
 class Size():
     """A size class just to make things a bit easier."""
@@ -94,4 +97,7 @@ class Size():
         return self.w == other[0] and self.h == other[1]
     def __neq__(self, other):
         return not a == other
+
+    def __str__(self):
+        return '{}x{}'.format(self.w, self.h)
 
