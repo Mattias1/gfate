@@ -46,11 +46,11 @@ class TextWin(Win, fate.userinterface.UserInterface):
             if b >= e:
                 bx, by = self.getCharCoord(b).t
                 self.drawcursor(bx, by)
-                selectionstext += '{}, {}: 0, '.format(by, bx)
+                selectionstext += '({}, {}: 0), '.format(by, bx)
             else:
                 bx, by = self.getCharCoord(b).t
                 ex, ey = self.drawSelection(w, h, b, e, bx, by)
-                selectionstext += '{}, {}: {}, '.format(by, bx, e - b)
+                selectionstext += '({}, {}: {}), '.format(by, bx, e - b)
                 if str(self.doc.mode) == 'ChangeBefore':
                     self.drawcursor(bx + len(self.doc.mode.peek().insertions[i]), by)
                 elif str(self.doc.mode) == 'ChangeAround':
@@ -105,7 +105,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
            self.doc.filetype,
            self.doc.mode,
            self.doc.selectmode,
-           self.doc.selection)
+           selectionstext[:-2])
         self.drawString(status, self.colors.tabtext, Pos(self.textOffset.x, h))
 
     def getTitle(self):
