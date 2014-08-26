@@ -45,19 +45,19 @@ class TextWin(Win, fate.userinterface.UserInterface):
         for i, (b, e) in enumerate(self.doc.selection):
             if b >= e:
                 bx, by = self.getCharCoord(b).t
-                self.drawcursor(bx, by)
+                self.drawCursor(bx, by)
                 selectionstext += '({}, {}: 0), '.format(by, bx)
             else:
                 bx, by = self.getCharCoord(b).t
                 ex, ey = self.drawSelection(w, h, b, e, bx, by)
                 selectionstext += '({}, {}: {}), '.format(by, bx, e - b)
-                if str(self.doc.mode) == 'ChangeBefore':
-                    self.drawcursor(bx + len(self.doc.mode.peek().insertions[i]), by)
-                elif str(self.doc.mode) == 'ChangeAround':
-                    self.drawcursor(bx, by)
-                    self.drawcursor(ex, ey)
-                elif str(self.doc.mode) == 'ChangeAfter':
-                    self.drawcursor(ex, ey)
+                if 'ChangeBefore' in str(self.doc.mode):
+                    self.drawCursor(bx + len(self.doc.mode.peek().insertions[i]), by)
+                elif 'ChangeAround' in str(self.doc.mode):
+                    self.drawCursor(bx, by)
+                    self.drawCursor(ex, ey)
+                elif 'ChangeAfter' in str(self.doc.mode):
+                    self.drawCursor(ex, ey)
 
         # Draw text
         self.drawString(self.doc.text, self.colors.text, self.textOffset)
@@ -69,9 +69,9 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if self.commandWin.enabled:
             self.commandWin.draw()
 
-    def drawcursor(self, cx, cy):
+    def drawCursor(self, cx, cy):
         w, h = self.settings.userfontsize.t
-        self.drawcursorline(self.textOffset + (w*cx, h*cy), self.flickerCountLeft <= self.settings.flickercount)
+        self.drawCursorLine(self.textOffset + (w*cx, h*cy), self.flickerCountLeft <= self.settings.flickercount)
 
     def drawSelection(self, w, h, b, e, bx, by):
         i = b
@@ -126,9 +126,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def acceptinput(self):
         return not self.commandWin.enabled
 
-    def showCmdWin(self, descr='', inpt='', callback=None):
+    def showCmdWin(self, descr='Command', inpt='', callback=None):
         self.commandWin.descr = descr
-        self.commandWin.test = inpt
+        self.commandWin.text = inpt
+        self.commandWin.result = ''
         self.commandWin.callback = callback
         self.commandWin.enable()
 
@@ -155,7 +156,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def notify(self, message):
         # This method is called from a different thread (the one fate runs in)
-        self.showCmdWin('Notification:\n' + message)
+        self.showCmdWin('Notification: ' + message)
 
     def _getuserinput(self):
         # This method is called from a different thread (the one fate runs in)
@@ -166,7 +167,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def prompt(self, prompt_string='>'):
         # This method is called from a different thread (the one fate runs in)
-        self.showCmdWin('', prompt_string, lambda result: print('Prompt result: ' + result))
+        self.showCmdWin(prompt_string, '', lambda result: print('Prompt result: ' + result))
+        while not self.commandWin.result:
+            sleep(self.settings.fps_inv)
+        return self.commandWin.result
 
     #
     # Some event handlers

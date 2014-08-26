@@ -97,45 +97,7 @@ class Win:
     def clear(self, c):
         self.drawRect(c, Pos(0, 0), self.size)
 
-    def drawcursorline(self, p, cursorvisible):
+    def drawCursorLine(self, p, cursorvisible):
         if cursorvisible:
             self.drawLine(self.colors.text, p, p + (0, self.settings.userfontsize.h))
-
-
-#     Things Chiel used in his win class and might be usefull later on
-#     @staticmethod
-#     def get_coords(lines, pos):
-#         """Compute the coordinates of pos in lines."""
-#         y = 0
-#         line_beg = 0
-#         for line in lines:
-#             if pos <= line_beg + len(line):
-#                 break
-#             y += 1
-#             line_beg += len(line)
-# 
-#         x = (pos - line_beg)
-# 
-#         return x, y
-# 
-#     def crop(self, string, center):
-#         """Crop the string around center."""
-#         assert 0 <= center < len(string)
-#         lines = string.split('\n')
-# 
-#         # Compensate for splitting
-#         center -= len(lines) - 1
-# 
-#         # Compute the coordinates of center
-#         x, y = self.get_coords(lines, center)
-# 
-#         # Crop vertically
-#         yoffset = max(0, y - int(self.height / 2))
-#         lines = [line for i, line in enumerate(lines) if yoffset <= i < self.height]
-# 
-#         # Crop horizontally
-#         xoffset = max(0, x - int(self.width / 2))
-#         lines = [line[xoffset:xoffset + self.width - 1] for line in lines]
-# 
-#         return '\n'.join(lines)
 

@@ -93,6 +93,7 @@ class Application(Frame):
         elif num == 65288: c = '\b'
         elif num == 65293: c = '\n'
         elif num == 65289: c = 'Backtab' if self.shift else '\t'
+        elif num == 65549: c = 'Capslock'
 
         return prefix + c
 

@@ -1,4 +1,5 @@
 from .win import *
+from .settings import *
 from .colors import *
 
 
@@ -12,17 +13,22 @@ class CommandWin(Win):
         Win.__init__(self, settings, app, Pos(0, 0), Pos(0, 0))
         self.descr = ''
         self.text = ''
+        self.result = ''
         self.callback = None
         self.disable()
 
     def draw(self):
         self.clear(self.colors.tabbg)
+        w, h = self.settings.userfontsize.t
+        textOffset = Pos(10, 12 + h)
         self.drawString(self.descr, self.colors.text, Pos(10, 10))
-        self.drawString(self.text, self.colors.text, Pos(10, 50))
+        self.drawString(self.text, self.colors.text, textOffset)
+        self.drawCursorLine(textOffset + (w*len(self.text), 0), self.app.mainWindow.activeWin.flickerCountLeft <= self.settings.flickercount)
 
     def onKeyDown(self, c):
         if c == '\n':
             self.disable()
+            self.result = self.text
             if self.callback != None:
                 self.callback(self.text)
                 self.callback = None
