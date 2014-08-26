@@ -51,12 +51,12 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 bx, by = self.getCharCoord(b).t
                 ex, ey = self.drawSelection(w, h, b, e, bx, by)
                 selectionstext += '{}, {}: {}, '.format(by, bx, e - b)
-                if str(self.doc.mode) == 'INSERT':
-                    self.drawcursor(bx + len(self.doc.mode.insertions[i]), by)
-                elif str(self.doc.mode) == 'SURROUND':
+                if str(self.doc.mode) == 'ChangeBefore':
+                    self.drawcursor(bx + len(self.doc.mode.peek().insertions[i]), by)
+                elif str(self.doc.mode) == 'ChangeAround':
                     self.drawcursor(bx, by)
                     self.drawcursor(ex, ey)
-                elif str(self.doc.mode) == 'APPEND':
+                elif str(self.doc.mode) == 'ChangeAfter':
                     self.drawcursor(ex, ey)
 
         # Draw text
@@ -91,11 +91,22 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h - 1)
         self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
         h = self.size.h - h + 2
-        modestr = 'NORMAL' if not self.doc.mode else str(self.doc.mode)
-        selpos = Pos(self.size.w - self.textOffset.x - (len(selectionstext) - 2) * self.settings.uifontsize.w, h)
-        self.drawString(self.doc.filename + '' if self.doc.saved else '*', self.colors.tabtext, Pos(self.textOffset.x, h))
-        self.drawString(modestr, self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
-        self.drawString(selectionstext[:-2], self.colors.tabtext, selpos)
+        # modestr = 'Normal' if not self.doc.mode else str(self.doc.mode)
+        # selmodestr = '' if not self.doc.selectmode else str(self.doc.selectmode)
+        # selpos = Pos(self.size.w - self.textOffset.x - (len(selectionstext) - 2) * self.settings.uifontsize.w, h)
+        # self.drawString(self.doc.filename + ('' if self.doc.saved else '*') + ' ' + self.doc.filetype, self.colors.tabtext, Pos(self.textOffset.x, h))
+        # self.drawString('{} {}'.format(modestr, selmodestr), self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
+        # self.drawString(selectionstext[:-2], self.colors.tabtext, selpos)
+
+
+        status = '{}{} | {} | {} | {} | {}'.format(
+           self.doc.filename,
+           ('*' if not self.doc.saved else ''),
+           self.doc.filetype,
+           self.doc.mode,
+           self.doc.selectmode,
+           self.doc.selection)
+        self.drawString(status, self.colors.tabtext, Pos(self.textOffset.x, h))
 
     def getTitle(self):
         return self.doc.filename

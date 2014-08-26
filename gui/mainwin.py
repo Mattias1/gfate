@@ -5,7 +5,6 @@ import fate
 import fate.document
 import fate.commands
 from collections import deque
-from PIL import Image, ImageTk, ImageDraw
 
 
 class MainWin(Win):
