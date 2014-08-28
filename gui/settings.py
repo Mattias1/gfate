@@ -1,4 +1,5 @@
 from . import colors
+from os.path import expanduser
 import tkinter.font
 import json
 
@@ -32,10 +33,11 @@ class Settings():
         """Load all the settings from json file"""
         # IO magic here
         try:
-            with open('~/.fate/gfate-settings.json', 'r') as fd:
+            pathToUser = expanduser('~') + '/.fate/'
+            with open(pathToUser + 'gfate-settings.json', 'r') as fd:
                 content = fd.read()
         except (FileNotFoundError, PermissionError) as e:
-            print('Could not open settings.json file (aka gfate rc).')
+            print('Could not open the gfate settings.json file.')
             return
 
         # JSON magic here
