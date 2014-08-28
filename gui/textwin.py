@@ -106,7 +106,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
            self.doc.mode,
            self.doc.selectmode,
            selectionstext[:-2])
-        self.drawString(status, self.colors.tabtext, Pos(self.textOffset.x, h))
+        self.drawUIString(status, self.colors.tabtext, Pos(self.textOffset.x, h))
 
     def getTitle(self):
         return self.doc.filename

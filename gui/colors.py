@@ -2,6 +2,9 @@ class Colors():
     """The colors class"""
 
     def __init__(self):
+        self.loadDefaults()
+
+    def loadDefaults(self):
         self.bg = "#272822"
         self.text = "#eeeeee"
         self.selectionbg = "#575852"
@@ -11,10 +14,6 @@ class Colors():
 
     def load(self):
         """Load all the colors from json file"""
-        pass
-
-    def save(self):
-        """Write the colors to a json file"""
         pass
 
     def toTuple(self, color):

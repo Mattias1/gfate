@@ -1,35 +1,55 @@
 from . import colors
 import tkinter.font
+import json
 
 
 class Settings():
     """The settings class"""
 
     def __init__(self):
+        self.loadDefaults()
+        self.load()
+        self.colors = colors.Colors()
+        self.calcFontSizes()
+
+    def loadDefaults(self):
         self.size = Size(800, 500)
-        self.uifont = ('Consolas', 10)
-        self.userfont = ('Consolas', 10)
+        self.uifont = ('Lucida Console', 10)
+        self.userfont = ('Lucida Console', 10)
         self.tabsize = Size(110, 36)
         self.tabwidthextra = 30
-        self.colors = colors.Colors()
         self.statuswinenabled = True
         self.commandsize = Size(300, 58)
         self.fps_inv = 1/30                       # seconds per frame
         self.flickercount = 0.400 // self.fps_inv # frames per cursor flicker change
-        self.calcFontWidths()
 
-    def calcFontWidths(self):
+    def calcFontSizes(self):
         fonts = [tkinter.font.Font(family=fam, size=pt) for fam, pt in [self.uifont, self.userfont]]
-        self.uifontsize = Size(fonts[0].measure('a'), fonts[0].metrics("linespace"))
-        self.userfontsize = Size(fonts[1].measure('a') , fonts[1].metrics("linespace"))
+        self.uifontsize = Size(fonts[0].measure('a'), fonts[0].metrics('linespace'))
+        self.userfontsize = Size(fonts[1].measure('a') , fonts[1].metrics('linespace'))
 
     def load(self):
         """Load all the settings from json file"""
-        pass
+        # IO magic here
+        try:
+            with open('~/.fate/gfate-settings.json', 'r') as fd:
+                content = fd.read()
+        except (FileNotFoundError, PermissionError) as e:
+            print('Could not open settings.json file (aka gfate rc).')
+            return
 
-    def save(self):
-        """Write the settings to a json file"""
-        pass
+        # JSON magic here
+        obj = json.loads(content)
+
+        self.size = Size(obj['windowsize'][0], obj['windowsize'][1])
+        self.uifont = (obj['uifont']['family'], obj['uifont']['size'])
+        self.userfont = (obj['userfont']['family'], obj['userfont']['size'])
+        self.tabsize = Size(obj['tabsize'][0], obj['tabsize'][1])
+        self.tabwidthextra = obj['tabwidthextra']
+        self.statuswinenabled = obj['statuswinenabled']
+        self.commandsize = Size(obj['commandwindowsize'][0], obj['commandwindowsize'][1])
+        self.fps_inv = 1 / obj['fps']                           # seconds per frame
+        self.flickercount = obj['flickertime'] // self.fps_inv  # frames per cursor flicker change
 
 
 class Pos():

@@ -1,0 +1,11 @@
+{
+    "windowsize" : [800, 500],
+    "uifont" : { "family" : "Lucida Console", "size" : 10 },
+    "userfont" : { "family" : "Lucida Console", "size" : 10 },
+    "tabsize" : [110, 36],
+    "tabwidthextra" : 30,
+    "statuswinenabled" : true,
+    "commandwindowsize" : [300, 58],
+    "fps" : 30,
+    "flickertime" : 0.400
+}
