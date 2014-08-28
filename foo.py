@@ -1,7 +1,7 @@
 """
 This is a test file.
 
-It's ment to test things.
+It's meant to test things.
 """
 def test():
     i = 3 + 3 * 3
