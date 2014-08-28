@@ -19,7 +19,7 @@ class Application(Frame):
         self.canvas.bind("<ButtonRelease>", self.onMouseUp)
         self.master.bind("<Key>", self.onKeyDown)
         self.master.bind("<KeyRelease>", self.onKeyUp)
-        self.resize_bind_id = self.master.bind("<Configure>", self.onResizeOrMove)
+        self.resize_bind_id = self.master.bind("<Configure>", self.onResizeMoveFocus)
         self.canvas.highlightthickness = 0
         self.canvas.width = settings.size.w
         self.canvas.height = settings.size.h
@@ -63,7 +63,11 @@ class Application(Frame):
             return True
         return False
 
-    def onResizeOrMove(self, event):
+    def onResizeMoveFocus(self, event):
+        # On focus
+        self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
+        
+        # On resize
         s = Size(event.width, event.height)
         if s != self.settings.size:
             self.settings.size = s
