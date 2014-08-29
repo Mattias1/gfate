@@ -15,6 +15,8 @@ class Application(Frame):
 
         self.canvas = Cnvs(master, bd=-2)
         self.canvas.bind("<Button>", self.onMouseDown)
+        self.canvas.bind("<Double-Button>", self.onMouseDownDouble)
+        self.canvas.bind("<Triple-Button>", self.onMouseDownTriple)
         self.canvas.bind("<Motion>", self.onMouseMove)
         self.canvas.bind("<ButtonRelease>", self.onMouseUp)
         self.master.bind("<Key>", self.onKeyDown)
@@ -34,6 +36,10 @@ class Application(Frame):
 
     def onMouseDown(self, event):
         self.mainWindow.onMouseDown(Pos(event.x, event.y), event.num)
+    def onMouseDownDouble(self, event):
+        self.mainWindow.onMouseDownDouble(Pos(event.x, event.y), event.num)
+    def onMouseDownTriple(self, event):
+        self.mainWindow.onMouseDownTriple(Pos(event.x, event.y), event.num)
 
     def onMouseMove(self, event):
         self.mainWindow.onMouseMove(Pos(event.x, event.y), event.num)

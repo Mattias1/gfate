@@ -96,6 +96,14 @@ class MainWin(Win):
             self.mouseDownStartPos = p
             # Pass the event on to my active child
             self.activeWin.onMouseDown(p, btnNr)
+    def onMouseDownDouble(self, p, btnNr):
+        if btnNr == 1:
+            b = self.getCharFromCoord(p)
+            self.queue.append(PointerDoubleClick(b))
+    def onMouseDownTriple(self, p, btnNr):
+        if btnNr == 1:
+            b = self.getCharFromCoord(p)
+            self.queue.append(PointerTripleClick(b))
     def onMouseMove(self, p, btnNr):
         # Move the tabs
         i = p.x // (self.settings.tabsize.w + self.settings.tabwidthextra)
@@ -118,7 +126,7 @@ class MainWin(Win):
             if self.mouseDownStartPos == p:
                 self.queue.append(PointerClick(e))
             else:
-                b = self.getCharFromCoord((self.mouseDownStartPos.x - off.x) // w, (self.mouseDownStartPos.y - off.y) // h)
+                b = self.getCharFromCoord(self.mouseDownStartPos)
                 self.queue.append(PointerInput(b, e-b))
             self.mouseDownStartPos = Pos(-1, -1)
 
