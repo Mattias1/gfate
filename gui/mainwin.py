@@ -4,7 +4,7 @@ from .textwin import TextWin
 import fate
 import fate.document
 import fate.commands
-from fate.pointer import PointerClick, PointerDoubleClick, PointerTripleClick
+from fate.pointer import PointerClick, PointerDoubleClick, PointerTripleClick, PointerInput
 from collections import deque
 
 
@@ -15,7 +15,7 @@ class MainWin(Win):
     """
 
     def __init__(self, settings, app):
-        Win.__init__(self, settings, app)
+        Win.__init__(self, settings, app, Pos(0, 0))
 
         self.selectedTab = -1 # Mark the tab that is selected while a mousekey is down
         self.mouseDownStartPos = Pos(-1, -1)
@@ -41,6 +41,7 @@ class MainWin(Win):
             win.disable()
         win = TextWin(self.settings, self.app, doc)
         self.textWins.append(win)
+        win.resize(False)
         return win
 
     def enableTab(self, newWin):
@@ -90,11 +91,10 @@ class MainWin(Win):
                 self.queue.append(fate.commands.quit_document(self.docList[self.selectedTab]))
             self.draw()
 
-        # Calculate position of the click (or maybe drag?)
-        self.mouseDownStartPos = p
-
-        # Pass the event on to my active child
-        if self.activeWin and self.activeWin.inside(p):
+        if self.activeWin and self.activeWin.containsPos(p):
+            # Calculate position of the click (or maybe drag?)
+            self.mouseDownStartPos = p
+            # Pass the event on to my active child
             self.activeWin.onMouseDown(p, btnNr)
     def onMouseMove(self, p, btnNr):
         # Move the tabs
@@ -106,7 +106,7 @@ class MainWin(Win):
                 self.draw()
 
         # Pass the event on to my active child
-        if self.activeWin.inside(p):
+        if self.activeWin.containsPos(p):
             self.activeWin.onMouseMove(p, btnNr)
     def onMouseUp(self, p, btnNr):
         # Deselect
@@ -114,37 +114,43 @@ class MainWin(Win):
 
         # Fire final mouse event
         if self.mouseDownStartPos != (-1, -1):
-            w, h = self.settings.userfontsize.t
-            off = self.activeWin.textOffset
-            b = self.getCharFromCoord((p.x - off.x) // w, (p.y - off.y) // h)
+            e = self.getCharFromCoord(p)
             if self.mouseDownStartPos == p:
-                self.queue.append(PointerClick(b))
+                self.queue.append(PointerClick(e))
             else:
-                pass
+                b = self.getCharFromCoord((self.mouseDownStartPos.x - off.x) // w, (self.mouseDownStartPos.y - off.y) // h)
+                self.queue.append(PointerInput(b, e-b))
+            self.mouseDownStartPos = Pos(-1, -1)
 
         # Pass the event on to my active child
-        if self.activeWin.inside(p):
+        if self.activeWin.containsPos(p):
             self.activeWin.onMouseUp(p, btnNr)
 
-    def getCharFromCoord(self, x, y):
+    def getCharFromCoord(self, p):
         """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
         i = 0
+        w, h = self.settings.userfontsize.t
+        offset = self.activeWin.pos + self.activeWin.textOffset
+        x, y = (p.x - offset.x) // w, (p.y - offset.y) // h
         cx, cy = 0, 0
         text = self.activeWin.doc.text
-        while cy < y:
-            c = text[i]
-            if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
-                cy += 1
-            i += 1
-        while cx < x:
-            cx += 1
-            c = text[i]
-            if c == '\n':
-                return i
-            i += 1
-        return i
+        try:
+            while cy < y:
+                c = text[i]
+                if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
+                    cy += 1
+                i += 1
+            while cx < x:
+                cx += 1
+                c = text[i]
+                if c == '\n':
+                    return i
+                i += 1
+            return i
+        except:
+            return i
 
     def onKeyDown(self, c):
         if c == 'Ctrl-c':
@@ -154,17 +160,14 @@ class MainWin(Win):
         self.activeWin.onKeyDown(c)
         self.draw()
 
-    def resize(self, s=None, draw=True):
+    def resize(self, draw=True):
         """Override the resize window"""
-        Win.resize(self, s, False)
+        self.size = self.settings.size
 
         self.initTabs()
 
-        try:
-            for win in self.textWins:
-                win.resize(s, False)
-        except:
-            pass
+        for win in self.textWins:
+            win.resize(False)
 
         if draw:
             self.draw()

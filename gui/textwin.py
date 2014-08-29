@@ -12,7 +12,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
     """
 
     def __init__(self, settings, app, doc):
-        Win.__init__(self, settings, app)
+        Win.__init__(self, settings, app, Pos(0, settings.tabsize.h))
         fate.userinterface.UserInterface.__init__(self, doc)
 
         self.commandWin = CommandWin(settings, app)
@@ -21,7 +21,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.doc.OnActivate.add(self.onActivate)
         self.flickerCountLeft = 1
         self.redraw = False
-        self.textOffset = Pos(6, 40)
+        self.textOffset = Pos(6, 4)
 
     def loop(self):
         result = self.redraw
@@ -116,13 +116,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if self.commandWin.enabled:
             self.commandWin.onKeyDown(c)
 
-    def resize(self, size=None, draw=True):
+    def resize(self, draw=True):
         assert draw == False
-        Win.resize(self, size, draw)
-        try:
-            self.commandWin.resize(size, False)
-        except:
-            pass
+        self.size = self.settings.size - (0, self.settings.tabsize.h)
+        self.commandWin.resize(False)
 
     def acceptinput(self):
         return not self.commandWin.enabled

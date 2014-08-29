@@ -12,15 +12,14 @@ from .colors import *
 class Win:
     """Abstract window class"""
 
-    def __init__(self, settings, app, s=None, p=Pos(0,0)):
+    def __init__(self, settings, app, pos):
         self.settings = settings
         self.colors = settings.colors
         self.enabled = True
         self.app = app
         self.g = app.canvas
-        self.pos = p
-        self.size = None
-        self.resize(s, False)
+        self.pos = pos
+        self.size = Size(50, 50) # Should be set in the resize method
 
     def enable(self):
         """Enable this window."""
@@ -34,7 +33,7 @@ class Win:
         """Quit the application"""
         self.app.quit()
 
-    def inside(self, p):
+    def containsPos(self, p):
         return self.pos.x <= p.x <= self.pos.x + self.size.w and self.pos.y <= p.y <= self.pos.y + self.size.h
 
     def onMouseDown(self, p, btnNr):
@@ -46,13 +45,9 @@ class Win:
     def onKeyDown(self, c):
         pass
 
-    def resize(self, s=None, draw=True):
+    def resize(self, draw=True):
         """Resize window."""
-        if s == None:
-            s = self.settings.size
-        self.size = s
-        if draw:
-            self.draw()
+        pass
 
     def loop(self):
         """This method is being called every X miliseconds"""

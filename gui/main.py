@@ -26,7 +26,7 @@ class Application(Frame):
         self.canvas.locateInside(self, d=0)
 
         self.mainWindow = MainWin(settings, self)
-        self.mainWindow.draw()
+        self.mainWindow.resize(True)
 
         self.settings = settings
 
@@ -72,7 +72,7 @@ class Application(Frame):
         if s != self.settings.size:
             self.settings.size = s
             self.canvas.width, self.canvas.height = s.w, s.h
-            self.mainWindow.resize(s)
+            self.mainWindow.resize()
 
     def loop(self):
         """Private method to manage the loop method"""

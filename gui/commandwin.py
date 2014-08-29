@@ -10,7 +10,7 @@ class CommandWin(Win):
     """
 
     def __init__(self, settings, app):
-        Win.__init__(self, settings, app, Pos(0, 0), Pos(0, 0))
+        Win.__init__(self, settings, app, Pos(0, 0))
         self.descr = ''
         self.text = ''
         self.result = ''
@@ -41,7 +41,7 @@ class CommandWin(Win):
         print(self.text)
         # Maybe force the textwindow to draw again (as in: mark redrawing)?
 
-    def resize(self, size=None, draw=True):
+    def resize(self, draw=True):
         """Override the resize window"""
         assert draw == False
         s = self.settings
