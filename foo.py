@@ -8,4 +8,3 @@ def test():
     return i
 
 print('Test: {}'.format(test()))
-

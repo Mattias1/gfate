@@ -4,6 +4,7 @@ from .textwin import TextWin
 import fate
 import fate.document
 import fate.commands
+from fate.pointer import PointerClick, PointerDoubleClick, PointerTripleClick
 from collections import deque
 
 
@@ -17,6 +18,7 @@ class MainWin(Win):
         Win.__init__(self, settings, app)
 
         self.selectedTab = -1 # Mark the tab that is selected while a mousekey is down
+        self.mouseDownStartPos = Pos(-1, -1)
 
         self.textWins = []
         self.docList = fate.document.documentlist
@@ -85,8 +87,11 @@ class MainWin(Win):
             if btnNr == 1:
                 self.queue.append(fate.document.goto_document(i))
             elif btnNr == 2:
-                fate.commands.quit_document(self.docList[self.selectedTab])
+                self.queue.append(fate.commands.quit_document(self.docList[self.selectedTab]))
             self.draw()
+
+        # Calculate position of the click (or maybe drag?)
+        self.mouseDownStartPos = p
 
         # Pass the event on to my active child
         if self.activeWin and self.activeWin.inside(p):
@@ -107,9 +112,39 @@ class MainWin(Win):
         # Deselect
         self.selectedTab = -1
 
+        # Fire final mouse event
+        if self.mouseDownStartPos != (-1, -1):
+            w, h = self.settings.userfontsize.t
+            off = self.activeWin.textOffset
+            b = self.getCharFromCoord((p.x - off.x) // w, (p.y - off.y) // h)
+            if self.mouseDownStartPos == p:
+                self.queue.append(PointerClick(b))
+            else:
+                pass
+
         # Pass the event on to my active child
         if self.activeWin.inside(p):
             self.activeWin.onMouseUp(p, btnNr)
+
+    def getCharFromCoord(self, x, y):
+        """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
+        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
+        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
+        i = 0
+        cx, cy = 0, 0
+        text = self.activeWin.doc.text
+        while cy < y:
+            c = text[i]
+            if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
+                cy += 1
+            i += 1
+        while cx < x:
+            cx += 1
+            c = text[i]
+            if c == '\n':
+                return i
+            i += 1
+        return i
 
     def onKeyDown(self, c):
         if c == 'Ctrl-c':

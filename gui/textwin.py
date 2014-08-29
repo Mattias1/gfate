@@ -44,11 +44,11 @@ class TextWin(Win, fate.userinterface.UserInterface):
         w, h = self.settings.userfontsize.t
         for i, (b, e) in enumerate(self.doc.selection):
             if b >= e:
-                bx, by = self.getCharCoord(b).t
+                bx, by = self.getCoordFromChar(b).t
                 self.drawCursor(bx, by)
                 selectionstext += '({}, {}: 0), '.format(by, bx)
             else:
-                bx, by = self.getCharCoord(b).t
+                bx, by = self.getCoordFromChar(b).t
                 ex, ey = self.drawSelection(w, h, b, e, bx, by)
                 selectionstext += '({}, {}: {}), '.format(by, bx, e - b)
                 if 'ChangeBefore' in str(self.doc.mode):
@@ -60,7 +60,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
                     self.drawCursor(ex, ey)
 
         # Draw text
-        self.drawString(self.doc.text, self.colors.text, self.textOffset)
+        self.drawText(self.doc.text, self.doc.labeling)
 
         # Draw statuswin
         self.drawStatusWin(selectionstext)
@@ -86,6 +86,9 @@ class TextWin(Win, fate.userinterface.UserInterface):
             i += 1
         raise Exception('Character at end of selection not found')
 
+    def drawText(self, text, labeling):
+        self.drawString(self.doc.text, self.colors.text, self.textOffset)
+
     def drawStatusWin(self, selectionstext):
         h = self.settings.uifontsize.h + 6
         self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h - 1)
@@ -98,10 +101,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # self.drawString('{} {}'.format(modestr, selmodestr), self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
         # self.drawString(selectionstext[:-2], self.colors.tabtext, selpos)
 
-
-        status = '{}{} | {} | {} | {} | {}'.format(
-           self.doc.filename,
-           ('*' if not self.doc.saved else ''),
+        status = '{} | {} | {} | {} | {}'.format(
+           self.getTitle(),
            self.doc.filetype,
            self.doc.mode,
            self.doc.selectmode,
@@ -109,7 +110,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.drawUIString(status, self.colors.tabtext, Pos(self.textOffset.x, h))
 
     def getTitle(self):
-        return self.doc.filename
+        return self.doc.filename + ('' if self.doc.saved else '*')
 
     def onKeyDown(self, c):
         if self.commandWin.enabled:
@@ -133,7 +134,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.commandWin.callback = callback
         self.commandWin.enable()
 
-    def getCharCoord(self, n):
+    def getCoordFromChar(self, n):
         """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.

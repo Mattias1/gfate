@@ -15,7 +15,10 @@ class Settings():
         self.calcFontSizes()
 
     def loadDefaults(self):
-        self.loadSettings('gfate-settings-default.json')
+        try:
+            self.loadSettings('settings-default.json')
+        except:
+            print('FATAL ERROR: COULD NOT LOAD SETTIGNS DEFAULTS!!!')
 
     def calcFontSizes(self):
         fonts = [tkinter.font.Font(family=fam, size=pt) for fam, pt in [self.uifont, self.userfont]]
@@ -24,7 +27,7 @@ class Settings():
 
     def load(self):
         """Load all the settings from json file"""
-        path = expanduser('~') + '/.fate/gfate-settings.json'
+        path = expanduser('~') + '/.fate/gfate/settings.json'
         self.loadSettings(path)
     
     def loadSettings(self, path):
@@ -39,15 +42,23 @@ class Settings():
         # JSON magic here
         settings = json.loads(content)
 
-        with suppress(KeyError): # Python 3.4+ only, but <3
+        with suppress(KeyError):
             self.size = Size(settings['windowsize'][0], settings['windowsize'][1])
+        with suppress(KeyError):
             self.uifont = (settings['uifont']['family'], settings['uifont']['size'])
+        with suppress(KeyError):
             self.userfont = (settings['userfont']['family'], settings['userfont']['size'])
+        with suppress(KeyError):
             self.tabsize = Size(settings['tabsize'][0], settings['tabsize'][1])
+        with suppress(KeyError):
             self.tabwidthextra = settings['tabwidthextra']
+        with suppress(KeyError):
             self.statuswinenabled = settings['statuswinenabled']
+        with suppress(KeyError):
             self.commandsize = Size(settings['commandwindowsize'][0], settings['commandwindowsize'][1])
+        with suppress(KeyError):
             self.fps_inv = 1 / settings['fps']                           # seconds per frame
+        with suppress(KeyError):
             self.flickercount = settings['flickertime'] // self.fps_inv  # frames per cursor flicker change
 
 

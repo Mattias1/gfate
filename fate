@@ -16,6 +16,7 @@ sys.path.insert(0, libs_path)
 import gui.main
 import fate
 import threading
+import logging
 
 # Create gfate
 app = gui.main.main()
@@ -25,11 +26,15 @@ filenames = sys.argv[1:] or ['']
 fate.document.Document.create_userinterface = app.mainWindow.addWin
 for filename in filenames:
     doc = fate.document.Document(filename)
-fate.document.activedocument = fate.document.documentlist[-1]
+# fate.document.activedocument = fate.document.documentlist[0]
+fate.document.documentlist[0].activate()
 
 # Start fate
 thread = threading.Thread(target=fate.run)
 thread.start()
+
+# Forward the fate logging to the standard out
+logging.getLogger().addHandler(logging.StreamHandler())
 
 # Start gfate
 try:
