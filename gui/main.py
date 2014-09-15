@@ -14,14 +14,14 @@ class Application(Frame):
         self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
 
         self.canvas = Cnvs(master, bd=-2)
-        self.canvas.bind("<Button>", self.onMouseDown)
-        self.canvas.bind("<Double-Button>", self.onMouseDownDouble)
-        self.canvas.bind("<Triple-Button>", self.onMouseDownTriple)
-        self.canvas.bind("<Motion>", self.onMouseMove)
-        self.canvas.bind("<ButtonRelease>", self.onMouseUp)
-        self.master.bind("<Key>", self.onKeyDown)
-        self.master.bind("<KeyRelease>", self.onKeyUp)
-        self.resize_bind_id = self.master.bind("<Configure>", self.onResizeMoveFocus)
+        self.canvas.bind('<Button>', self.onMouseDown)
+        self.canvas.bind('<Double-Button>', self.onMouseDownDouble)
+        self.canvas.bind('<Triple-Button>', self.onMouseDownTriple)
+        self.canvas.bind('<Motion>', self.onMouseMove)
+        self.canvas.bind('<ButtonRelease>', self.onMouseUp)
+        self.master.bind('<Key>', self.onKeyDown)
+        self.master.bind('<KeyRelease>', self.onKeyUp)
+        self.resize_bind_id = self.master.bind('<Configure>', self.onResizeMoveFocus)
         self.canvas.highlightthickness = 0
         self.canvas.width = settings.size.w
         self.canvas.height = settings.size.h
@@ -50,7 +50,6 @@ class Application(Frame):
     def onKeyDown(self, event):
         if self.setModifyKeys(event, True):
             self.mainWindow.onKeyDown(self.getchar(event))
-            print('"{}"'.format(self.getchar(event)))
 
     def onKeyUp(self, event):
         self.setModifyKeys(event, False)

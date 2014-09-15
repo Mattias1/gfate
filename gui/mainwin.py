@@ -98,11 +98,11 @@ class MainWin(Win):
             self.activeWin.onMouseDown(p, btnNr)
     def onMouseDownDouble(self, p, btnNr):
         if btnNr == 1:
-            b = self.getCharFromCoord(p)
+            b = self.activeWin.getCharFromCoord(p)
             self.queue.append(PointerDoubleClick(b))
     def onMouseDownTriple(self, p, btnNr):
         if btnNr == 1:
-            b = self.getCharFromCoord(p)
+            b = self.activeWin.getCharFromCoord(p)
             self.queue.append(PointerTripleClick(b))
     def onMouseMove(self, p, btnNr):
         # Move the tabs
@@ -122,43 +122,17 @@ class MainWin(Win):
 
         # Fire final mouse event
         if self.mouseDownStartPos != (-1, -1):
-            e = self.getCharFromCoord(p)
+            e = self.activeWin.getCharFromCoord(p)
             if self.mouseDownStartPos == p:
                 self.queue.append(PointerClick(e))
             else:
-                b = self.getCharFromCoord(self.mouseDownStartPos)
+                b = self.activeWin.getCharFromCoord(self.mouseDownStartPos)
                 self.queue.append(PointerInput(b, e-b))
             self.mouseDownStartPos = Pos(-1, -1)
 
         # Pass the event on to my active child
         if self.activeWin.containsPos(p):
             self.activeWin.onMouseUp(p, btnNr)
-
-    def getCharFromCoord(self, p):
-        """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
-        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
-        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
-        i = 0
-        w, h = self.settings.userfontsize.t
-        offset = self.activeWin.pos + self.activeWin.textOffset
-        x, y = (p.x - offset.x) // w, (p.y - offset.y) // h
-        cx, cy = 0, 0
-        text = self.activeWin.doc.text
-        try:
-            while cy < y:
-                c = text[i]
-                if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
-                    cy += 1
-                i += 1
-            while cx < x:
-                cx += 1
-                c = text[i]
-                if c == '\n':
-                    return i
-                i += 1
-            return i
-        except:
-            return i
 
     def onKeyDown(self, c):
         if c == 'Ctrl-c':
@@ -199,12 +173,12 @@ class MainWin(Win):
     def initTabs(self):
         """Create the images for the tabs"""
         # Load all images and their pixel maps
-        tabr = self.loadImgPIL("tab.png")
+        tabr = self.loadImgPIL('tab.png')
         w, h = tabr.size
-        piltabs = [Image.new("RGBA", tabr.size), Image.new("RGBA", (1, h)), tabr]
+        piltabs = [Image.new('RGBA', tabr.size), Image.new('RGBA', (1, h)), tabr]
         for i in range(3):
             piltabs.append(piltabs[i].copy())
-        piltabs.append(Image.new("RGBA", (1, h)))
+        piltabs.append(Image.new('RGBA', (1, h)))
         pixs = [t.load() for t in piltabs]
 
         # Paint the tabr images

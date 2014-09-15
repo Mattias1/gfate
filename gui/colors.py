@@ -5,12 +5,12 @@ class Colors():
         self.loadDefaults()
 
     def loadDefaults(self):
-        self.bg = "#272822"
-        self.text = "#eeeeee"
-        self.selectionbg = "#575852"
-        self.inactivetab = "#474842"
-        self.tabbg = "#171714"
-        self.tabtext = "#eeeeee"
+        self.bg = '#272822'
+        self.text = '#eeeeee'
+        self.selectionbg = '#575852'
+        self.inactivetab = '#474842'
+        self.tabbg = '#171714'
+        self.tabtext = '#eeeeee'
 
     def load(self):
         """Load all the colors from json file"""
@@ -28,4 +28,15 @@ class Colors():
         """Linearely interpolate between two colours a and b"""
         c, d = self.toTuple(a), self.toTuple(b)
         return self.toHex([int(c[i] + (d[i] - c[i]) * v) for i in range(3)])
+
+    def fromLabel(self, label):
+        if label == 'string':
+            return '#e6db74'
+        if label == 'number':
+            return '#ae81ff'
+        if label == 'keyword':
+            return '#f92672'
+        if label == 'comment':
+            return '#75715e'
+        return self.text
 

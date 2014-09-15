@@ -22,6 +22,24 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.flickerCountLeft = 1
         self.redraw = False
         self.textOffset = Pos(6, 4)
+        self.displayOffset = Pos(0, 0)
+        self.displayIndex = 0 # For readability purposes - this is double work (it's done while setting displayOffset).
+
+    @property
+    def displayOffset(self):
+        return self._displayOffset
+    @displayOffset.setter
+    def displayOffset(self, value):
+        self._displayOffset = value
+        self._displayIndex = self.getCharFromCoord(value)
+
+    @property
+    def displayIndex(self):
+        return self._displayIndex
+    @displayIndex.setter
+    def displayIndex(self, value):
+        self._displayIndex = value
+        self._displayOffset = self.getCoordFromChar(value)
 
     def loop(self):
         result = self.redraw
@@ -39,6 +57,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return result
 
     def draw(self):
+        """Draw the text win"""
         # Draw selection (and get the selections text already)
         selectionstext = ''
         w, h = self.settings.userfontsize.t
@@ -70,15 +89,21 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.commandWin.draw()
 
     def drawCursor(self, cx, cy):
+        """Draw a single cursor (that is, an empty selection)"""
         w, h = self.settings.userfontsize.t
-        self.drawCursorLine(self.textOffset + (w*cx, h*cy), self.flickerCountLeft <= self.settings.flickercount)
+        ox, oy = self.displayOffset.t
+        cursorVisible = self.flickerCountLeft <= self.settings.flickercount
+        self.drawCursorLine(self.textOffset + (w*(cx - ox), h*(cy - oy)), cursorVisible)
 
     def drawSelection(self, w, h, b, e, bx, by):
+        """Draw a single selection rectangle"""
+        ox, oy = self.displayOffset.t
         i = b
         while i < e:
             c = self.doc.text[i]
-            if i == e - 1 or c == '\n': # TODO: manage different newline options
-                self.drawRect(self.colors.selectionbg, self.textOffset + (w*bx, by*h), Size(w*(i + 1 - b), h))
+            # Can't deal with OSX line endings or word wrap (TODO !)
+            if i == e - 1 or c == '\n':
+                self.drawRect(self.colors.selectionbg, self.textOffset + (w*(bx - ox), h*(by - oy)), Size(w*(i + 1 - b), h))
                 if i == e - 1:
                     return (bx + i + 1 - b, by)
                 bx, by = 0, by + 1
@@ -87,9 +112,39 @@ class TextWin(Win, fate.userinterface.UserInterface):
         raise Exception('Character at end of selection not found')
 
     def drawText(self, text, labeling):
-        self.drawString(self.doc.text, self.colors.text, self.textOffset)
+        """Draw the part of the text that should appear on the screen"""
+        w, h = self.settings.userfontsize.t # The size of one character
+        i = self.displayIndex               # The index of the character currently being processed
+        x, y = self.displayOffset.t         # The coordinates of that char
+        maxLength = len(self.doc.text)
+        while True:
+            length = 0                      # The length of the interval currently being processed
+            label = '' if not i in self.doc.labeling else self.doc.labeling[i]  # The current label
+
+            # Stop drawing at the end of the screen or the end of the text
+            if h * y > self.size.h or i >= maxLength:
+                break
+
+            # Draw a text interval with the same label
+            # Can't deal with OSX line endings or word wrap (TODO !)
+            while i < maxLength:
+                tempLabel = '' if not i in self.doc.labeling else self.doc.labeling[i]
+                if tempLabel != label or self.doc.text[i] == '\n':
+                    break
+                length += 1
+                i += 1
+            self.drawString(self.doc.text[i - length : i], self.colors.fromLabel(label), self.textOffset + (w*x, h*y))
+
+            # Special case for the new line character - Can't deal with OSX line endings or word wrap (TODO !)
+            if self.doc.text[i] == '\n':
+                y += 1
+                x = 0
+                i += 1
+            else:
+                x += length
 
     def drawStatusWin(self, selectionstext):
+        """Draw some stats to the bottom of the text win"""
         h = self.settings.uifontsize.h + 6
         self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h - 1)
         self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
@@ -144,6 +199,32 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 y += 1
                 x = 0
         return Pos(x, y)
+
+    def getCharFromCoord(self, p):
+        """Return character index from the (x, y) coordinates. This is a truly terrible method."""
+        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
+        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
+        i = 0
+        w, h = self.settings.userfontsize.t
+        offset = self.pos + self.textOffset
+        x, y = (p.x - offset.x) // w, (p.y - offset.y) // h
+        cx, cy = 0, 0
+        text = self.doc.text
+        try:
+            while cy < y:
+                c = text[i]
+                if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
+                    cy += 1
+                i += 1
+            while cx < x:
+                cx += 1
+                c = text[i]
+                if c == '\n':
+                    return i
+                i += 1
+            return i
+        except:
+            return i
 
     #
     # Implement UserInterface methods

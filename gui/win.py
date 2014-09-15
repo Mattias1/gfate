@@ -58,11 +58,11 @@ class Win:
         pass
 
     # Some draw methods to make sure all my subclasses don't have to bother about tkinters canvas
-    def drawFString(self, text, c, p, font, anchor="nw"):
+    def drawFString(self, text, c, p, font, anchor='nw'):
         self.g.create_text((self.pos + p).t, anchor=anchor, text=text, fill=c, font=font)
-    def drawUIString(self, text, c, p, anchor="nw"):
+    def drawUIString(self, text, c, p, anchor='nw'):
         self.drawFString(text, c, p, self.settings.uifont, anchor=anchor)
-    def drawString(self, text, c, p, anchor="nw"):
+    def drawString(self, text, c, p, anchor='nw'):
         self.drawFString(text, c, p, self.settings.userfont, anchor=anchor)
 
     def drawLine(self, c, p, q, w=1):
@@ -77,13 +77,13 @@ class Win:
         self.g.create_rectangle((self.pos + p).t, (self.pos + p + s).t, fill=c, width=borderw)
 
     def loadImgPIL(self, path):
-        return Image.open("img/" + path)
+        return Image.open('img/' + path)
     def loadImgTk(self, img):
         return ImageTk.PhotoImage(img)
     def loadImg(self, path):
         return self.loadImgTk(self.loadImgPIL(path))
 
-    def drawImg(self, p, img, anchor="nw"):
+    def drawImg(self, p, img, anchor='nw'):
         self.g.create_image((self.pos + p).t, image=img, anchor=anchor)
 
     def fullClear(self):
