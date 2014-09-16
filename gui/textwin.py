@@ -15,7 +15,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         Win.__init__(self, settings, app, Pos(0, settings.tabsize.h))
         fate.userinterface.UserInterface.__init__(self, doc)
 
-        self.commandWin = CommandWin(settings, app)
+        self.commandWin = CommandWin(settings, app, doc)
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
         self.doc.OnActivate.add(self.onActivate)
@@ -85,7 +85,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.drawStatusWin(selectionstext)
 
         # Draw commandWin
-        if self.commandWin.enabled:
+        if 'Prompt' in str(self.doc.mode):
             self.commandWin.draw()
 
     def drawCursor(self, cx, cy):
