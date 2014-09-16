@@ -12,18 +12,21 @@ class Settings():
         self.loadDefaults()
         self.load()
         self.colors = colors.Colors()
-        self.calcFontSizes()
 
     def loadDefaults(self):
         try:
             self.loadSettings('settings-default.json')
         except:
             print('FATAL ERROR: COULD NOT LOAD SETTIGNS DEFAULTS!!!')
+            raise
 
-    def calcFontSizes(self):
+    def calcSettings(self):
+        # The font sizes
         fonts = [tkinter.font.Font(family=fam, size=pt) for fam, pt in [self.uifont, self.userfont]]
         self.uifontsize = Size(fonts[0].measure('a'), fonts[0].metrics('linespace'))
         self.userfontsize = Size(fonts[1].measure('a') , fonts[1].metrics('linespace'))
+        # The Status window size
+        self.statusheight = self.uifontsize.h + 6
 
     def load(self):
         """Load all the settings from json file"""
@@ -45,6 +48,8 @@ class Settings():
         with suppress(KeyError):
             self.size = Size(settings['windowsize'][0], settings['windowsize'][1])
         with suppress(KeyError):
+            self.cursormargin = Size(settings['cursormargin'][0], settings['cursormargin'][1])
+        with suppress(KeyError):
             self.uifont = (settings['uifont']['family'], settings['uifont']['size'])
         with suppress(KeyError):
             self.userfont = (settings['userfont']['family'], settings['userfont']['size'])
@@ -61,12 +66,15 @@ class Settings():
         with suppress(KeyError):
             self.flickercount = settings['flickertime'] // self.fps_inv  # frames per cursor flicker change
 
+        # Calculate some settings based on loaded settings
+        self.calcSettings()
+
 
 class Pos():
     """A position class just to make things a bit easier."""
     def __init__(self, x, y=None):
         if y == None:
-            self.x, self.y = x
+            self.x, self.y = x[0], x[1]
         else:
             self.x, self.y = x, y
 
@@ -101,7 +109,7 @@ class Size():
     """A size class just to make things a bit easier."""
     def __init__(self, w, h=None):
         if h == None:
-            self.w, self.h = w
+            self.w, self.h = w[0], w[1]
         else:
             self.w, self.h = w, h
 

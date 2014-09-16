@@ -135,9 +135,7 @@ class MainWin(Win):
             self.activeWin.onMouseUp(p, btnNr)
 
     def onKeyDown(self, c):
-        if c == 'Ctrl-c':
-            self.activeWin.notify('Ctrl-c is pressed, this is a gfate test message (mainWin.py - def onKeyDown).')
-        if self.activeWin.acceptinput() and c:
+        if c:
             self.queue.append(c)
         self.activeWin.onKeyDown(c)
         self.draw()

@@ -21,17 +21,20 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.doc.OnActivate.add(self.onActivate)
         self.flickerCountLeft = 1
         self.redraw = False
+        self.oldSelection = self.doc.selection[-1]
         self.textOffset = Pos(6, 4)
         self.displayOffset = Pos(0, 0)
         self.displayIndex = 0 # For readability purposes - this is double work (it's done while setting displayOffset).
+        self.cursorRange = Size(0, 0)
 
     @property
     def displayOffset(self):
         return self._displayOffset
     @displayOffset.setter
     def displayOffset(self, value):
-        self._displayOffset = value
-        self._displayIndex = self.getCharFromCoord(value)
+        self._displayOffset = Pos(value)
+        self._displayIndex = self.getCharFromCoord(self._displayOffset)
+        print('GETS HERE (index: {}, offset: {})'.format(self._displayIndex, self._displayOffset))
 
     @property
     def displayIndex(self):
@@ -49,6 +52,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.commandWin.enable()
         if 'Prompt' not in str(self.doc.mode) and self.commandWin.enabled:
             self.commandWin.disable()
+        # Adjust display offset on cursor movement
+        if self.oldSelection != self.doc.selection[-1]:
+            self.oldSelection = self.doc.selection[-1]
+            self.adjustWindow()
         # Draw commandWindow
         if self.commandWin.enabled:
             result = result or self.commandWin.loop()
@@ -120,7 +127,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         """Draw the part of the text that should appear on the screen"""
         w, h = self.settings.userfontsize.t # The size of one character
         i = self.displayIndex               # The index of the character currently being processed
-        x, y = self.displayOffset.t         # The coordinates of that char
+        x, y = (0, 0)                       # The coordinates of that char
         maxLength = len(self.doc.text)
         while True:
             length = 0                      # The length of the interval currently being processed
@@ -150,7 +157,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def drawStatusWin(self, selectionstext):
         """Draw some stats to the bottom of the text win"""
-        h = self.settings.uifontsize.h + 6
+        h = self.settings.statusheight
         self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h - 1)
         self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
         h = self.size.h - h + 2
@@ -169,6 +176,25 @@ class TextWin(Win, fate.userinterface.UserInterface):
            selectionstext[:-2])
         self.drawUIString(status, self.colors.tabtext, Pos(self.textOffset.x, h))
 
+    def adjustWindow(self):
+        """Adjust the window so that the cursor is in the allowed range"""
+        (b, e) = self.oldSelection
+        bx, by = self.getCoordFromChar(b).t
+        ex, ey = self.getCoordFromChar(e, b, (bx, by)).t
+        off = self.displayOffset
+        # Vertical scrolling
+        aim = off.y + self.settings.cursormargin.h
+        if by < aim:
+            off.y -= aim - by
+            off.y = max(0, off.y)
+            self.displayOffset = off
+        aim = off.y + self.settings.cursormargin.h + self.cursorRange.h
+        if ey > aim:
+            off.y += ey - aim
+            self.displayOffset = off
+        # Horizontal scrolling
+        # Todo
+
     def getTitle(self):
         return self.doc.filename + ('' if self.doc.saved else '*')
 
@@ -179,25 +205,18 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def resize(self, draw=True):
         assert draw == False
         self.size = self.settings.size - (0, self.settings.tabsize.h)
+        w, h = self.settings.userfontsize.t # The size of one character
+        s = self.size - self.textOffset - (0, self.settings.statusheight)
+        self.cursorRange = Size(s.w // w - 2 * self.settings.cursormargin.w, s.h // h - 2 * self.settings.cursormargin.h)
         self.commandWin.resize(False)
 
-    def acceptinput(self):
-        return not self.commandWin.enabled
-
-    def showCmdWin(self, descr='Command', inpt='', callback=None):
-        self.commandWin.descr = descr
-        self.commandWin.text = inpt
-        self.commandWin.result = ''
-        self.commandWin.callback = callback
-        self.commandWin.enable()
-
-    def getCoordFromChar(self, n):
+    def getCoordFromChar(self, n, start=0, startPosTuple=(0, 0)):
         """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
-        x, y = 0, 0
+        x, y = startPosTuple
         text = self.doc.text
-        for i in range(n):
+        for i in range(start, n):
             c = text[i]
             x += 1
             if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
@@ -240,7 +259,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def notify(self, message):
         # This method is called from a different thread (the one fate runs in)
-        self.showCmdWin('Notification: ' + message)
+        raise NotImplementedError()
 
     def _getuserinput(self):
         # This method is called from a different thread (the one fate runs in)
@@ -263,6 +282,5 @@ class TextWin(Win, fate.userinterface.UserInterface):
     #
     def command_mode(self, command_string=':'):
         # This method is called from a different thread (the one fate runs in)
-        print('THIS METHOD IS ACTUALLY BEING CALLED!!! - def command_mode(...) in textwin.py (bottom of the file)')
-        self.showCmdWin('', command_string, lambda result: print(result))
+        raise NotImplementedError()
 

@@ -3,8 +3,9 @@
     "NOTE": "Instead, create a file in ~/.fate/gfate/settings.json and add your changes there!!!",
 
     "windowsize" : [800, 500],
-    "uifont" : { "family" : "Lucida Console", "size" : 10 },
-    "userfont" : { "family" : "Lucida Console", "size" : 10 },
+    "cursormargin" : [5, 2],
+    "uifont" : { "family" : "Courier New", "size" : 10 },
+    "userfont" : { "family" : "Courier new", "size" : 10 },
     "tabsize" : [110, 36],
     "tabwidthextra" : 30,
     "statuswinenabled" : true,
