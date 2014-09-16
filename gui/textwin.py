@@ -44,15 +44,20 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def loop(self):
         result = self.redraw
         self.redraw = False
+        # Show/hide the commandwindow
+        if 'Prompt' in str(self.doc.mode) and not self.commandWin.enabled:
+            self.commandWin.enable()
+        if 'Prompt' not in str(self.doc.mode) and self.commandWin.enabled:
+            self.commandWin.disable()
+        # Draw commandWindow
+        if self.commandWin.enabled:
+            result = result or self.commandWin.loop()
         # Draw cursor
         self.flickerCountLeft -= 1
         if self.flickerCountLeft in {0, self.settings.flickercount}:
             if self.flickerCountLeft == 0:
                 self.flickerCountLeft = self.settings.flickercount * 2
             result = True
-        # Draw commandWindow
-        if self.commandWin.enabled:
-            result = result or self.commandWin.loop()
         # Redraw needed
         return result
 
@@ -85,7 +90,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.drawStatusWin(selectionstext)
 
         # Draw commandWin
-        if 'Prompt' in str(self.doc.mode):
+        if self.commandWin.enabled:
             self.commandWin.draw()
 
     def drawCursor(self, cx, cy):
@@ -243,13 +248,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
         while not self.inputqueue:
             sleep(self.settings.fps_inv)
         return self.inputqueue.popleft()
-
-    def prompt(self, prompt_string='>'):
-        # This method is called from a different thread (the one fate runs in)
-        self.showCmdWin(prompt_string, '', lambda result: print('Prompt result: ' + result))
-        while not self.commandWin.result:
-            sleep(self.settings.fps_inv)
-        return self.commandWin.result
 
     #
     # Some event handlers
