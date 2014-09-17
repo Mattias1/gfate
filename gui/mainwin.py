@@ -98,11 +98,11 @@ class MainWin(Win):
             self.activeWin.onMouseDown(p, btnNr)
     def onMouseDownDouble(self, p, btnNr):
         if btnNr == 1:
-            b = self.activeWin.getCharFromCoord(p)
+            b = self.activeWin.getCharFromPixelCoord(p)
             self.queue.append(PointerDoubleClick(b))
     def onMouseDownTriple(self, p, btnNr):
         if btnNr == 1:
-            b = self.activeWin.getCharFromCoord(p)
+            b = self.activeWin.getCharFromPixelCoord(p)
             self.queue.append(PointerTripleClick(b))
     def onMouseMove(self, p, btnNr):
         # Move the tabs
@@ -122,11 +122,11 @@ class MainWin(Win):
 
         # Fire final mouse event
         if self.mouseDownStartPos != (-1, -1):
-            e = self.activeWin.getCharFromCoord(p)
+            e = self.activeWin.getCharFromPixelCoord(p)
             if self.mouseDownStartPos == p:
                 self.queue.append(PointerClick(e))
             else:
-                b = self.activeWin.getCharFromCoord(self.mouseDownStartPos)
+                b = self.activeWin.getCharFromPixelCoord(self.mouseDownStartPos)
                 self.queue.append(PointerInput(b, e-b))
             self.mouseDownStartPos = Pos(-1, -1)
 

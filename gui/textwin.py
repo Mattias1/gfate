@@ -231,7 +231,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         i = 0
         w, h = self.settings.userfontsize.t
         offset = self.pos + self.textOffset
-        x, y = (p.x - offset.x) // w, (p.y - offset.y) // h
+        x, y = p.t
         cx, cy = 0, 0
         text = self.doc.text
         try:
@@ -249,6 +249,15 @@ class TextWin(Win, fate.userinterface.UserInterface):
             return i
         except:
             return i
+        
+    def getCharFromPixelCoord(self, p):
+        """Return character index from the (x, y) coordinates (in pixels). This is a truly terrible method."""
+        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
+        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
+        w, h = self.settings.userfontsize.t
+        offset = self.pos + self.textOffset
+        x, y = (p.x - offset.x) // w, (p.y - offset.y) // h
+        return self.getCharFromCoord(Pos(x, y))
 
     #
     # Implement UserInterface methods
