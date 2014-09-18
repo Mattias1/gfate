@@ -18,6 +18,7 @@ class Application(Frame):
         self.canvas.bind('<Double-Button>', self.onMouseDownDouble)
         self.canvas.bind('<Triple-Button>', self.onMouseDownTriple)
         self.canvas.bind('<Motion>', self.onMouseMove)
+        self.canvas.bind('<MouseWheel>', self.onMouseScroll)
         self.canvas.bind('<ButtonRelease>', self.onMouseUp)
         self.master.bind('<Key>', self.onKeyDown)
         self.master.bind('<KeyRelease>', self.onKeyUp)
@@ -43,6 +44,15 @@ class Application(Frame):
 
     def onMouseMove(self, event):
         self.mainWindow.onMouseMove(Pos(event.x, event.y), event.num)
+
+    def onMouseScroll(self, event):
+        # respond to Linux or Windows wheel event
+        amount = 0
+        if event.num == 5 or event.delta == -120:
+            n = 1
+        if event.num == 4 or event.delta == 120:
+            n = -1
+        self.mainWindow.onMouseScroll(Pos(event.x, event.y), n)
 
     def onMouseUp(self, event):
         self.mainWindow.onMouseUp(Pos(event.x, event.y), event.num)

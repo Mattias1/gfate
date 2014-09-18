@@ -198,9 +198,17 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def getTitle(self):
         return self.doc.filename + ('' if self.doc.saved else '*')
 
+    #
+    # Win specific methods
+    #
     def onKeyDown(self, c):
         if self.commandWin.enabled:
             self.commandWin.onKeyDown(c)
+
+    def onMouseScroll(self, p, n):
+        self.displayOffset = (self.displayOffset.x, max(0, self.displayOffset.y + self.settings.scrolllines * n))
+        if self.commandWin.enabled:
+            self.commandWin.onMouseScroll(p, n)
 
     def resize(self, draw=True):
         assert draw == False
@@ -210,6 +218,9 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.cursorRange = Size(s.w // w - 2 * self.settings.cursormargin.w, s.h // h - 2 * self.settings.cursormargin.h)
         self.commandWin.resize(False)
 
+    #
+    # Some helper methods
+    #
     def getCoordFromChar(self, n, start=0, startPosTuple=(0, 0)):
         """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,

@@ -116,6 +116,11 @@ class MainWin(Win):
         # Pass the event on to my active child
         if self.activeWin.containsPos(p):
             self.activeWin.onMouseMove(p, btnNr)
+    def onMouseScroll(self, p, n):
+        # Pass the event on to my active child
+        if self.activeWin.containsPos(p):
+            self.activeWin.onMouseScroll(p, n)
+            self.draw()
     def onMouseUp(self, p, btnNr):
         # Deselect
         self.selectedTab = -1

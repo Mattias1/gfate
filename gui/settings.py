@@ -48,7 +48,11 @@ class Settings():
         with suppress(KeyError):
             self.size = Size(settings['windowsize'][0], settings['windowsize'][1])
         with suppress(KeyError):
+            self.commandsize = Size(settings['commandwindowsize'][0], settings['commandwindowsize'][1])
+        with suppress(KeyError):
             self.cursormargin = Size(settings['cursormargin'][0], settings['cursormargin'][1])
+        with suppress(KeyError):
+            self.scrolllines = settings['scrolllines']
         with suppress(KeyError):
             self.uifont = (settings['uifont']['family'], settings['uifont']['size'])
         with suppress(KeyError):
@@ -59,8 +63,6 @@ class Settings():
             self.tabwidthextra = settings['tabwidthextra']
         with suppress(KeyError):
             self.statuswinenabled = settings['statuswinenabled']
-        with suppress(KeyError):
-            self.commandsize = Size(settings['commandwindowsize'][0], settings['commandwindowsize'][1])
         with suppress(KeyError):
             self.fps_inv = 1 / settings['fps']                           # seconds per frame
         with suppress(KeyError):
