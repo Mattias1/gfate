@@ -213,7 +213,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.commandWin.onKeyDown(c)
 
     def onMouseScroll(self, p, factor):
-        self.displayOffset = (self.displayOffset.x, max(0, self.displayOffset.y + self.settings.scrolllines * factor))
+        maxLines = self.doc.text.count('\n') # Can't deal with OSX line endings or word wrap (TODO !)
+        self.displayOffset = (self.displayOffset.x, min(maxLines, max(0, self.displayOffset.y + self.settings.scrolllines * factor)))
         if self.commandWin.enabled:
             self.commandWin.onMouseScroll(p, factor)
 
