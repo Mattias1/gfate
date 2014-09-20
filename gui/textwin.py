@@ -15,17 +15,17 @@ class TextWin(Win, fate.userinterface.UserInterface):
         Win.__init__(self, settings, app, Pos(0, settings.tabsize.h))
         fate.userinterface.UserInterface.__init__(self, doc)
 
-        self.commandWin = CommandWin(settings, app, doc)
+        self.commandWin = CommandWin(settings, app, doc, self)
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
         self.doc.OnActivate.add(self.onActivate)
-        self.flickerCountLeft = 1
+        self.flickerCountLeft = 0
         self.redraw = False
         self.oldSelection = self.doc.selection[-1]
         self.textOffset = Pos(6, 4)
         self.displayOffset = Pos(0, 0)
-        self.displayIndex = 0 # For readability purposes - this is double work (it's done while setting displayOffset).
-        self.cursorRange = Size(0, 0)
+        self.displayIndex = 0
+        self.cursorRange = Size(0, 0) # Windowsize - 2*margins
 
     @property
     def displayOffset(self):
@@ -34,7 +34,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def displayOffset(self, value):
         self._displayOffset = Pos(value)
         self._displayIndex = self.getCharFromCoord(self._displayOffset)
-        print('GETS HERE (index: {}, offset: {})'.format(self._displayIndex, self._displayOffset))
 
     @property
     def displayIndex(self):
@@ -56,6 +55,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if self.oldSelection != self.doc.selection[-1]:
             self.oldSelection = self.doc.selection[-1]
             self.adjustWindow()
+            self.resetCursor()
         # Draw commandWindow
         if self.commandWin.enabled:
             result = result or self.commandWin.loop()
@@ -102,20 +102,24 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def drawCursor(self, cx, cy):
         """Draw a single cursor (that is, an empty selection)"""
-        w, h = self.settings.userfontsize.t
         ox, oy = self.displayOffset.t
-        cursorVisible = self.flickerCountLeft <= self.settings.flickercount
+        if not oy <= cy <= oy + self.cursorRange.h + 2 * self.settings.cursormargin.h:
+            return
+        w, h = self.settings.userfontsize.t
+        cursorVisible = self.flickerCountLeft <= self.settings.flickercount and not self.commandWin.enabled
         self.drawCursorLine(self.textOffset + (w*(cx - ox), h*(cy - oy)), cursorVisible)
 
     def drawSelection(self, w, h, b, e, bx, by):
         """Draw a single selection rectangle"""
         ox, oy = self.displayOffset.t
+        color = self.colors.selectionbg
         i = b
         while i < e:
             c = self.doc.text[i]
             # Can't deal with OSX line endings or word wrap (TODO !)
             if i == e - 1 or c == '\n':
-                self.drawRect(self.colors.selectionbg, self.textOffset + (w*(bx - ox), h*(by - oy)), Size(w*(i + 1 - b), h))
+                if oy <= by <= oy + self.cursorRange.h + 2 * self.settings.cursormargin.h:
+                    self.drawRect(color, self.textOffset + (w*(bx - ox), h*(by - oy)), Size(w*(i + 1 - b), h))
                 if i == e - 1:
                     return (bx + i + 1 - b, by)
                 bx, by = 0, by + 1
@@ -198,6 +202,9 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def getTitle(self):
         return self.doc.filename + ('' if self.doc.saved else '*')
 
+    def resetCursor(self):
+        self.flickerCountLeft = self.settings.flickercount
+
     #
     # Win specific methods
     #
@@ -205,10 +212,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if self.commandWin.enabled:
             self.commandWin.onKeyDown(c)
 
-    def onMouseScroll(self, p, n):
-        self.displayOffset = (self.displayOffset.x, max(0, self.displayOffset.y + self.settings.scrolllines * n))
+    def onMouseScroll(self, p, factor):
+        self.displayOffset = (self.displayOffset.x, max(0, self.displayOffset.y + self.settings.scrolllines * factor))
         if self.commandWin.enabled:
-            self.commandWin.onMouseScroll(p, n)
+            self.commandWin.onMouseScroll(p, factor)
 
     def resize(self, draw=True):
         assert draw == False
@@ -217,6 +224,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
         s = self.size - self.textOffset - (0, self.settings.statusheight)
         self.cursorRange = Size(s.w // w - 2 * self.settings.cursormargin.w, s.h // h - 2 * self.settings.cursormargin.h)
         self.commandWin.resize(False)
+
+    def enable(self):
+        Win.enable(self)
+        self.resetCursor()
 
     #
     # Some helper methods

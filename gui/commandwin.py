@@ -9,9 +9,10 @@ class CommandWin(Win):
     This class represents the window for a command or other input requests.
     """
 
-    def __init__(self, settings, app, doc):
+    def __init__(self, settings, app, doc, win):
         Win.__init__(self, settings, app, Pos(0, 0))
         self.doc = doc
+        self.win = win
         self.disable()
 
     def draw(self):
@@ -20,7 +21,7 @@ class CommandWin(Win):
         textOffset = Pos(10, 12 + h)
         self.drawString(self.doc.mode.promptstring, self.colors.text, Pos(10, 10))
         self.drawString(self.doc.mode.inputstring, self.colors.text, textOffset)
-        self.drawCursorLine(textOffset + (w*len(self.doc.mode.inputstring), 0), self.app.mainWindow.activeWin.flickerCountLeft <= self.settings.flickercount)
+        self.drawCursorLine(textOffset + (w*len(self.doc.mode.inputstring), 0), self.win.flickerCountLeft <= self.settings.flickercount)
 
     def resize(self, draw=True):
         """Override the resize window"""
@@ -28,4 +29,12 @@ class CommandWin(Win):
         s = self.settings
         self.size = s.commandsize
         self.pos = Pos(max(0, (s.size.w - s.commandsize.w) // 2), s.tabsize.h)
+
+    def enable(self):
+        Win.enable(self)
+        self.win.resetCursor()
+
+    def disable(self):
+        Win.disable(self)
+        self.win.resetCursor()
 

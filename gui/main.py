@@ -47,12 +47,12 @@ class Application(Frame):
 
     def onMouseScroll(self, event):
         # respond to Linux or Windows wheel event
-        amount = 0
+        factor = 0
         if event.num == 5 or event.delta == -120:
-            n = 1
+            factor = 1
         if event.num == 4 or event.delta == 120:
-            n = -1
-        self.mainWindow.onMouseScroll(Pos(event.x, event.y), n)
+            factor = -1
+        self.mainWindow.onMouseScroll(Pos(event.x, event.y), factor)
 
     def onMouseUp(self, event):
         self.mainWindow.onMouseUp(Pos(event.x, event.y), event.num)

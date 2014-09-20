@@ -44,6 +44,12 @@ class Win:
         pass
     def onKeyDown(self, c):
         pass
+    def onMouseScroll(self, p, factor):
+        pass
+    def onMouseDownDouble(self, p, btnNr):
+        pass
+    def onMouseDownTriple(self, p, btnNr):
+        pass
 
     def resize(self, draw=True):
         """Resize window."""
