@@ -27,6 +27,8 @@ class Settings():
         self.userfontsize = Size(fonts[1].measure('a') , fonts[1].metrics('linespace'))
         # The Status window size
         self.statusheight = self.uifontsize.h + 6
+        # Line number margin
+        self.linenumbermargin = 2
 
     def load(self):
         """Load all the settings from json file"""
@@ -63,6 +65,8 @@ class Settings():
             self.tabwidthextra = settings['tabwidthextra']
         with suppress(KeyError):
             self.statuswinenabled = settings['statuswinenabled']
+        with suppress(KeyError):
+            self.linenumbers = settings['linenumbers']
         with suppress(KeyError):
             self.fps_inv = 1 / settings['fps']                           # seconds per frame
         with suppress(KeyError):

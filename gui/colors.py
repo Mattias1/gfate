@@ -7,6 +7,7 @@ class Colors():
     def loadDefaults(self):
         self.bg = '#272822'
         self.text = '#eeeeee'
+        self.linenumber = '#777777'
         self.selectionbg = '#575852'
         self.inactivetab = '#474842'
         self.tabbg = '#171714'

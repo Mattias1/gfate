@@ -73,25 +73,28 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # Draw selection (and get the selections text already)
         selectionstext = ''
         w, h = self.settings.userfontsize.t
+        lineNrW = 0
+        if self.settings.linenumbers:
+            lineNrW = 2 * self.settings.linenumbermargin + w * len(str(self.doc.text.count('\n')))
         for i, (b, e) in enumerate(self.doc.selection):
             if b >= e:
                 bx, by = self.getCoordFromChar(b).t
-                self.drawCursor(bx, by)
-                selectionstext += '({}, {}: 0), '.format(by, bx)
+                self.drawCursor(bx, by, lineNrW)
+                selectionstext += '({}, {}: 0), '.format(by + 1, bx)
             else:
                 bx, by = self.getCoordFromChar(b).t
-                ex, ey = self.drawSelection(w, h, b, e, bx, by)
-                selectionstext += '({}, {}: {}), '.format(by, bx, e - b)
+                ex, ey = self.drawSelection(w, h, b, e, bx, by, lineNrW)
+                selectionstext += '({}, {}: {}), '.format(by + 1, bx, e - b)
                 if 'ChangeBefore' in str(self.doc.mode):
-                    self.drawCursor(bx + len(self.doc.mode.insertions[i]), by)
+                    self.drawCursor(bx + len(self.doc.mode.insertions[i]), by, lineNrW)
                 elif 'ChangeAround' in str(self.doc.mode):
-                    self.drawCursor(bx, by)
-                    self.drawCursor(ex, ey)
+                    self.drawCursor(bx, by, lineNrW)
+                    self.drawCursor(ex, ey, lineNrW)
                 elif 'ChangeAfter' in str(self.doc.mode):
-                    self.drawCursor(ex, ey)
+                    self.drawCursor(ex, ey, lineNrW)
 
         # Draw text
-        self.drawText(self.doc.text, self.doc.labeling)
+        self.drawText(self.doc.text, self.doc.labeling, lineNrW)
 
         # Draw statuswin
         self.drawStatusWin(selectionstext)
@@ -100,16 +103,16 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if self.commandWin.enabled:
             self.commandWin.draw()
 
-    def drawCursor(self, cx, cy):
+    def drawCursor(self, cx, cy, lineNrW):
         """Draw a single cursor (that is, an empty selection)"""
         ox, oy = self.displayOffset.t
         if not oy <= cy <= oy + self.cursorRange.h + 2 * self.settings.cursormargin.h:
             return
         w, h = self.settings.userfontsize.t
         cursorVisible = self.flickerCountLeft <= self.settings.flickercount and not self.commandWin.enabled
-        self.drawCursorLine(self.textOffset + (w*(cx - ox), h*(cy - oy)), cursorVisible)
+        self.drawCursorLine(self.textOffset + (lineNrW, 0) + (w*(cx - ox), h*(cy - oy)), cursorVisible)
 
-    def drawSelection(self, w, h, b, e, bx, by):
+    def drawSelection(self, w, h, b, e, bx, by, lineNrW):
         """Draw a single selection rectangle"""
         ox, oy = self.displayOffset.t
         color = self.colors.selectionbg
@@ -119,7 +122,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
             # Can't deal with OSX line endings or word wrap (TODO !)
             if i == e - 1 or c == '\n':
                 if oy <= by <= oy + self.cursorRange.h + 2 * self.settings.cursormargin.h:
-                    self.drawRect(color, self.textOffset + (w*(bx - ox), h*(by - oy)), Size(w*(i + 1 - b), h))
+                    self.drawRect(color, self.textOffset + (lineNrW, 0) + (w*(bx - ox), h*(by - oy)), Size(w*(i + 1 - b), h))
                 if i == e - 1:
                     return (bx + i + 1 - b, by)
                 bx, by = 0, by + 1
@@ -127,12 +130,14 @@ class TextWin(Win, fate.userinterface.UserInterface):
             i += 1
         raise Exception('Character at end of selection not found')
 
-    def drawText(self, text, labeling):
+    def drawText(self, text, labeling, lineNrW):
         """Draw the part of the text that should appear on the screen"""
-        w, h = self.settings.userfontsize.t # The size of one character
+        settings, colors = self.settings, self.colors
+        w, h = settings.userfontsize.t # The size of one character
         i = self.displayIndex               # The index of the character currently being processed
         x, y = (0, 0)                       # The coordinates of that char
-        maxLength = len(self.doc.text)
+        maxLength = len(self.doc.text)      # The amount of letters in a text (used as stop criterium)
+        # The length of a linenumber - Can't deal with OSX line endings or word wrap (TODO !)
         while True:
             length = 0                      # The length of the interval currently being processed
             label = '' if not i in self.doc.labeling else self.doc.labeling[i]  # The current label
@@ -149,7 +154,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
                     break
                 length += 1
                 i += 1
-            self.drawString(self.doc.text[i - length : i], self.colors.fromLabel(label), self.textOffset + (w*x, h*y))
+            self.drawString(str(y+1), colors.linenumber, (lineNrW - settings.linenumbermargin, self.textOffset.y + h*y), 'ne')
+            self.drawString(self.doc.text[i - length : i], colors.fromLabel(label), self.textOffset + (lineNrW + w*x, h*y))
 
             # Special case for the new line character - Can't deal with OSX line endings or word wrap (TODO !)
             if self.doc.text[i] == '\n':
