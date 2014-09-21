@@ -143,7 +143,6 @@ class MainWin(Win):
         if c:
             self.queue.append(c)
         self.activeWin.onKeyDown(c)
-        self.draw()
 
     def resize(self, draw=True):
         """Override the resize window"""

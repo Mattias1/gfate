@@ -142,10 +142,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
             length = 0                      # The length of the interval currently being processed
             label = '' if not i in self.doc.labeling else self.doc.labeling[i]  # The current label
 
-            # Stop drawing at the end of the screen or the end of the text
-            if h * y > self.size.h or i >= maxLength:
-                break
-
             # Draw a text interval with the same label
             # Can't deal with OSX line endings or word wrap (TODO !)
             while i < maxLength:
@@ -157,6 +153,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.drawString(str(y+1), colors.linenumber, (lineNrW - settings.linenumbermargin, self.textOffset.y + h*y), 'ne')
             self.drawString(self.doc.text[i - length : i], colors.fromLabel(label), self.textOffset + (lineNrW + w*x, h*y))
 
+            # Stop drawing at the end of the screen or the end of the text
+            if h * y > self.size.h or i >= maxLength:
+                break
+
             # Special case for the new line character - Can't deal with OSX line endings or word wrap (TODO !)
             if self.doc.text[i] == '\n':
                 y += 1
@@ -164,6 +164,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 i += 1
             else:
                 x += length
+        self.drawString(str(y + 1), colors.linenumber, (lineNrW - settings.linenumbermargin, self.textOffset.y + h*y), 'ne')
 
     def drawStatusWin(self, selectionstext):
         """Draw some stats to the bottom of the text win"""
