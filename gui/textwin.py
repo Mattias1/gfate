@@ -83,7 +83,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 ex, ey = self.drawSelection(w, h, b, e, bx, by)
                 selectionstext += '({}, {}: {}), '.format(by, bx, e - b)
                 if 'ChangeBefore' in str(self.doc.mode):
-                    self.drawCursor(bx + len(self.doc.mode.peek().insertions[i]), by)
+                    self.drawCursor(bx + len(self.doc.mode.insertions[i]), by)
                 elif 'ChangeAround' in str(self.doc.mode):
                     self.drawCursor(bx, by)
                     self.drawCursor(ex, ey)
