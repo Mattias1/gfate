@@ -73,7 +73,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # Draw selection (and get the selections text already)
         selectionstext = ''
         w, h = self.settings.userfontsize.t
-        lineNrW = 0
+        lineNrW = self.calcLineNumberWidth(w)
         if self.settings.linenumbers:
             lineNrW = 2 * self.settings.linenumbermargin + w * len(str(self.doc.text.count('\n')))
         for i, (b, e) in enumerate(self.doc.selection):
@@ -212,6 +212,12 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def resetCursor(self):
         self.flickerCountLeft = self.settings.flickercount
 
+    def calcLineNumberWidth(self, w):
+        lineNumberWidth = 0
+        if self.settings.linenumbers:
+            lineNumberWidth = 2 * self.settings.linenumbermargin + w * len(str(self.doc.text.count('\n')))
+        return lineNumberWidth
+
     #
     # Win specific methods
     #
@@ -279,14 +285,15 @@ class TextWin(Win, fate.userinterface.UserInterface):
             return i
         except:
             return i
-        
+
     def getCharFromPixelCoord(self, p):
         """Return character index from the (x, y) coordinates (in pixels). This is a truly terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
         w, h = self.settings.userfontsize.t
-        offset = self.pos + self.textOffset
-        x, y = (p.x - offset.x) // w, (p.y - offset.y) // h
+        lineNrWidth = self.calcLineNumberWidth(w)
+        offset = self.pos + self.textOffset + (lineNrWidth, 0)
+        x, y = (p.x - offset.x) // w + self.displayOffset.x, (p.y - offset.y) // h + self.displayOffset.y
         return self.getCharFromCoord(Pos(x, y))
 
     #

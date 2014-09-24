@@ -92,7 +92,7 @@ class MainWin(Win):
             self.draw()
 
         if self.activeWin and self.activeWin.containsPos(p):
-            # Calculate position of the click (or maybe drag?)
+            # Store position of the click (or maybe drag?)
             self.mouseDownStartPos = p
             # Pass the event on to my active child
             self.activeWin.onMouseDown(p, btnNr)
