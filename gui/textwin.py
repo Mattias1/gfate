@@ -25,7 +25,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.textOffset = Pos(6, 4)
         self.displayOffset = Pos(0, 0)
         self.displayIndex = 0
-        self.cursorRange = Size(0, 0) # Windowsize - 2*margins
+        self.textRange = Size(0, 0)
+        self.nrOfLines = 0
 
     @property
     def displayOffset(self):
@@ -43,8 +44,15 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self._displayIndex = value
         self._displayOffset = self.getCoordFromChar(value)
 
+    @property
+    def cursorRange(self):
+        return self.textRange - 2 * self.settings.cursormargin - (0, 1)
+
     def loop(self):
         result = self.redraw
+        # Update some stats for fast access
+        if self.redraw:
+            self.nrOfLines = len(str(self.doc.text.count('\n')))
         self.redraw = False
         # Show/hide the commandwindow
         if 'Prompt' in str(self.doc.mode) and not self.commandWin.enabled:
@@ -74,8 +82,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
         selectionstext = ''
         w, h = self.settings.userfontsize.t
         lineNrW = self.calcLineNumberWidth(w)
-        if self.settings.linenumbers:
-            lineNrW = 2 * self.settings.linenumbermargin + w * len(str(self.doc.text.count('\n')))
         for i, (b, e) in enumerate(self.doc.selection):
             if b >= e:
                 bx, by = self.getCoordFromChar(b).t
@@ -97,7 +103,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.drawText(self.doc.text, self.doc.labeling, lineNrW)
 
         # Draw statuswin
-        self.drawStatusWin(selectionstext)
+        if self.settings.statuswinenabled:
+            self.drawStatusWin(selectionstext)
 
         # Draw commandWin
         if self.commandWin.enabled:
@@ -106,7 +113,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def drawCursor(self, cx, cy, lineNrW):
         """Draw a single cursor (that is, an empty selection)"""
         ox, oy = self.displayOffset.t
-        if not oy <= cy <= oy + self.cursorRange.h + 2 * self.settings.cursormargin.h:
+        if not oy <= cy <= oy + self.textRange.h:
             return
         w, h = self.settings.userfontsize.t
         cursorVisible = self.flickerCountLeft <= self.settings.flickercount and not self.commandWin.enabled
@@ -121,7 +128,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
             c = self.doc.text[i]
             # Can't deal with OSX line endings or word wrap (TODO !)
             if i == e - 1 or c == '\n':
-                if oy <= by <= oy + self.cursorRange.h + 2 * self.settings.cursormargin.h:
+                if oy <= by <= oy + self.textRange.h:
                     self.drawRect(color, self.textOffset + (lineNrW, 0) + (w*(bx - ox), h*(by - oy)), Size(w*(i + 1 - b), h))
                 if i == e - 1:
                     return (bx + i + 1 - b, by)
@@ -135,7 +142,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         settings, colors = self.settings, self.colors
         w, h = settings.userfontsize.t # The size of one character
         i = self.displayIndex               # The index of the character currently being processed
-        x, y = (0, 0)                       # The coordinates of that char
+        x, y = (0, 0)                       # The coordinates of that char (relative to screen)
         maxLength = len(self.doc.text)      # The amount of letters in a text (used as stop criterium)
         # The length of a linenumber - Can't deal with OSX line endings or word wrap (TODO !)
         while True:
@@ -150,7 +157,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
                     break
                 length += 1
                 i += 1
-            self.drawString(str(y+1), colors.linenumber, (lineNrW - settings.linenumbermargin, self.textOffset.y + h*y), 'ne')
+            self.drawString(str(y + 1 + self.displayOffset.y), colors.linenumber, (lineNrW - settings.linenumbermargin, self.textOffset.y + h*y), 'ne')
             self.drawString(self.doc.text[i - length : i], colors.fromLabel(label), self.textOffset + (lineNrW + w*x, h*y))
 
             # Stop drawing at the end of the screen or the end of the text
@@ -164,7 +171,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 i += 1
             else:
                 x += length
-        self.drawString(str(y + 1), colors.linenumber, (lineNrW - settings.linenumbermargin, self.textOffset.y + h*y), 'ne')
 
     def drawStatusWin(self, selectionstext):
         """Draw some stats to the bottom of the text win"""
@@ -215,7 +221,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def calcLineNumberWidth(self, w):
         lineNumberWidth = 0
         if self.settings.linenumbers:
-            lineNumberWidth = 2 * self.settings.linenumbermargin + w * len(str(self.doc.text.count('\n')))
+            lineNumberWidth = 2 * self.settings.linenumbermargin + w * self.nrOfLines
         return lineNumberWidth
 
     #
@@ -235,8 +241,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         assert draw == False
         self.size = self.settings.size - (0, self.settings.tabsize.h)
         w, h = self.settings.userfontsize.t # The size of one character
-        s = self.size - self.textOffset - (0, self.settings.statusheight)
-        self.cursorRange = Size(s.w // w - 2 * self.settings.cursormargin.w, s.h // h - 2 * self.settings.cursormargin.h)
+        s = self.size - self.textOffset - (0, self.settings.statusheight if self.settings.statuswinenabled else 0)
+        self.textRange = Size(s.w // w, s.h // h)
         self.commandWin.resize(False)
 
     def enable(self):

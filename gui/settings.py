@@ -100,6 +100,11 @@ class Pos():
     def __sub__(self, other):
         return self + (-other[0], -other[1])
 
+    def __mul__(self, constant):
+        return Size(constant * self.x, constant * self.y)
+    def __rmul__(self, constant):
+        return self * constant
+
     def __eq__(self, other):
         if other is None:
             return False
@@ -134,6 +139,11 @@ class Size():
         return other + self
     def __sub__(self, other):
         return self + (-other[0], -other[1])
+
+    def __mul__(self, constant):
+        return Size(constant * self.w, constant * self.h)
+    def __rmul__(self, constant):
+        return self * constant
 
     def __eq__(self, other):
         if other is None:
