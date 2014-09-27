@@ -22,11 +22,11 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.flickerCountLeft = 0
         self.redraw = False
         self.oldSelection = self.doc.selection[-1]
-        self.textOffset = Pos(6, 4)
-        self.displayOffset = Pos(0, 0)
-        self.displayIndex = 0
-        self.textRange = Size(0, 0)
-        self.nrOfLines = 0
+        self.textOffset = Pos(6, 4)     # Margin for the text in px (so that it doesn't hug the borders)
+        self.displayOffset = Pos(0, 0)  # The character with this pos (col, row) is the first one to be drawn (so it's in the top left of the text win)
+        self.displayIndex = 0           # The index of the above character in the self.doc.text string
+        self.textRange = Size(0, 0)     # The amount of letters that fit in the screen
+        self.nrOfLines = 0              # The total number of lines (ie. newline chars) in self.doc.text
 
     @property
     def displayOffset(self):
@@ -52,7 +52,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         result = self.redraw
         # Update some stats for fast access
         if self.redraw:
-            self.nrOfLines = len(str(self.doc.text.count('\n')))
+            self.nrOfLines = self.doc.text.count('\n')
         self.redraw = False
         # Show/hide the commandwindow
         if 'Prompt' in str(self.doc.mode) and not self.commandWin.enabled:
@@ -101,6 +101,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
         # Draw text
         self.drawText(self.doc.text, self.doc.labeling, lineNrW)
+
+        # Draw scrollbars
+        if self.settings.scrollbars in {'both', 'vertical'}:
+            self.drawScrollbars()
 
         # Draw statuswin
         if self.settings.statuswinenabled:
@@ -172,11 +176,26 @@ class TextWin(Win, fate.userinterface.UserInterface):
             else:
                 x += length
 
+    def drawScrollbars(self):
+        """Draw the vertical scrollbar"""
+        vert, hor = self.settings.scrollbars in {'both', 'verical'}, self.settings.scrollbars in {'both', 'horizontal'}
+        barW = self.settings.scrollwidth
+        statusExtra = self.settings.statusheight if self.settings.statuswinenabled else 0
+        x, y = self.size.w - barW, self.size.h - barW - statusExtra
+        w, h = x + (0 if vert else barW) - 2 * barW, y + (0 if hor else barW) - 2 * barW
+        # Draw vertical scrollbar
+        if vert:
+            p = self.displayOffset.y / self.nrOfLines
+            self.drawRect(self.colors.scrollbg, Pos(x, barW), Size(barW, h))
+            self.drawRect(self.colors.scroll, Pos(x, int(p * (h - 4 * barW)) + barW), Size(barW, 4 * barW))
+        if hor:
+            self.drawRect(self.colors.scrollbg, Pos(barW, y), Size(w, barW))
+
     def drawStatusWin(self, selectionstext):
         """Draw some stats to the bottom of the text win"""
         h = self.settings.statusheight
-        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h - 1)
-        self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h), Size(self.size.w, h))
+        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h)
+        self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h + 1), Size(self.size.w, h - 1))
         h = self.size.h - h + 2
         # modestr = 'Normal' if not self.doc.mode else str(self.doc.mode)
         # selmodestr = '' if not self.doc.selectmode else str(self.doc.selectmode)
@@ -221,7 +240,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def calcLineNumberWidth(self, w):
         lineNumberWidth = 0
         if self.settings.linenumbers:
-            lineNumberWidth = 2 * self.settings.linenumbermargin + w * self.nrOfLines
+            lineNumberWidth = 2 * self.settings.linenumbermargin + w * len(str(self.nrOfLines))
         return lineNumberWidth
 
     #

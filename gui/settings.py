@@ -66,6 +66,10 @@ class Settings():
         with suppress(KeyError):
             self.statuswinenabled = settings['statuswinenabled']
         with suppress(KeyError):
+            self.scrollbars = settings['scrollbars']
+        with suppress(KeyError):
+            self.scrollwidth = settings['scrollwidth']
+        with suppress(KeyError):
             self.linenumbers = settings['linenumbers']
         with suppress(KeyError):
             self.fps_inv = 1 / settings['fps']                           # seconds per frame

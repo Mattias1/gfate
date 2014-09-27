@@ -11,6 +11,8 @@
     "tabsize" : [110, 36],
     "tabwidthextra" : 30,
     "statuswinenabled" : true,
+    "scrollbars" : "both",
+    "scrollwidth" : 12,
     "linenumbers" : true,
     "fps" : 30,
     "flickertime" : 0.400
