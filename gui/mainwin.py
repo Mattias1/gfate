@@ -18,6 +18,8 @@ class MainWin(Win):
         Win.__init__(self, settings, app, Pos(0, 0))
 
         self.selectedTab = -1 # Mark the tab that is selected while a mousekey is down
+        self.tabImgs = None
+        self.scrollImgs = None
         self.mouseDownStartPos = Pos(-1, -1)
 
         self.textWins = []
@@ -48,6 +50,8 @@ class MainWin(Win):
         for win in self.textWins:
             win.disable()
         newWin.enable()
+        newWin.redraw = True
+        newWin.loop()
 
     def swapTabs(self, a, b):
         self.textWins[a], self.textWins[b] = self.textWins[b], self.textWins[a]
@@ -148,7 +152,8 @@ class MainWin(Win):
         """Override the resize window"""
         self.size = self.settings.size
 
-        self.initTabs()
+        self.initTabImgs()
+        self.initScrollImgs()
 
         for win in self.textWins:
             win.resize(False)
@@ -170,18 +175,16 @@ class MainWin(Win):
 
 
     #
-    # Tabs
+    # Tab images
     #
-    def initTabs(self):
+    def initTabImgs(self):
         """Create the images for the tabs"""
         # Load all images and their pixel maps
         tabr = self.loadImgPIL('tab.png')
         w, h = tabr.size
-        piltabs = [Image.new('RGBA', tabr.size), Image.new('RGBA', (1, h)), tabr]
-        for i in range(3):
-            piltabs.append(piltabs[i].copy())
-        piltabs.append(Image.new('RGBA', (1, h)))
-        pixs = [t.load() for t in piltabs]
+        pilTabs = [Image.new('RGBA', tabr.size), Image.new('RGBA', (1, h)), tabr]
+        pilTabs.extend([pilTabs[i].copy() for i in [0, 1, 2, 1]])
+        pixs = [t.load() for t in pilTabs]
 
         # Paint the tabr images
         if tabr.mode == 'RGB' or tabr.mode == 'RGBA':
@@ -208,13 +211,13 @@ class MainWin(Win):
             pixc, pixr = pixs[nr], pixs[nr + 1]
             for y in range(h):
                 pixc[0, y] = pixr[0, y]
-            piltabs[nr] = piltabs[nr].resize((self.settings.tabsize.w, h), Image.NEAREST)
+            pilTabs[nr] = pilTabs[nr].resize((self.settings.tabsize.w, h), Image.NEAREST)
         for y in range(h):
             pixs[6][0, y] = pixs[2][w - 1, y]
-        piltabs[6] = piltabs[6].resize((self.size.w, h), Image.NEAREST)
+        pilTabs[6] = pilTabs[6].resize((self.size.w, h), Image.NEAREST)
 
         # Convert the images to Tk images
-        self.tabImgs = [self.loadImgTk(t) for t in piltabs]
+        self.tabImgs = [self.loadImgTk(t) for t in pilTabs]
 
     def drawTab(self, p, text, active=False):
         """Draw a single tab"""
@@ -247,4 +250,54 @@ class MainWin(Win):
         # Draw the active tab
         if activeWin > -1:
             self.drawTab(Pos(activeWin * w, y), self.textWins[activeWin].getTitle(), True)
+
+    #
+    # Scroll images
+    #
+    def initScrollImgs(self):
+        """Create the images for the scroll bars and buttons"""
+        # Load all images and their pixel maps [bg, top, middle, bottom, bg, left, middle, right, up, right, down, left]
+        pilImgs = [self.loadImgPIL(i) for i in ['scrollbg.png', 'scrolltop.png', 'scrollup.png']]
+        w, h = pilImgs[1].size
+        sq = Image.new('RGBA', (w, h))
+        pilImgs[2:2] = [Image.new('RGBA', (w, 1)), sq, Image.new('RGBA', (1, h)), sq, Image.new('RGBA', (1, h)), sq]
+        pilImgs.extend([sq, sq, sq])
+        pixs = [t.load() for t in pilImgs]
+        pixBgV, pixTop, pixMidV, pixBottom, pixBgH, pixLeft, pixMidH, pixRight, pixN, pixE, pixS, pixW = pixs
+
+        # Paint the tabr images
+        # if tabr.mode == 'RGB' or tabr.mode == 'RGBA':
+        #     pixr = pixs[nr]
+        #     tabColor = self.colors.toTuple(self.colors.bg if nr == 2 else self.colors.inactivetab)
+        #     diff = [tabColor[i] - pixr[0, h-1][i] for i in range(3)]
+        #     temp = []
+        #     for y in range(h):
+        #         for x in range(w):
+        #             temp = [min(255, max(0, pixr[x, y][i] + diff[i])) for i in range(3)]
+        #             temp.append(pixr[x, y][3])
+        #             pixr[x, y] = tuple(temp)
+
+        # Create scroll bottom, right and left images
+        for y in range(h):
+            for x in range(w):
+                pixBottom[x, y] = pixTop[x, h - 1 - y]
+                pixLeft[x, y] = pixTop[y, x]
+                pixRight[x, y] = pixTop[h - 1 - y, w - 1 - x]
+        pilImgs[6] = pilImgs[6].resize((self.size.w, h), Image.NEAREST)
+
+        # Create the middle and bg images
+        for i in range(w):
+            pixMidV[i, 0] = pixBottom[i, 0]
+            pixBgH[0, i] = pixBgV[i, 0]
+            pixMidH[0, i] = pixRight[0, i]
+
+        # Create the E, S, W images
+        for y in range(h):
+            for x in range(w):
+                pixE[x, y] = pixN[y, x]
+                pixS[x, y] = pixN[x, h - 1 - y]
+                pixW[x, y] = pixN[h - 1 - y, w - 1 - x]
+
+        # Convert the images to Tk images
+        self.scrollImgs = [self.loadImgTk(t) for t in pilImgs]
 

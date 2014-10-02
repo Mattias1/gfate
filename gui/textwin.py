@@ -103,8 +103,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.drawText(self.doc.text, self.doc.labeling, lineNrW)
 
         # Draw scrollbars
-        if self.settings.scrollbars in {'both', 'vertical'}:
-            self.drawScrollbars()
+        self.drawScrollbars()
 
         # Draw statuswin
         if self.settings.statuswinenabled:
@@ -178,7 +177,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def drawScrollbars(self):
         """Draw the vertical scrollbar"""
-        vert, hor = self.settings.scrollbars in {'both', 'verical'}, self.settings.scrollbars in {'both', 'horizontal'}
+        vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
         barW = self.settings.scrollwidth
         statusExtra = self.settings.statusheight if self.settings.statuswinenabled else 0
         x, y = self.size.w - barW, self.size.h - barW - statusExtra
@@ -187,6 +186,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if vert:
             p = self.displayOffset.y / self.nrOfLines
             self.drawRect(self.colors.scrollbg, Pos(x, barW), Size(barW, h))
+            self.drawRect('#ff0000', Pos(x, 0), Size(barW, barW))
+            self.drawUIString('^', '#000000', Pos(x + 2, -1))
             self.drawRect(self.colors.scroll, Pos(x, int(p * (h - 4 * barW)) + barW), Size(barW, 4 * barW))
         if hor:
             self.drawRect(self.colors.scrollbg, Pos(barW, y), Size(w, barW))
