@@ -176,20 +176,34 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 x += length
 
     def drawScrollbars(self):
-        """Draw the vertical scrollbar"""
+        """Draw the scroll bars"""
+        # [bg, top, middle, bottom, bg, left, middle, right, up, right, down, left]           
+        scrollImgs = self.app.mainWindow.scrollImgs
+        imgBgV, imgTop, imgMidV, imgBottom, imgBgH, imgLeft, imgMidH, imgRight, imgN, imgE, imgS, imgW = scrollImgs
         vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
-        barW = self.settings.scrollwidth
+        barW = imgTop.width()
         statusExtra = self.settings.statusheight if self.settings.statuswinenabled else 0
-        x, y = self.size.w - barW, self.size.h - barW - statusExtra
+        x, y = self.size.w - (self.settings.scrollbarwidth + barW) // 2, self.size.h - barW - statusExtra
         w, h = x + (0 if vert else barW) - 2 * barW, y + (0 if hor else barW) - 2 * barW
+        ratio = 0
+
         # Draw vertical scrollbar
         if vert:
-            p = self.displayOffset.y / self.nrOfLines
-            self.drawRect(self.colors.scrollbg, Pos(x, barW), Size(barW, h))
-            self.drawRect('#ff0000', Pos(x, 0), Size(barW, barW))
-            self.drawUIString('^', '#000000', Pos(x + 2, -1))
-            self.drawRect(self.colors.scroll, Pos(x, int(p * (h - 4 * barW)) + barW), Size(barW, 4 * barW))
+            if self.nrOfLines > 0:
+                ratio = self.displayOffset.y / self.nrOfLines
+            posY = int(ratio * (h - imgMidV.height() - 2 * barW)) + barW
+            # Background
+            self.drawImg(Pos(self.size.w - self.settings.scrollbarwidth, 0), imgBgV)
+            # Arrows
+            self.drawImg(Pos(x, 0), imgN)
+            self.drawImg(Pos(x, y), imgS)
+            # The scrollbar
+            self.drawImg(Pos(x, posY), imgTop)
+            self.drawImg(Pos(x, posY + barW), imgMidV)
+            self.drawImg(Pos(x, posY + barW + imgMidV.height()), imgBottom)
+        # Draw horizontal scrollbar
         if hor:
+            self.drawImg(Pos(0, y), imgBgH)
             self.drawRect(self.colors.scrollbg, Pos(barW, y), Size(w, barW))
 
     def drawStatusWin(self, selectionstext):

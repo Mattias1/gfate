@@ -12,7 +12,7 @@ class Colors():
         self.inactivetab = '#474842'
         self.tabbg = '#171714'
         self.tabtext = '#eeeeee'
-        self.scroll = '#777777'
+        self.scroll = '#737373'
         self.scrollbg = '#1d1d1d'
 
     def load(self):

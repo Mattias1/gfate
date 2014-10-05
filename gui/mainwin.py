@@ -217,7 +217,7 @@ class MainWin(Win):
         pilTabs[6] = pilTabs[6].resize((self.size.w, h), Image.NEAREST)
 
         # Convert the images to Tk images
-        self.tabImgs = [self.loadImgTk(t) for t in pilTabs]
+        self.tabImgs = [self.loadImgTk(img) for img in pilTabs]
 
     def drawTab(self, p, text, active=False):
         """Draw a single tab"""
@@ -258,24 +258,25 @@ class MainWin(Win):
         """Create the images for the scroll bars and buttons"""
         # Load all images and their pixel maps [bg, top, middle, bottom, bg, left, middle, right, up, right, down, left]
         pilImgs = [self.loadImgPIL(i) for i in ['scrollbg.png', 'scrolltop.png', 'scrollup.png']]
+        self.settings.scrollbarwidth = pilImgs[0].size[0]
         w, h = pilImgs[1].size
         sq = Image.new('RGBA', (w, h))
-        pilImgs[2:2] = [Image.new('RGBA', (w, 1)), sq, Image.new('RGBA', (1, h)), sq, Image.new('RGBA', (1, h)), sq]
-        pilImgs.extend([sq, sq, sq])
+        pilImgs[2:2] = [Image.new('RGBA', (w, 1)), sq, Image.new('RGBA', (1, self.settings.scrollbarwidth)), sq.copy(), Image.new('RGBA', (1, h)), sq.copy()]
+        pilImgs.extend([sq.copy(), sq.copy(), sq.copy()])
         pixs = [t.load() for t in pilImgs]
         pixBgV, pixTop, pixMidV, pixBottom, pixBgH, pixLeft, pixMidH, pixRight, pixN, pixE, pixS, pixW = pixs
 
         # Paint the tabr images
-        # if tabr.mode == 'RGB' or tabr.mode == 'RGBA':
-        #     pixr = pixs[nr]
-        #     tabColor = self.colors.toTuple(self.colors.bg if nr == 2 else self.colors.inactivetab)
-        #     diff = [tabColor[i] - pixr[0, h-1][i] for i in range(3)]
-        #     temp = []
-        #     for y in range(h):
-        #         for x in range(w):
-        #             temp = [min(255, max(0, pixr[x, y][i] + diff[i])) for i in range(3)]
-        #             temp.append(pixr[x, y][3])
-        #             pixr[x, y] = tuple(temp)
+        for img, pix in [(pilImgs[i], pixs[i]) for i in [1, 8]]:
+            if img.mode == 'RGB' or img.mode == 'RGBA':
+                color = self.colors.toTuple(self.colors.scroll)
+                diff = [color[i] - pix[w // 2, h // 2][i] for i in range(3)]
+                temp = []
+                for y in range(h):
+                    for x in range(w):
+                        temp = [min(255, max(0, pix[x, y][i] + diff[i])) for i in range(3)]
+                        temp.append(pix[x, y][3])
+                        pix[x, y] = tuple(temp)
 
         # Create scroll bottom, right and left images
         for y in range(h):
@@ -283,13 +284,16 @@ class MainWin(Win):
                 pixBottom[x, y] = pixTop[x, h - 1 - y]
                 pixLeft[x, y] = pixTop[y, x]
                 pixRight[x, y] = pixTop[h - 1 - y, w - 1 - x]
-        pilImgs[6] = pilImgs[6].resize((self.size.w, h), Image.NEAREST)
 
         # Create the middle and bg images
         for i in range(w):
             pixMidV[i, 0] = pixBottom[i, 0]
             pixBgH[0, i] = pixBgV[i, 0]
             pixMidH[0, i] = pixRight[0, i]
+        pilImgs[0] = pilImgs[0].resize((self.settings.scrollbarwidth, self.settings.size.h - self.settings.tabsize.h), Image.NEAREST)
+        pilImgs[2] = pilImgs[2].resize((w, 100), Image.NEAREST)
+        pilImgs[4] = pilImgs[4].resize((self.settings.size.w, self.settings.scrollbarwidth), Image.NEAREST)
+        pilImgs[6] = pilImgs[6].resize((100, h), Image.NEAREST)
 
         # Create the E, S, W images
         for y in range(h):
@@ -299,5 +303,5 @@ class MainWin(Win):
                 pixW[x, y] = pixN[h - 1 - y, w - 1 - x]
 
         # Convert the images to Tk images
-        self.scrollImgs = [self.loadImgTk(t) for t in pilImgs]
+        self.scrollImgs = [self.loadImgTk(img) for img in pilImgs]
 

@@ -25,6 +25,8 @@ class Settings():
         fonts = [tkinter.font.Font(family=fam, size=pt) for fam, pt in [self.uifont, self.userfont]]
         self.uifontsize = Size(fonts[0].measure('a'), fonts[0].metrics('linespace'))
         self.userfontsize = Size(fonts[1].measure('a') , fonts[1].metrics('linespace'))
+        # The scroll bar width (will be set at scrollbar img initialization)
+        self.scrollbarwidth = 0
         # The Status window size
         self.statusheight = self.uifontsize.h + 6
         # Line number margin
