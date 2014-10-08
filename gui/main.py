@@ -122,6 +122,6 @@ def main():
     root = Tk()
     settings = Settings()
     root.configure(bg=settings.colors.bg)
-    root.geometry("{}x{}".format(settings.size.w, settings.size.h))
+    root.geometry("{}x{}+{}+{}".format(settings.size.w, settings.size.h, settings.pos.x, settings.pos.y))
     return Application(settings, master=root)
 

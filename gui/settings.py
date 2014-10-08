@@ -50,6 +50,8 @@ class Settings():
         settings = json.loads(content)
 
         with suppress(KeyError):
+            self.pos = Pos(settings['windowpos'][0], settings['windowpos'][1])
+        with suppress(KeyError):
             self.size = Size(settings['windowsize'][0], settings['windowsize'][1])
         with suppress(KeyError):
             self.commandsize = Size(settings['commandwindowsize'][0], settings['commandwindowsize'][1])
