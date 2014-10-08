@@ -101,11 +101,11 @@ class MainWin(Win):
             # Pass the event on to my active child
             self.activeWin.onMouseDown(p, btnNr)
     def onMouseDownDouble(self, p, btnNr):
-        if btnNr == 1:
+        if btnNr == 1 and self.activeWin and self.activeWin.containsPos(p):
             b = self.activeWin.getCharFromPixelCoord(p)
             self.queue.append(PointerDoubleClick(b))
     def onMouseDownTriple(self, p, btnNr):
-        if btnNr == 1:
+        if btnNr == 1 and self.activeWin and self.activeWin.containsPos(p):
             b = self.activeWin.getCharFromPixelCoord(p)
             self.queue.append(PointerTripleClick(b))
     def onMouseMove(self, p, btnNr):

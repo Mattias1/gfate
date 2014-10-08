@@ -1,5 +1,6 @@
 from .win import *
 from .commandwin import CommandWin
+from .statuswin import StatusWin
 from .colors import *
 from time import sleep
 import fate.userinterface
@@ -16,6 +17,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         fate.userinterface.UserInterface.__init__(self, doc)
 
         self.commandWin = CommandWin(settings, app, doc, self)
+        self.statusWin = StatusWin(settings, app, doc, self)
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
         self.doc.OnActivate.add(self.onActivate)
@@ -107,7 +109,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
         # Draw statuswin
         if self.settings.statuswinenabled:
-            self.drawStatusWin(selectionstext)
+            self.statusWin.draw(selectionstext)
 
         # Draw commandWin
         if self.commandWin.enabled:
@@ -182,8 +184,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         imgBgV, imgTop, imgMidV, imgBottom, imgBgH, imgLeft, imgMidH, imgRight, imgN, imgE, imgS, imgW = scrollImgs
         vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
         barW = imgTop.width()
-        statusExtra = self.settings.statusheight if self.settings.statuswinenabled else 0
-        x, y = self.size.w - (self.settings.scrollbarwidth + barW) // 2, self.size.h - barW - statusExtra
+        x, y = self.size.w + (self.settings.scrollbarwidth - barW) // 2, self.size.h - barW
         w, h = x + (0 if vert else barW) - 2 * barW, y + (0 if hor else barW) - 2 * barW
         ratio = 0
 
@@ -193,7 +194,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 ratio = self.displayOffset.y / self.nrOfLines
             posY = int(ratio * (h - imgMidV.height() - 2 * barW)) + barW
             # Background
-            self.drawImg(Pos(self.size.w - self.settings.scrollbarwidth, 0), imgBgV)
+            self.drawImg(Pos(self.size.w, 0), imgBgV)
             # Arrows
             self.drawImg(Pos(x, 0), imgN)
             self.drawImg(Pos(x, y), imgS)
@@ -205,27 +206,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if hor:
             self.drawImg(Pos(0, y), imgBgH)
             self.drawRect(self.colors.scrollbg, Pos(barW, y), Size(w, barW))
-
-    def drawStatusWin(self, selectionstext):
-        """Draw some stats to the bottom of the text win"""
-        h = self.settings.statusheight
-        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), self.size.h - h)
-        self.drawRect(self.colors.tabbg, Pos(0, self.size.h - h + 1), Size(self.size.w, h - 1))
-        h = self.size.h - h + 2
-        # modestr = 'Normal' if not self.doc.mode else str(self.doc.mode)
-        # selmodestr = '' if not self.doc.selectmode else str(self.doc.selectmode)
-        # selpos = Pos(self.size.w - self.textOffset.x - (len(selectionstext) - 2) * self.settings.uifontsize.w, h)
-        # self.drawString(self.doc.filename + ('' if self.doc.saved else '*') + ' ' + self.doc.filetype, self.colors.tabtext, Pos(self.textOffset.x, h))
-        # self.drawString('{} {}'.format(modestr, selmodestr), self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
-        # self.drawString(selectionstext[:-2], self.colors.tabtext, selpos)
-
-        status = '{} | {} | {} | {} | {}'.format(
-           self.getTitle(),
-           self.doc.filetype,
-           self.doc.mode,
-           self.doc.selectmode,
-           selectionstext[:-2])
-        self.drawUIString(status, self.colors.tabtext, Pos(self.textOffset.x, h))
 
     def adjustWindow(self):
         """Adjust the window so that the cursor is in the allowed range"""
@@ -273,11 +253,15 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def resize(self, draw=True):
         assert draw == False
-        self.size = self.settings.size - (0, self.settings.tabsize.h)
+        vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
+        scrollSize = Size(self.settings.scrollbarwidth if vert else 0, self.settings.scrollbarwidth if hor else 0)
+        statusSize = (0, self.settings.statusheight if self.settings.statuswinenabled else 0)
+        self.size = self.settings.size - (0, self.settings.tabsize.h) - scrollSize - statusSize
         w, h = self.settings.userfontsize.t # The size of one character
-        s = self.size - self.textOffset - (0, self.settings.statusheight if self.settings.statuswinenabled else 0)
+        s = self.size - self.textOffset
         self.textRange = Size(s.w // w, s.h // h)
         self.commandWin.resize(False)
+        self.statusWin.resize(False)
 
     def enable(self):
         Win.enable(self)
