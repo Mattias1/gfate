@@ -184,28 +184,41 @@ class TextWin(Win, fate.userinterface.UserInterface):
         imgBgV, imgTop, imgMidV, imgBottom, imgBgH, imgLeft, imgMidH, imgRight, imgN, imgE, imgS, imgW = scrollImgs
         vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
         barW = imgTop.width()
-        x, y = self.size.w + (self.settings.scrollbarwidth - barW) // 2, self.size.h - barW
-        w, h = x + (0 if vert else barW) - 2 * barW, y + (0 if hor else barW) - 2 * barW
+        padding = (self.settings.scrollbarwidth - barW) // 2
+        x, y = self.size.w + padding, self.size.h + padding
+        w, h = x - 5 * padding - 2 * barW, y - 3 * padding - 2 * barW
         ratio = 0
 
         # Draw vertical scrollbar
         if vert:
             if self.nrOfLines > 0:
                 ratio = self.displayOffset.y / self.nrOfLines
-            posY = int(ratio * (h - imgMidV.height() - 2 * barW)) + barW
+            posY = int(ratio * (h - imgMidV.height() - 2 * barW)) + barW + padding
             # Background
-            self.drawImg(Pos(self.size.w, 0), imgBgV)
+            self.drawRect(self.colors.scrollbg, Pos(x - padding, 0), Size(imgBgV.width(), imgBgV.height()))
+            self.drawImg(Pos(x - padding, 0), imgBgV)
             # Arrows
-            self.drawImg(Pos(x, 0), imgN)
-            self.drawImg(Pos(x, y), imgS)
+            self.drawImg(Pos(x, padding), imgN)
+            self.drawImg(Pos(x, y - 2 * padding - barW), imgS)
             # The scrollbar
             self.drawImg(Pos(x, posY), imgTop)
             self.drawImg(Pos(x, posY + barW), imgMidV)
             self.drawImg(Pos(x, posY + barW + imgMidV.height()), imgBottom)
         # Draw horizontal scrollbar
         if hor:
-            self.drawImg(Pos(0, y), imgBgH)
-            self.drawRect(self.colors.scrollbg, Pos(barW, y), Size(w, barW))
+            # if self.nrOfLines > 0:
+            ratio = 0 # self.displayOffset.y / self.nrOfLines
+            posX = int(ratio * (w - imgMidH.width() - 2 * barW)) + barW + padding
+            # Background
+            self.drawRect(self.colors.scrollbg, Pos(0, y - padding), Size(imgBgH.width(), imgBgH.height()))
+            self.drawImg(Pos(0, y - padding), imgBgH)
+            # Arrows
+            self.drawImg(Pos(padding, y), imgW)
+            self.drawImg(Pos(x - 3 * padding - barW, y), imgE)
+            # The scrollbar
+            self.drawImg(Pos(posX, y), imgLeft)
+            self.drawImg(Pos(posX + barW, y), imgMidH)
+            self.drawImg(Pos(posX + barW + imgMidH.width(), y), imgRight)
 
     def adjustWindow(self):
         """Adjust the window so that the cursor is in the allowed range"""

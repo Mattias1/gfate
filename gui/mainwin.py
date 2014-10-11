@@ -95,6 +95,19 @@ class MainWin(Win):
                 self.queue.append(fate.commands.quit_document(self.docList[self.selectedTab]))
             self.draw()
 
+        # Hit scrollbar button
+        vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
+        w = self.settings.scrollbarwidth
+        if vert:
+            x, y = self.activeWin.pos.x + self.activeWin.size.w, self.activeWin.pos.y
+            h = self.activeWin.size.h
+            # Check if the user clicked somewhere in the (vertical) scrollbar region
+            if x <= p.x <= x + w and y <= p.y <= y + h:
+                # The up button
+                if p.y <= y + w:
+                    pass
+
+        # Forward click to children
         if self.activeWin and self.activeWin.containsPos(p):
             # Store position of the click (or maybe drag?)
             self.mouseDownStartPos = p
@@ -187,7 +200,7 @@ class MainWin(Win):
         pixs = [t.load() for t in pilTabs]
 
         # Paint the tabr images
-        if tabr.mode == 'RGB' or tabr.mode == 'RGBA':
+        if tabr.mode in ['RGB', 'RGBA']:
             for nr in [2, 5]:
                 pixr = pixs[nr]
                 tabColor = self.colors.toTuple(self.colors.bg if nr == 2 else self.colors.inactivetab)
@@ -266,9 +279,9 @@ class MainWin(Win):
         pixs = [t.load() for t in pilImgs]
         pixBgV, pixTop, pixMidV, pixBottom, pixBgH, pixLeft, pixMidH, pixRight, pixN, pixE, pixS, pixW = pixs
 
-        # Paint the tabr images
+        # Paint the scroll images
         for img, pix in [(pilImgs[i], pixs[i]) for i in [1, 8]]:
-            if img.mode == 'RGB' or img.mode == 'RGBA':
+            if img.mode in ['RGB', 'RGBA']:
                 color = self.colors.toTuple(self.colors.scroll)
                 diff = [color[i] - pix[w // 2, h // 2][i] for i in range(3)]
                 temp = []
@@ -286,21 +299,24 @@ class MainWin(Win):
                 pixRight[x, y] = pixTop[h - 1 - y, w - 1 - x]
 
         # Create the middle and bg images
+        for i in range(self.settings.scrollbarwidth):
+            pixBgH[0, i] = pixBgV[i, 0]
         for i in range(w):
             pixMidV[i, 0] = pixBottom[i, 0]
-            pixBgH[0, i] = pixBgV[i, 0]
             pixMidH[0, i] = pixRight[0, i]
-        pilImgs[0] = pilImgs[0].resize((self.settings.scrollbarwidth, self.settings.size.h - self.settings.tabsize.h), Image.NEAREST)
+        otherBarExtra = self.settings.scrollbarwidth if self.settings.scrollbars == 'both' else 0
+        statusExtra = self.settings.statusheight if self.settings.statuswinenabled else 0
+        pilImgs[0] = pilImgs[0].resize((self.settings.scrollbarwidth, self.settings.size.h - self.settings.tabsize.h - otherBarExtra - statusExtra), Image.NEAREST)
         pilImgs[2] = pilImgs[2].resize((w, 100), Image.NEAREST)
-        pilImgs[4] = pilImgs[4].resize((self.settings.size.w, self.settings.scrollbarwidth), Image.NEAREST)
+        pilImgs[4] = pilImgs[4].resize((self.settings.size.w - otherBarExtra, self.settings.scrollbarwidth), Image.NEAREST)
         pilImgs[6] = pilImgs[6].resize((100, h), Image.NEAREST)
 
         # Create the E, S, W images
         for y in range(h):
             for x in range(w):
-                pixE[x, y] = pixN[y, x]
+                pixE[x, y] = pixN[h - 1 - y, w - 1 - x]
                 pixS[x, y] = pixN[x, h - 1 - y]
-                pixW[x, y] = pixN[h - 1 - y, w - 1 - x]
+                pixW[x, y] = pixN[y, x]
 
         # Convert the images to Tk images
         self.scrollImgs = [self.loadImgTk(img) for img in pilImgs]

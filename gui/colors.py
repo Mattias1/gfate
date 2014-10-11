@@ -13,7 +13,7 @@ class Colors():
         self.tabbg = '#171714'
         self.tabtext = '#eeeeee'
         self.scroll = '#737373'
-        self.scrollbg = '#1d1d1d'
+        self.scrollbg = '#3d3d3d'
 
     def load(self):
         """Load all the colors from json file"""

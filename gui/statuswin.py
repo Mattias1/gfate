@@ -41,5 +41,6 @@ class StatusWin(Win):
         assert draw == False
         s = self.settings
         self.size = Size(s.size.w, s.statusheight)
-        self.pos = Pos(0, self.win.size.h + self.win.pos.y)
+        scrollOffset = self.settings.scrollbarwidth if self.settings.scrollbars in {'both', 'horizontal'} else 0
+        self.pos = Pos(0, self.win.size.h + self.win.pos.y + scrollOffset)
 
