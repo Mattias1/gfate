@@ -290,6 +290,16 @@ class MainWin(Win):
                         temp = [min(255, max(0, pix[x, y][i] + diff[i])) for i in range(3)]
                         temp.append(pix[x, y][3])
                         pix[x, y] = tuple(temp)
+        # Paint the background image
+        if pilImgs[0].mode in ['RGB', 'RGBA']:
+            color = self.colors.toTuple(self.colors.scrollbg)
+            diff = [color[i] - pixBgV[0, 0][i] for i in range(3)]
+            temp = []
+            for x in range(self.settings.scrollbarwidth):
+                temp = [min(255, max(0, pixBgV[x, 0][i] + diff[i])) for i in range(3)]
+                if pilImgs[0].mode == 'RGBA':
+                    temp.append(pixBgV[x, y][3])
+                pixBgV[x, 0] = tuple(temp)
 
         # Create scroll bottom, right and left images
         for y in range(h):
