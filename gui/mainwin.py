@@ -17,7 +17,8 @@ class MainWin(Win):
     def __init__(self, settings, app):
         Win.__init__(self, settings, app, Pos(0, 0))
 
-        self.selectedTab = -1 # Mark the tab that is selected while a mousekey is down
+        self.selectedTab = -1       # Mark the tab that is selected while a mousekey is down
+        self.selectedScrollbar = -1 # Mark the scrollbar that is selected while a mousekey is down (1=vert, 2=hor)
         self.tabImgs = None
         self.scrollImgs = None
         self.mouseDownStartPos = Pos(-1, -1)
@@ -79,6 +80,41 @@ class MainWin(Win):
         if self.activeWin != None:
             self.activeWin.draw()
 
+    def scrollbarClicks(self, p):
+        # Manage scrollbar clicks
+        vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
+        barW = self.settings.scrollbarwidth
+        if vert:
+            x, y = self.activeWin.pos.x + self.activeWin.size.w, self.activeWin.pos.y
+            h = self.activeWin.size.h
+            # Check if the user clicked somewhere in the (vertical) scrollbar region
+            if x <= p.x <= x + barW and y <= p.y <= y + h:
+                # The up button
+                if p.y <= y + barW:
+                    self.activeWin.scrollText(True, -1)
+                # The scrollbar (todo: split in two)
+                elif p.y <= y + h - barW:
+                    self.selectedScrollbar = 1
+                # The down button
+                else:
+                    self.activeWin.scrollText(True, 1)
+                self.draw()
+        if hor:
+            x, y = self.activeWin.pos.x, self.activeWin.pos.y + self.activeWin.size.h
+            w = self.activeWin.size.w
+            # Check if the user clicked somewhere in the (horizontal) scrollbar region
+            if x <= p.x <= x + w and y <= p.y <= y + barW:
+                # The left button
+                if p.x <= x + barW:
+                    self.activeWin.scrollText(False, -1)
+                # The scrollbar (todo: split in two)
+                elif p.x <= x + w - barW:
+                    self.selectedScrollbar = 2
+                # The right button
+                else:
+                    self.activeWin.scrollText(False, 1)
+                self.draw()
+
     def onMouseDown(self, p, btnNr):
         # Hit tabs
         self.selectedTab = -1
@@ -96,16 +132,8 @@ class MainWin(Win):
             self.draw()
 
         # Hit scrollbar button
-        vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
-        w = self.settings.scrollbarwidth
-        if vert:
-            x, y = self.activeWin.pos.x + self.activeWin.size.w, self.activeWin.pos.y
-            h = self.activeWin.size.h
-            # Check if the user clicked somewhere in the (vertical) scrollbar region
-            if x <= p.x <= x + w and y <= p.y <= y + h:
-                # The up button
-                if p.y <= y + w:
-                    pass
+        if btnNr == 1:
+            self.scrollbarClicks(p)
 
         # Forward click to children
         if self.activeWin and self.activeWin.containsPos(p):
@@ -114,13 +142,21 @@ class MainWin(Win):
             # Pass the event on to my active child
             self.activeWin.onMouseDown(p, btnNr)
     def onMouseDownDouble(self, p, btnNr):
+        # Forward double click
         if btnNr == 1 and self.activeWin and self.activeWin.containsPos(p):
             b = self.activeWin.getCharFromPixelCoord(p)
             self.queue.append(PointerDoubleClick(b))
+        # Check scrollbar (you want to be able to click it multiple times close after eachother)
+        elif btnNr == 1:
+            self.scrollbarClicks(p)
     def onMouseDownTriple(self, p, btnNr):
+        # Forward triple click
         if btnNr == 1 and self.activeWin and self.activeWin.containsPos(p):
             b = self.activeWin.getCharFromPixelCoord(p)
             self.queue.append(PointerTripleClick(b))
+        # Check scrollbar (you want to be able to click it multiple times close after eachother)
+        elif btnNr == 1:
+            self.scrollbarClicks(p)
     def onMouseMove(self, p, btnNr):
         # Move the tabs
         i = p.x // (self.settings.tabsize.w + self.settings.tabwidthextra)
@@ -129,6 +165,10 @@ class MainWin(Win):
                 self.swapTabs(i, self.selectedTab)
                 self.selectedTab = i
                 self.draw()
+
+        # Move the scrollbar
+        # TODO...
+        # SOMETHING WITH TEXTWIN . SCROLLWINDOW or something
 
         # Pass the event on to my active child
         if self.activeWin.containsPos(p):
@@ -141,6 +181,7 @@ class MainWin(Win):
     def onMouseUp(self, p, btnNr):
         # Deselect
         self.selectedTab = -1
+        self.selectedScrollbar = -1
 
         # Fire final mouse event
         if self.mouseDownStartPos != (-1, -1):

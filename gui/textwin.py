@@ -121,7 +121,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if not oy <= cy <= oy + self.textRange.h:
             return
         w, h = self.settings.userfontsize.t
-        cursorVisible = self.flickerCountLeft <= self.settings.flickercount and not self.commandWin.enabled
+        cursorVisible = self.flickerCountLeft <= self.settings.flickercount and not self.commandWin.enabled and cx >= ox
         self.drawCursorLine(self.textOffset + (lineNrW, 0) + (w*(cx - ox), h*(cy - oy)), cursorVisible)
 
     def drawSelection(self, w, h, b, e, bx, by, lineNrW):
@@ -134,7 +134,13 @@ class TextWin(Win, fate.userinterface.UserInterface):
             # Can't deal with OSX line endings or word wrap (TODO !)
             if i == e - 1 or c == '\n':
                 if oy <= by <= oy + self.textRange.h:
-                    self.drawRect(color, self.textOffset + (lineNrW, 0) + (w*(bx - ox), h*(by - oy)), Size(w*(i + 1 - b), h))
+                    fromX = w*(bx - ox)
+                    width = w*(i + 1 - b)
+                    if fromX < 0:
+                        width += fromX
+                        fromX = 0
+                    if width > 0:
+                        self.drawRect(color, self.textOffset + (lineNrW, 0) + (fromX, h*(by - oy)), Size(width, h))
                 if i == e - 1:
                     return (bx + i + 1 - b, by)
                 bx, by = 0, by + 1
@@ -173,7 +179,11 @@ class TextWin(Win, fate.userinterface.UserInterface):
             if self.doc.text[i] == '\n':
                 y += 1
                 x = 0
-                i += 1
+                # Now skip the first "displayOffset.x'th" characters (except with newline chars)
+                for j in range(self.displayOffset.x + 1):
+                    i += 1
+                    if i == maxLength or self.doc.text[i] == '\n':
+                        break
             else:
                 x += length
 
@@ -207,7 +217,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # Draw horizontal scrollbar
         if hor:
             # if self.nrOfLines > 0:
-            ratio = 0 # self.displayOffset.y / self.nrOfLines
+            ratio = self.displayOffset.x / 50 # self.nrOfLines # TODO: use self.maxNrOfCharsOnALine
             posX = int(ratio * (w - imgMidH.width() - 2 * barW)) + barW + padding
             # Background
             self.drawRect(self.colors.scrollbg, Pos(0, y - padding), Size(imgBgH.width(), imgBgH.height()))
@@ -239,6 +249,15 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # Horizontal scrolling
         # Todo
 
+    def scrollText(self, vert, n):
+        # Scroll a window vertically (or horizontally if vert is False) down n chars
+        if vert:
+            maxLines = self.doc.text.count('\n') # Can't deal with OSX line endings or word wrap (TODO !)
+            self.displayOffset = (self.displayOffset.x, min(maxLines, max(0, self.displayOffset.y + n)))
+        else:
+            maxChars = 50 # TODO: vertical scroll check?
+            self.displayOffset = (min(maxChars, max(0, self.displayOffset.x + n)), self.displayOffset.y)
+
     def getTitle(self):
         return self.doc.filename + ('' if self.doc.saved else '*')
 
@@ -259,8 +278,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.commandWin.onKeyDown(c)
 
     def onMouseScroll(self, p, factor):
-        maxLines = self.doc.text.count('\n') # Can't deal with OSX line endings or word wrap (TODO !)
-        self.displayOffset = (self.displayOffset.x, min(maxLines, max(0, self.displayOffset.y + self.settings.scrolllines * factor)))
+        self.scrollText(True, self.settings.scrolllines * factor)
         if self.commandWin.enabled:
             self.commandWin.onMouseScroll(p, factor)
 
