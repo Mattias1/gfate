@@ -247,7 +247,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
             off.y += ey - aim
             self.displayOffset = off
         # Horizontal scrolling
-        # Todo
+        # TODO ...
 
     def scrollText(self, vert, n):
         # Scroll a window vertically (or horizontally if vert is False) down n chars
@@ -270,6 +270,14 @@ class TextWin(Win, fate.userinterface.UserInterface):
             lineNumberWidth = 2 * self.settings.linenumbermargin + w * len(str(self.nrOfLines))
         return lineNumberWidth
 
+    def containsPos(self, p, includeVerticalScroll = False, includeHorizontalScroll = False):
+        extra = Size(0, 0)
+        if includeVerticalScroll:
+            extra.w += self.settings.scrollbarwidth
+        if includeHorizontalScroll:
+            extra.h += self.settings.scrollbarwidth
+        return self.pos.x <= p.x <= self.pos.x + self.size.w + extra.w and self.pos.y <= p.y <= self.pos.y + self.size.h + extra.h
+
     #
     # Win specific methods
     #
@@ -277,8 +285,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if self.commandWin.enabled:
             self.commandWin.onKeyDown(c)
 
-    def onMouseScroll(self, p, factor):
-        self.scrollText(True, self.settings.scrolllines * factor)
+    def onMouseScroll(self, p, factor, scrollVertical = True):
+        self.scrollText(scrollVertical, self.settings.scrolllines * factor)
         if self.commandWin.enabled:
             self.commandWin.onMouseScroll(p, factor)
 
