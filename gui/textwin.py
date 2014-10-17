@@ -197,13 +197,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
         padding = (self.settings.scrollbarwidth - barW) // 2
         x, y = self.size.w + padding, self.size.h + padding
         w, h = x - 5 * padding - 2 * barW, y - 3 * padding - 2 * barW
-        ratio = 0
 
         # Draw vertical scrollbar
         if vert:
-            if self.nrOfLines > 0:
-                ratio = self.displayOffset.y / self.nrOfLines
-            posY = int(ratio * (h - imgMidV.height() - 2 * barW)) + barW + padding
+            posY = self.calcScrollbarPos(True)
             # Background
             self.drawRect(self.colors.scrollbg, Pos(x - padding, 0), Size(imgBgV.width(), imgBgV.height()))
             self.drawImg(Pos(x - padding, 0), imgBgV)
@@ -216,9 +213,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.drawImg(Pos(x, posY + barW + imgMidV.height()), imgBottom)
         # Draw horizontal scrollbar
         if hor:
-            # if self.nrOfLines > 0:
-            ratio = self.displayOffset.x / 50 # self.nrOfLines # TODO: use self.maxNrOfCharsOnALine
-            posX = int(ratio * (w - imgMidH.width() - 2 * barW)) + barW + padding
+            posX = self.calcScrollbarPos(False)
             # Background
             self.drawRect(self.colors.scrollbg, Pos(0, y - padding), Size(imgBgH.width(), imgBgH.height()))
             self.drawImg(Pos(0, y - padding), imgBgH)
@@ -229,6 +224,23 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.drawImg(Pos(posX, y), imgLeft)
             self.drawImg(Pos(posX + barW, y), imgMidH)
             self.drawImg(Pos(posX + barW + imgMidH.width(), y), imgRight)
+
+    def calcScrollbarPos(self, vertical):
+        # Calculate some constants
+        ratio = 0
+        img = self.app.mainWindow.scrollImgs[2 if vertical else 6]
+        barW = img.width() if vertical else img.height()
+        padding = (self.settings.scrollbarwidth - barW) // 2
+        w, h = self.size.w - 4 * padding - 2 * barW, self.size.h - 2 * padding - 2 * barW
+        # Calculate the position of the vertical scrollbar
+        if vertical:
+            if self.nrOfLines > 0:
+                ratio = self.displayOffset.y / self.nrOfLines
+            return int(ratio * (h - img.height() - 2 * barW)) + barW + padding
+        # Calculate the position of the horizontal scrollbar
+        # if self.nrOfLines > 0:
+        ratio = self.displayOffset.x / 50 # self.nrOfLines # TODO: use self.maxNrOfCharsOnALine
+        return int(ratio * (w - img.width() - 2 * barW)) + barW + padding
 
     def adjustWindow(self):
         """Adjust the window so that the cursor is in the allowed range"""

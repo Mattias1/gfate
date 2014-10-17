@@ -94,7 +94,14 @@ class MainWin(Win):
                     self.activeWin.scrollText(True, -1)
                 # The scrollbar (todo: split in two)
                 elif p.y <= y + h - barW:
-                    self.selectedScrollbar = 1
+                    posY = self.activeWin.calcScrollbarPos(True) + self.activeWin.pos.y
+                    if p.y < posY:
+                        print('page up')
+                    elif p.y > posY + self.scrollImgs[2].height() + 2 * self.scrollImgs[2].width():
+                        print('page down')
+                    else:
+                        print('drag')
+                        self.selectedScrollbar = 1
                 # The down button
                 else:
                     self.activeWin.scrollText(True, 1)

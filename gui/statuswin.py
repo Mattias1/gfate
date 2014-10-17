@@ -13,7 +13,6 @@ class StatusWin(Win):
         Win.__init__(self, settings, app, Pos(0, 0))
         self.doc = doc
         self.win = win
-        self.disable()
 
     def draw(self, selectionsText):
         """Draw some stats to the bottom of the text win"""
