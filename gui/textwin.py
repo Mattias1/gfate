@@ -21,8 +21,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
         self.doc.OnActivate.add(self.onActivate)
+        self.doc.OnPrompt.add(self.onPrompt)
         self.flickerCountLeft = 0
-        self.redraw = False
         self.oldSelection = self.doc.selection[-1]
         self.textOffset = Pos(6, 4)     # Margin for the text in px (so that it doesn't hug the borders)
         self.displayOffset = Pos(0, 0)  # The character with this pos (col, row) is the first one to be drawn (so it's in the top left of the text win)
@@ -51,16 +51,9 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return self.textRange - 2 * self.settings.cursormargin - (0, 1)
 
     def loop(self):
-        result = self.redraw
         # Update some stats for fast access
-        if self.redraw:
+        if self.app.mainWindow.redrawMarker:
             self.nrOfLines = self.doc.text.count('\n')
-        self.redraw = False
-        # Show/hide the commandwindow
-        if 'Prompt' in str(self.doc.mode) and not self.commandWin.enabled:
-            self.commandWin.enable()
-        if 'Prompt' not in str(self.doc.mode) and self.commandWin.enabled:
-            self.commandWin.disable()
         # Adjust display offset on cursor movement
         if self.oldSelection != self.doc.selection[-1]:
             self.oldSelection = self.doc.selection[-1]
@@ -68,15 +61,15 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.resetCursor()
         # Draw commandWindow
         if self.commandWin.enabled:
-            result = result or self.commandWin.loop()
+            self.commandWin.loop()
         # Draw cursor
         self.flickerCountLeft -= 1
         if self.flickerCountLeft in {0, self.settings.flickercount}:
             if self.flickerCountLeft == 0:
                 self.flickerCountLeft = self.settings.flickercount * 2
-            result = True
-        # Redraw needed
-        return result
+
+    def redraw(self):
+        self.app.mainWindow.redraw()
 
     def draw(self):
         """Draw the text win"""
@@ -376,7 +369,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
     #
     def touch(self):
         # This method is called from a different thread (the one fate runs in)
-        self.redraw = True
+        self.redraw()
 
     def notify(self, message):
         # This method is called from a different thread (the one fate runs in)
@@ -393,10 +386,17 @@ class TextWin(Win, fate.userinterface.UserInterface):
     # Some event handlers
     #
     def onQuit(self, doc):
-        doc.ui.app.mainWindow.closeTab(fate.document.documentlist.index(doc))
+        i = fate.document.documentlist.index(doc)
+        self.app.mainWindow.closeTab(fate.document.documentlist.index(doc))
 
     def onActivate(self, doc):
-        doc.ui.app.mainWindow.enableTab(doc.ui)
+        self.app.mainWindow.enableTab(doc.ui)
+
+    def onPrompt(self, doc):
+        if 'Prompt' in str(self.doc.mode) and not self.commandWin.enabled:
+            self.commandWin.enable()
+        if 'Prompt' not in str(self.doc.mode) and self.commandWin.enabled:
+            self.commandWin.disable()
 
     #
     # Implement UI commands

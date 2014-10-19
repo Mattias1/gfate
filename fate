@@ -40,9 +40,7 @@ logging.getLogger().addHandler(logging.StreamHandler())
 try:
     app.mainloop()
 except:
-    # fate.commands.force_quit(None)
-    fate.document.activedocument = None
+    fate.commands.force_quit()
     raise
 
 # TODO: at crash close eachother (double try catch)
-

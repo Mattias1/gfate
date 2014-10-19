@@ -22,6 +22,7 @@ class MainWin(Win):
         self.tabImgs = None
         self.scrollImgs = None
         self.mouseDownStartPos = Pos(-1, -1)
+        self.redrawMarker = False
 
         self.textWins = []
         self.docList = fate.document.documentlist
@@ -51,7 +52,7 @@ class MainWin(Win):
         for win in self.textWins:
             win.disable()
         newWin.enable()
-        newWin.redraw = True
+        self.redraw()
         newWin.loop()
 
     def swapTabs(self, a, b):
@@ -68,7 +69,11 @@ class MainWin(Win):
             else:
                 self.app.master.quit()
                 return
-        self.draw()
+        self.redraw()
+
+    def redraw(self):
+        """Mark the window for redrawing"""
+        self.redrawMarker = True
 
     def draw(self):
         """Draw the main window"""
@@ -171,7 +176,7 @@ class MainWin(Win):
             if i < len(self.textWins):
                 self.swapTabs(i, self.selectedTab)
                 self.selectedTab = i
-                self.draw()
+                self.redraw()
 
         # Move the scrollbar
         # TODO...
@@ -184,11 +189,11 @@ class MainWin(Win):
         # Pass the event on to my active child
         if self.activeWin.containsPos(p, True, False):
             self.activeWin.onMouseScroll(p, factor)
-            self.draw()
+            self.redraw()
         # So we are not in the window with vertical scroll, but we are in the window with vertical and horizontal scroll
         elif self.activeWin.containsPos(p, True, True):
             self.activeWin.onMouseScroll(p, factor, False)
-            self.draw()
+            self.redraw()
     def onMouseUp(self, p, btnNr):
         # Deselect
         self.selectedTab = -1
@@ -213,7 +218,13 @@ class MainWin(Win):
             self.queue.append(c)
         self.activeWin.onKeyDown(c)
 
-    def resize(self, draw=True):
+    def quit(self):
+        """Quit the entire application"""
+        inputQueue = self.queue
+        fate.commands.quit_all()
+        inputQueue.append('Cancel') # Stop the input thread from running
+
+    def resize(self, redraw=True):
         """Override the resize window"""
         self.size = self.settings.size
 
@@ -223,20 +234,19 @@ class MainWin(Win):
         for win in self.textWins:
             win.resize(False)
 
-        if draw:
-            self.draw()
+        if redraw:
+            self.redraw()
 
     def loop(self):
         """This method is being called every n miliseconds (depending on the fps)"""
         # Call my active child
         if not self.activeWin:
             return False
-        redraw = self.activeWin.loop()
+        self.activeWin.loop()
         # Draw if nescessary
-        if redraw:
+        if self.redrawMarker:
             self.draw()
-        # No redraw needed
-        return False
+            self.redrawMarker = False
 
 
     #

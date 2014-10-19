@@ -14,6 +14,7 @@ class Application(Frame):
         self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
 
         self.canvas = Cnvs(master, bd=-2)
+        self.master.wm_protocol("WM_DELETE_WINDOW", self.quitApp)
         self.canvas.bind('<Button>', self.onMouseDown)
         self.canvas.bind('<Double-Button>', self.onMouseDownDouble)
         self.canvas.bind('<Triple-Button>', self.onMouseDownTriple)
@@ -34,6 +35,9 @@ class Application(Frame):
         self.settings = settings
 
         self.master.after(int(self.settings.fps_inv * 1000), self.loop)
+
+    def quitApp(self):
+        self.mainWindow.quit()
 
     def onMouseDown(self, event):
         self.mainWindow.onMouseDown(Pos(event.x, event.y), event.num)
