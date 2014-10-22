@@ -3,12 +3,13 @@ from tkinter.ttk import *
 from mattycontrols.MattyControls import *
 from .mainwin import MainWin
 from .settings import Settings, Pos, Size
+from .options import Options
 
 
 class Application(Frame):
-    def __init__(self, settings, master=None):
-        """The constructor"""
-        Frame.__init__(self, master)
+    def __init__(self, settings, master):
+        """The tkinter frame that manages the canvas and the keyboard and mouse interaction"""
+        frame_init(self, master)
         master.title("fate - test")
 
         self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
@@ -120,12 +121,15 @@ class Application(Frame):
 
         return prefix + c
 
+    def showOptions(self):
+        frame = Options(self, self.settings, self.master)
+
 
 def main():
     """The main entrypoint for this application"""
     root = Tk()
     settings = Settings()
     root.configure(bg=settings.colors.bg)
-    root.geometry("{}x{}+{}+{}".format(settings.size.w, settings.size.h, settings.pos.x, settings.pos.y))
+    root.geometry('{}x{}+{}+{}'.format(settings.size.w, settings.size.h, settings.pos.x, settings.pos.y))
     return Application(settings, master=root)
 

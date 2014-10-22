@@ -21,6 +21,7 @@ class MainWin(Win):
         self.selectedScrollbar = -1 # Mark the scrollbar that is selected while a mousekey is down (1=vert, 2=hor)
         self.tabImgs = None
         self.scrollImgs = None
+        self.gearImg = None
         self.mouseDownStartPos = Pos(-1, -1)
         self.redrawMarker = False
 
@@ -143,6 +144,13 @@ class MainWin(Win):
                 self.queue.append(fate.commands.quit_document(self.docList[self.selectedTab]))
             self.draw()
 
+        # Hit the gear (options button)
+        if btnNr == 1 and self.size.w - h < p.x < self.size.w and 0 < p.y < h:
+            print('Open the options menu.')
+            self.app.showOptions()
+        elif btnNr == 1:
+            print('Misclick at {}, for w, h = {}.'.format(p, Size(self.size.w, h)))
+
         # Hit scrollbar button
         if btnNr == 1:
             self.scrollbarClicks(p)
@@ -221,13 +229,14 @@ class MainWin(Win):
     def quit(self):
         """Quit the entire application"""
         inputQueue = self.queue
-        fate.commands.quit_all()
+        fate.commands.force_quit()
         inputQueue.append('Cancel') # Stop the input thread from running
 
     def resize(self, redraw=True):
         """Override the resize window"""
         self.size = self.settings.size
 
+        self.initMiscImgs()
         self.initTabImgs()
         self.initScrollImgs()
 
@@ -247,6 +256,31 @@ class MainWin(Win):
         if self.redrawMarker:
             self.draw()
             self.redrawMarker = False
+
+
+    #
+    # Misc images
+    #
+    def initMiscImgs(self):
+        """Create some misc images (settings gear)"""
+        pilImgs = [self.loadImgPIL(url) for url in ['gear.png']]
+        pixs = [t.load() for t in pilImgs]
+
+        # Paint the scroll images
+        for i, img, pix in [(i, pilImgs[i], pixs[i]) for i in [0]]:
+            if img.mode in ['RGB', 'RGBA']:
+                w, h = img.size
+                color = self.colors.toTuple(self.colors.gear)
+                diff = [color[i] - pix[4, h // 2][i] for i in range(3)]
+                temp = []
+                for y in range(h):
+                    for x in range(w):
+                        temp = [min(255, max(0, pix[x, y][i] + diff[i])) for i in range(3)]
+                        temp.append(pix[x, y][3])
+                        pix[x, y] = tuple(temp)
+
+        # Convert the images to Tk images
+        self.gearImg = self.loadImgTk(pilImgs[0])
 
 
     #
@@ -326,13 +360,17 @@ class MainWin(Win):
         if activeWin > -1:
             self.drawTab(Pos(activeWin * w, y), self.textWins[activeWin].getTitle(), True)
 
+        # Draw options gear
+        gearOffset = 5
+        self.drawImg(Pos(self.size.w - self.gearImg.width() - gearOffset, gearOffset), self.gearImg)
+
     #
     # Scroll images
     #
     def initScrollImgs(self):
         """Create the images for the scroll bars and buttons"""
         # Load all images and their pixel maps [bg, top, middle, bottom, bg, left, middle, right, up, right, down, left]
-        pilImgs = [self.loadImgPIL(i) for i in ['scrollbg.png', 'scrolltop.png', 'scrollup.png']]
+        pilImgs = [self.loadImgPIL(url) for url in ['scrollbg.png', 'scrolltop.png', 'scrollup.png']]
         self.settings.scrollbarwidth = pilImgs[0].size[0]
         w, h = pilImgs[1].size
         sq = Image.new('RGBA', (w, h))
