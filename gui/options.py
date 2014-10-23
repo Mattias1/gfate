@@ -4,6 +4,10 @@ from mattycontrols.MattyControls import *
 from .settings import Settings, Pos, Size
 
 
+#
+# Helper classes
+#
+# The Toplevel class (this is the window that manages the tabs)
 class Options(Toplevel):
     def __init__(self, master, app, settings):
         """The options frame"""
@@ -20,10 +24,25 @@ class Options(Toplevel):
         tabHolder.add(colorFrame, text='Colours')
 
 
-class FontOptions(Frame):
+# An optionsframe with some predefined methods
+class OptionsFrame(Frame):
+    def init(self, master, optionsApp, mainApp, settings):
+        frame_init(self, master, True)
+
+        self.master = master
+        self.optionsApp = optionsApp
+        self.mainApp = mainApp
+        self.settings = settings
+        self.colors = settings.colors
+
+
+#
+# The actual frames
+#
+class FontOptions(OptionsFrame):
     def __init__(self, master, optionsApp, mainApp, settings):
         """A frame that allows you to choose a font"""
-        frame_init(self, master, True)
+        self.init(master, optionsApp, mainApp, settings)
 
         self.dbPreset = Db(self, ['Sid', 'Manny', 'Diego'], 0)
         self.dbPreset.locateInside(self, H_LEFT, V_TOP)
@@ -32,15 +51,15 @@ class FontOptions(Frame):
         self.cbNotes = Cb(self, text="Don't check this checkbox")
         self.cbNotes.locateFrom(self.dbPreset, H_COPY_LEFT, V_BOTTOM)
 
-        self.btnQuit = Btn(self, text='Quit', command=self.quit)
+        self.btnQuit = Btn(self, text='Quit', command=self.optionsApp.destroy)
         self.btnQuit.locateInside(self, H_RIGHT, V_BOTTOM)
 
 
-class ColorOptions(Frame):
+class ColorOptions(OptionsFrame):
     def __init__(self, master, optionsApp, mainApp, settings):
         """An options frame that allows you to choose a colour scheme"""
-        frame_init(self, master, True)
+        self.init(master, optionsApp, mainApp, settings)
 
-        self.btnQuit = Btn(self, text='Quit', command=self.quit)
+        self.btnQuit = Btn(self, text='Quit', command=self.optionsApp.destroy)
         self.btnQuit.locateInside(self, H_RIGHT, V_BOTTOM)
 
