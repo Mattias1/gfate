@@ -146,10 +146,7 @@ class MainWin(Win):
 
         # Hit the gear (options button)
         if btnNr == 1 and self.size.w - h < p.x < self.size.w and 0 < p.y < h:
-            print('Open the options menu.')
             self.app.showOptions()
-        elif btnNr == 1:
-            print('Misclick at {}, for w, h = {}.'.format(p, Size(self.size.w, h)))
 
         # Hit scrollbar button
         if btnNr == 1:

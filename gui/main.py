@@ -33,6 +33,8 @@ class Application(Frame):
         self.mainWindow = MainWin(settings, self)
         self.mainWindow.resize(True)
 
+        self.optionsWindow = None
+
         self.settings = settings
 
         self.master.after(int(self.settings.fps_inv * 1000), self.loop)
@@ -84,6 +86,10 @@ class Application(Frame):
         return False
 
     def onResizeMoveFocus(self, event):
+        # Don't handle event when the options window is open.
+        if self.optionsWindow:
+            return
+
         # On focus
         self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
         
@@ -122,7 +128,8 @@ class Application(Frame):
         return prefix + c
 
     def showOptions(self):
-        frame = Options(self, self.settings, self.master)
+        self.optionsWindow = Options(self.master, self, self.settings)
+        print('AFTER OPTIONS')
 
 
 def main():
