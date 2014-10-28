@@ -192,12 +192,16 @@ class MainWin(Win):
             self.activeWin.onMouseMove(p, btnNr)
     def onMouseScroll(self, p, factor):
         # Pass the event on to my active child
-        if self.activeWin.containsPos(p, True, False):
-            self.activeWin.onMouseScroll(p, factor)
+        if self.activeWin.containsPos(p, False, False):
+            self.activeWin.onMouseScroll(p, factor, not self.app.shift)
             self.redraw()
-        # So we are not in the window with vertical scroll, but we are in the window with vertical and horizontal scroll
-        elif self.activeWin.containsPos(p, True, True):
+        # So we are not in the window with scrolls, but we are in the window with horizontal scroll
+        elif self.activeWin.containsPos(p, False, True):
             self.activeWin.onMouseScroll(p, factor, False)
+            self.redraw()
+        # So we are not in the normal window with horizontal scroll, but we are in the window with horizontal and vertical scroll
+        elif self.activeWin.containsPos(p, True, False):
+            self.activeWin.onMouseScroll(p, factor, True)
             self.redraw()
     def onMouseUp(self, p, btnNr):
         # Deselect
