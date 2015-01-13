@@ -178,9 +178,7 @@ class MainWin(Win):
         # Move the tabs
         i = p.x // (self.settings.tabsize.w + self.settings.tabwidthextra)
         if i != self.selectedTab and btnNr == 1:
-            print('if 1')
             if i < len(self.textWins):
-                print('if 2')
                 self.swapTabs(i, self.selectedTab)
                 self.selectedTab = i
                 self.redraw()

@@ -19,7 +19,9 @@ class Application(Frame):
         self.canvas.bind('<Button>', self.onMouseDown)
         self.canvas.bind('<Double-Button>', self.onMouseDownDouble)
         self.canvas.bind('<Triple-Button>', self.onMouseDownTriple)
-        self.canvas.bind('<Motion>', self.onMouseMove)
+        self.canvas.bind('<B1-Motion>', self.createOnMouseMove(1))
+        self.canvas.bind('<B2-Motion>', self.createOnMouseMove(2))
+        self.canvas.bind('<B3-Motion>', self.createOnMouseMove(3))
         self.canvas.bind('<MouseWheel>', self.onMouseScroll)
         self.canvas.bind('<ButtonRelease>', self.onMouseUp)
         self.master.bind('<Key>', self.onKeyDown)
@@ -49,9 +51,8 @@ class Application(Frame):
     def onMouseDownTriple(self, event):
         self.mainWindow.onMouseDownTriple(Pos(event.x, event.y), event.num)
 
-    def onMouseMove(self, event):
-        self.mainWindow.onMouseMove(Pos(event.x, event.y), event.num)
-        print('Test - onMouseMove event.num = {}'.format(event.num))
+    def createOnMouseMove(self, btnNr):
+        return lambda event: self.mainWindow.onMouseMove(Pos(event.x, event.y), btnNr)
 
     def onMouseScroll(self, event):
         # respond to Linux or Windows wheel event
