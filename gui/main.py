@@ -19,6 +19,7 @@ class Application(Frame):
         self.canvas.bind('<Button>', self.onMouseDown)
         self.canvas.bind('<Double-Button>', self.onMouseDownDouble)
         self.canvas.bind('<Triple-Button>', self.onMouseDownTriple)
+        self.canvas.bind('<Motion>', self.createOnMouseMove(0))
         self.canvas.bind('<B1-Motion>', self.createOnMouseMove(1))
         self.canvas.bind('<B2-Motion>', self.createOnMouseMove(2))
         self.canvas.bind('<B3-Motion>', self.createOnMouseMove(3))
