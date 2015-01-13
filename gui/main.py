@@ -51,6 +51,7 @@ class Application(Frame):
 
     def onMouseMove(self, event):
         self.mainWindow.onMouseMove(Pos(event.x, event.y), event.num)
+        print('Test - onMouseMove event.num = {}'.format(event.num))
 
     def onMouseScroll(self, event):
         # respond to Linux or Windows wheel event

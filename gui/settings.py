@@ -17,7 +17,7 @@ class Settings():
         try:
             self.loadSettings('settings-default.json')
         except:
-            print('FATAL ERROR: COULD NOT LOAD SETTIGNS DEFAULTS!!!')
+            print('FATAL ERROR: COULD NOT LOAD DEFAULT SETTINGS!!!')
             raise
 
     def calcSettings(self):
@@ -76,9 +76,9 @@ class Settings():
         with suppress(KeyError):
             self.linenumbers = settings['linenumbers']
         with suppress(KeyError):
-            self.fps_inv = 1 / settings['fps']                           # seconds per frame
+            self.fps_inv = 1 / settings['fps']                                  # seconds per frame
         with suppress(KeyError):
-            self.flickercount = settings['flickertime'] // self.fps_inv  # frames per cursor flicker change
+            self.flickercount = int(settings['flickertime'] // self.fps_inv)    # frames per cursor flicker change
 
         # Calculate some settings based on loaded settings
         self.calcSettings()

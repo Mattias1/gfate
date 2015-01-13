@@ -178,7 +178,9 @@ class MainWin(Win):
         # Move the tabs
         i = p.x // (self.settings.tabsize.w + self.settings.tabwidthextra)
         if i != self.selectedTab and btnNr == 1:
+            print('if 1')
             if i < len(self.textWins):
+                print('if 2')
                 self.swapTabs(i, self.selectedTab)
                 self.selectedTab = i
                 self.redraw()
@@ -195,11 +197,11 @@ class MainWin(Win):
         if self.activeWin.containsPos(p, False, False):
             self.activeWin.onMouseScroll(p, factor, not self.app.shift)
             self.redraw()
-        # So we are not in the window with scrolls, but we are in the window with horizontal scroll
+        # So we are not in the window without scrollbars, but we are in the window with horizontal scrollbar
         elif self.activeWin.containsPos(p, False, True):
             self.activeWin.onMouseScroll(p, factor, False)
             self.redraw()
-        # So we are not in the normal window with horizontal scroll, but we are in the window with horizontal and vertical scroll
+        # So we are not in the normal window or with horizontal scrollbar, but we are in the window with vertical scrollbar
         elif self.activeWin.containsPos(p, True, False):
             self.activeWin.onMouseScroll(p, factor, True)
             self.redraw()

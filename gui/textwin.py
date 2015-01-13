@@ -57,16 +57,17 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # Adjust display offset on cursor movement
         if self.oldSelection != self.doc.selection[-1]:
             self.oldSelection = self.doc.selection[-1]
-            self.adjustWindow()
+            self.adjustWindow() # Contains redraw
             self.resetCursor()
-        # Draw commandWindow
+        # Update commandWindow
         if self.commandWin.enabled:
             self.commandWin.loop()
-        # Draw cursor
+        # Update cursor
         self.flickerCountLeft -= 1
         if self.flickerCountLeft in {0, self.settings.flickercount}:
             if self.flickerCountLeft == 0:
                 self.flickerCountLeft = self.settings.flickercount * 2
+            self.redraw()
 
     def redraw(self):
         self.app.mainWindow.redraw()
@@ -253,6 +254,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.displayOffset = off
         # Horizontal scrolling
         # TODO ...
+        self.redraw()
 
     def scrollText(self, vert, n):
         # Scroll a window vertically (or horizontally if vert is False) down n chars
