@@ -10,7 +10,7 @@ class Application(Frame):
     def __init__(self, settings, master):
         """The tkinter frame that manages the canvas and the keyboard and mouse interaction"""
         frame_init(self, master)
-        master.title("fate - test")
+        master.title('fate - test')
 
         self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
 
@@ -35,6 +35,8 @@ class Application(Frame):
 
         self.mainWindow = MainWin(settings, self)
         self.mainWindow.resize(True)
+
+        self.mainWindow.setIcon('favicon.ico')
 
         self.optionsWindow = None
 

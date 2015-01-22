@@ -92,6 +92,10 @@ class Win:
     def drawImg(self, p, img, anchor='nw'):
         self.g.create_image((self.pos + p).t, image=img, anchor=anchor)
 
+    def setIcon(self, path):
+        img = self.loadImg(path)
+        self.app.master.tk.call('wm', 'iconphoto', self.app.master._w, img)
+
     def fullClear(self):
         self.g.delete(ALL)
         self.clear(self.colors.bg)
