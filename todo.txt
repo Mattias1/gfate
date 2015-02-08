@@ -1,17 +1,26 @@
  Todo's for gfate.
--------------------
+===================
+
 Fully functional scrollbars.
 Search support.
-Linux scrollwheel support.
 Undo tree support.
 Colour scheme porting (also improve fate-core's syntax highlighting).
 Settings gui.
+Settings generate fate and gfate resource files - and open in explorer/nautilus.
+Code folding.
+
+Ubuntu:
+- Fix on resize event.
+- Scrollwheel support.
 
 
 
  Todo's for fate.
-------------------
+==================
+
 Ctrl-n en Ctrl-p: Either Ctrl-n and Ctrl-N or Ctrl-Tab and Ctrl-Shift-Tab (Ctrl-Backtab). (subject: tab switching)
 jk to <Up> and <Down>, and make j and k move the current selection just one line up or down (so no modifying the selction, just sel.y++).    likewise: v as select full line.  (subject: guitar tab editing)
 Ctrl-a instead of A. (subject: support windows notepad defaults)
+
+Code folding.
 
