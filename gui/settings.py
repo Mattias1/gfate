@@ -36,7 +36,7 @@ class Settings():
         """Load all the settings from json file"""
         path = expanduser('~') + '/.fate/gfate/settings.json'
         self.loadSettings(path)
-    
+
     def loadSettings(self, path):
         # IO magic here
         try:

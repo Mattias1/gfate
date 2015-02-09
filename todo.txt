@@ -23,4 +23,5 @@ jk to <Up> and <Down>, and make j and k move the current selection just one line
 Ctrl-a instead of A. (subject: support windows notepad defaults)
 
 Code folding.
+Cross platform line endings
 
