@@ -25,26 +25,18 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.flickerCountLeft = 0
         self.oldSelection = self.doc.selection[-1]
         self.textOffset = Pos(6, 4)     # Margin for the text in px (so that it doesn't hug the borders)
-        self.displayOffset = Pos(0, 0)  # The character with this pos (col, row) is the first one to be drawn (so it's in the top left of the text win)
-        self.displayIndex = 0           # The index of the above character in the self.doc.text string
+        self._displayOffset = Pos(0, 0) # The character with this pos (col, row) is the first one to be drawn (so it's in the top left of the text win)
+        self._displayIndex = 0          # The index of the above character in the self.doc.text string
         self.textRange = Size(0, 0)     # The amount of letters that fit in the screen
         self.nrOfLines = 0              # The total number of lines (ie. newline chars) in self.doc.text
 
     @property
     def displayOffset(self):
         return self._displayOffset
-    @displayOffset.setter
-    def displayOffset(self, value):
-        self._displayOffset = Pos(value)
-        self._displayIndex = self.getCharFromCoord(self._displayOffset)
 
     @property
     def displayIndex(self):
         return self._displayIndex
-    @displayIndex.setter
-    def displayIndex(self, value):
-        self._displayIndex = value
-        self._displayOffset = self.getCoordFromChar(value)
 
     @property
     def cursorRange(self):
@@ -145,13 +137,13 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def drawText(self, text, labeling, lineNrW):
         """Draw the part of the text that should appear on the screen"""
         settings, colors = self.settings, self.colors
-        w, h = settings.userfontsize.t # The size of one character
+        w, h = settings.userfontsize.t      # The size of one character
         i = self.displayIndex               # The index of the character currently being processed
         x, y = (0, 0)                       # The coordinates of that char (relative to screen)
         maxLength = len(self.doc.text)      # The amount of letters in a text (used as stop criterium)
         # The length of a linenumber - Can't deal with OSX line endings or word wrap (TODO !)
         while True:
-            length = 0                      # The length of the interval currently being processed
+            length = 0                      # The length of the interval currently being processed (nr of characters)
             label = '' if not i in self.doc.labeling else self.doc.labeling[i]  # The current label
 
             # Draw a text interval with the same label
@@ -176,14 +168,14 @@ class TextWin(Win, fate.userinterface.UserInterface):
                 # Now skip the first "displayOffset.x'th" characters (except with newline chars)
                 for j in range(self.displayOffset.x + 1):
                     i += 1
-                    if i == maxLength or self.doc.text[i] == '\n':
+                    if i >= maxLength or self.doc.text[i] == '\n':
                         break
             else:
                 x += length
 
     def drawScrollbars(self):
         """Draw the scroll bars"""
-        # [bg, top, middle, bottom, bg, left, middle, right, up, right, down, left]           
+        # [bg, top, middle, bottom, bg, left, middle, right, up, right, down, left]
         scrollImgs = self.app.mainWindow.scrollImgs
         imgBgV, imgTop, imgMidV, imgBottom, imgBgH, imgLeft, imgMidH, imgRight, imgN, imgE, imgS, imgW = scrollImgs
         vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
@@ -383,6 +375,19 @@ class TextWin(Win, fate.userinterface.UserInterface):
         while not self.inputqueue:
             sleep(self.settings.fps_inv)
         return self.inputqueue.popleft()
+    @property
+    def viewport_size(self):
+        return self.textRange.t
+
+    @property
+    def viewport_offset(self):
+        return self._displayOffset.y
+
+    @viewport_offset.setter
+    def viewport_offset(self, value):
+        self._displayOffset.y = value
+        self._displayIndex = self.getCharFromCoord(self._displayOffset)
+        self.redraw()
 
     #
     # Some event handlers

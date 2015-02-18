@@ -97,7 +97,7 @@ class Application(Frame):
 
         # On focus
         self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
-        
+
         # On resize
         s = Size(event.width, event.height)
         if s != self.settings.size:

@@ -8,6 +8,8 @@ Colour scheme porting (also improve fate-core's syntax highlighting).
 Settings gui.
 Settings generate fate and gfate resource files - and open in explorer/nautilus.
 Code folding.
+Drag/drop files.
+Tabs + listchars (tab display & trailing space display).
 
 Ubuntu:
 - Fix on resize event.
@@ -24,4 +26,8 @@ Ctrl-a instead of A. (subject: support windows notepad defaults)
 
 Code folding.
 Cross platform line endings
+vims 'r' command
+empty lines (with spaces)
+backspace on tab/'4 spaces'
+Tabs vs spaces
 
