@@ -33,4 +33,5 @@ Moving up or down over empty line should preserve original index in line.
 Tabs + listchars (tab display & trailing space display).
 O and o reversed?
 undo to saved undo part should remove the * in the name?
+Crash when input is not in keymap
 

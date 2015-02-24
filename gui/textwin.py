@@ -50,7 +50,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def loop(self):
         # Update some stats for fast access
         if self.app.mainWindow.redrawMarker:
+            oldNrOfLines = self.nrOfLines
             self.nrOfLines = self.doc.text.count('\n')
+            if self.nrOfLines != oldNrOfLines:
+                self.app.mainWindow.updateScrollImgs()
         # Adjust display offset on cursor movement
         if self.oldSelection != self.doc.selection[-1]:
             self.oldSelection = self.doc.selection[-1]

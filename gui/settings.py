@@ -56,10 +56,6 @@ class Settings():
         with suppress(KeyError):
             self.commandsize = Size(settings['commandwindowsize'][0], settings['commandwindowsize'][1])
         with suppress(KeyError):
-            self.cursormargin = Size(settings['cursormargin'][0], settings['cursormargin'][1])
-        with suppress(KeyError):
-            self.scrolllines = settings['scrolllines']
-        with suppress(KeyError):
             self.uifont = (settings['uifont']['family'], settings['uifont']['size'])
         with suppress(KeyError):
             self.userfont = (settings['userfont']['family'], settings['userfont']['size'])
@@ -72,9 +68,11 @@ class Settings():
         with suppress(KeyError):
             self.statuswinenabled = settings['statuswinenabled']
         with suppress(KeyError):
+            self.scrolllines = settings['scrolllines']
+        with suppress(KeyError):
             self.scrollbars = settings['scrollbars']
         with suppress(KeyError):
-            self.scrollwidth = settings['scrollwidth']
+            self.minimumscrollbarsize = settings['minimumscrollbarsize']
         with suppress(KeyError):
             self.linenumbers = settings['linenumbers']
         with suppress(KeyError):

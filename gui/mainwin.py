@@ -22,6 +22,7 @@ class MainWin(Win):
         self.selectedScrollbar = -1 # Mark the scrollbar that is selected while a mousekey is down (1=vert, 2=hor)
         self.tabImgs = None
         self.scrollImgs = None
+        self.scrollImgsPil = None
         self.gearImg = None
         self.mouseDownStartPos = Pos(-1, -1)
         self.redrawMarker = False
@@ -54,6 +55,7 @@ class MainWin(Win):
         for win in self.textWins:
             win.disable()
         newWin.enable()
+        self.updateScrollImgs()
         self.redraw()
         newWin.loop()
 
@@ -238,12 +240,12 @@ class MainWin(Win):
         """Override the resize window"""
         self.size = self.settings.size
 
+        for win in self.textWins:
+            win.resize(False)
+
         self.initMiscImgs()
         self.initTabImgs()
         self.initScrollImgs()
-
-        for win in self.textWins:
-            win.resize(False)
 
         if redraw:
             self.redraw()
@@ -423,9 +425,9 @@ class MainWin(Win):
         otherBarExtra = self.settings.scrollbarwidth if self.settings.scrollbars == 'both' else 0
         statusExtra = self.settings.statusheight if self.settings.statuswinenabled else 0
         pilImgs[0] = pilImgs[0].resize((self.settings.scrollbarwidth, self.settings.size.h - self.settings.tabsize.h - otherBarExtra - statusExtra), Image.NEAREST)
-        pilImgs[2] = pilImgs[2].resize((w, 100), Image.NEAREST)
         pilImgs[4] = pilImgs[4].resize((self.settings.size.w - otherBarExtra, self.settings.scrollbarwidth), Image.NEAREST)
-        pilImgs[6] = pilImgs[6].resize((100, h), Image.NEAREST)
+        self.scrollImgsPil = [pilImgs[i] for i in [2, 6]]
+        self.updateScrollImgs()
 
         # Create the E, S, W images
         for y in range(h):
@@ -434,6 +436,20 @@ class MainWin(Win):
                 pixS[x, y] = pixN[x, h - 1 - y]
                 pixW[x, y] = pixN[y, x]
 
-        # Convert the images to Tk images
+        # Convert the images to Tk images and save the original for the middle images
         self.scrollImgs = [self.loadImgTk(img) for img in pilImgs]
+
+    def updateScrollImgs(self):
+        """Update the images for the moving part of the scroll bars"""
+        # Resize the middle images (2 and 6 in [bg, top, middle, bottom, bg, left, middle, right, up, right, down, left])
+        w = self.scrollImgsPil[0].size[0]
+        win = self.activeWin
+        if not win:
+            return
+        h1 = win.size.h * win.textRange.h // (win.textRange.h + win.nrOfLines)
+        h2 = win.size.w * win.textRange.w // (win.textRange.w + 50) # TODO: use self.maxNrOfCharsOnALine
+        h1, h2 = max(self.settings.minimumscrollbarsize, h1), max(self.settings.minimumscrollbarsize, h2)
+        for i, j in enumerate([2, 6]):
+            self.scrollImgsPil[i] = self.scrollImgsPil[i].resize([(w, h1), (h2, w)][i], Image.NEAREST)
+            self.scrollImgs[j] = self.loadImgTk(self.scrollImgsPil[i])
 
