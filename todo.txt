@@ -30,4 +30,5 @@ vims 'r' command
 empty lines (with spaces)
 backspace on tab/'4 spaces'
 Tabs vs spaces
+Moving up or down over empty line preserves index in line.
 

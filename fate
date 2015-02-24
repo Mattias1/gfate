@@ -5,7 +5,9 @@ import os
 import sys
 
 libs_path = os.path.dirname(os.path.abspath(__file__)) + '/libs/'
+libs_path_fate = os.path.dirname(os.path.abspath(__file__)) + '/libs/fate/'
 sys.path.insert(0, libs_path)
+sys.path.insert(0, libs_path_fate)
 
 # Make sure fate can be imported anywhere (also from the user script).
 # This way we can:

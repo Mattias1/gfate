@@ -49,8 +49,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         # Adjust display offset on cursor movement
         if self.oldSelection != self.doc.selection[-1]:
             self.oldSelection = self.doc.selection[-1]
-            self.adjustWindow() # Contains redraw
             self.resetCursor()
+            self.redraw()
         # Update commandWindow
         if self.commandWin.enabled:
             self.commandWin.loop()
@@ -228,33 +228,13 @@ class TextWin(Win, fate.userinterface.UserInterface):
         ratio = self.displayOffset.x / 50 # self.nrOfLines # TODO: use self.maxNrOfCharsOnALine
         return int(ratio * (w - img.width() - 2 * barW)) + barW + padding
 
-    def adjustWindow(self):
-        """Adjust the window so that the cursor is in the allowed range"""
-        (b, e) = self.oldSelection
-        bx, by = self.getCoordFromChar(b).t
-        ex, ey = self.getCoordFromChar(e, b, (bx, by)).t
-        off = self.displayOffset
-        # Vertical scrolling
-        aim = off.y + self.settings.cursormargin.h
-        if by < aim:
-            off.y -= aim - by
-            off.y = max(0, off.y)
-            self.displayOffset = off
-        aim = off.y + self.settings.cursormargin.h + self.cursorRange.h
-        if ey > aim:
-            off.y += ey - aim
-            self.displayOffset = off
-        # Horizontal scrolling
-        # TODO ...
-        self.redraw()
-
     def scrollText(self, vert, n):
         # Scroll a window vertically (or horizontally if vert is False) down n chars
         if vert:
             maxLines = self.doc.text.count('\n') # Can't deal with OSX line endings or word wrap (TODO !)
             self.displayOffset = (self.displayOffset.x, min(maxLines, max(0, self.displayOffset.y + n)))
         else:
-            maxChars = 50 # TODO: vertical scroll check?
+            maxChars = 50 # TODO: use self.maxNrOfCharsOnALine
             self.displayOffset = (min(maxChars, max(0, self.displayOffset.x + n)), self.displayOffset.y)
 
     def getTitle(self):
@@ -377,16 +357,17 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return self.inputqueue.popleft()
     @property
     def viewport_size(self):
+        print("Viewport size: {}".format(self.textRange))
         return self.textRange.t
 
     @property
     def viewport_offset(self):
-        return self._displayOffset.y
+        return self._displayIndex
 
     @viewport_offset.setter
     def viewport_offset(self, value):
-        self._displayOffset.y = value
-        self._displayIndex = self.getCharFromCoord(self._displayOffset)
+        self._displayIndex = value
+        self._displayOffset = self.getCoordFromChar(value)
         self.redraw()
 
     #
