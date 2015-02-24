@@ -11,6 +11,7 @@
     "userfont" : { "family" : "Courier new", "size" : 10 },
     "tabsize" : [110, 36],
     "tabwidthextra" : 30,
+    "tabname" : "filename",
     "statuswinenabled" : true,
     "scrollbars" : "both",
     "scrollwidth" : 12,

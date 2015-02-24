@@ -363,7 +363,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return self.inputqueue.popleft()
     @property
     def viewport_size(self):
-        print("Viewport size: {}".format(self.textRange))
         return self.textRange.t
 
     @property

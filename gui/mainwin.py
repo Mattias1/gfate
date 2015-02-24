@@ -1,3 +1,4 @@
+import os
 from .win import *
 from .colors import *
 from .textwin import TextWin
@@ -102,11 +103,11 @@ class MainWin(Win):
                 elif p.y <= y + h - barW:
                     posY = self.activeWin.calcScrollbarPos(True) + self.activeWin.pos.y
                     if p.y < posY:
-                        print('page up')
+                        self.queue.append(fate.commands.pageup)
                     elif p.y > posY + self.scrollImgs[2].height() + 2 * self.scrollImgs[2].width():
-                        print('page down')
+                        self.queue.append(fate.commands.pagedown)
                     else:
-                        print('drag')
+                        print('todo: drag')
                         self.selectedScrollbar = 1
                 # The down button
                 else:
@@ -345,6 +346,10 @@ class MainWin(Win):
         if y < 0:
             self.settings.tabsize.h = h
             y = 0
+        # How to handle file names
+        tabname = lambda name: name
+        if self.settings.tabname == 'filename':
+            tabname = lambda name: os.path.basename(name)
         # Draw tab background
         w = self.settings.tabsize.w + self.settings.tabwidthextra
         self.drawRect(self.colors.tabbg, Pos(0, 0), Pos(self.size.w, y + h))
@@ -354,12 +359,12 @@ class MainWin(Win):
             if win.enabled:
                 activeWin = i
             else:
-                self.drawTab(Pos(i * w, y), win.getTitle())
+                self.drawTab(Pos(i * w, y), tabname(win.getTitle()))
         # Draw tab bottom
         self.drawImg(Pos(0, y), self.tabImgs[6])
         # Draw the active tab
         if activeWin > -1:
-            self.drawTab(Pos(activeWin * w, y), self.textWins[activeWin].getTitle(), True)
+            self.drawTab(Pos(activeWin * w, y), tabname(self.textWins[activeWin].getTitle()), True)
 
         # Draw options gear
         gearOffset = 5

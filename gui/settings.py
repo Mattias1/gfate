@@ -68,6 +68,8 @@ class Settings():
         with suppress(KeyError):
             self.tabwidthextra = settings['tabwidthextra']
         with suppress(KeyError):
+            self.tabname = settings['tabname']
+        with suppress(KeyError):
             self.statuswinenabled = settings['statuswinenabled']
         with suppress(KeyError):
             self.scrollbars = settings['scrollbars']
