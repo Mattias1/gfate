@@ -282,7 +282,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.size = self.settings.size - (0, self.settings.tabsize.h) - scrollSize - statusSize
         w, h = self.settings.userfontsize.t # The size of one character
         s = self.size - self.textOffset
-        self.textRange = Size(s.w // w, s.h // h)
+        lineNrWidth = self.calcLineNumberWidth(w)
+        self.textRange = Size((s.w - lineNrWidth) // w, s.h // h)
         self.commandWin.resize(False)
         self.statusWin.resize(False)
 
