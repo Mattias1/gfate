@@ -33,6 +33,11 @@ class TextWin(Win, fate.userinterface.UserInterface):
     @property
     def displayOffset(self):
         return self._displayOffset
+    @displayOffset.setter
+    def displayOffset(self, value):
+        self._displayOffset = Pos(value)
+        self._displayIndex = self.getCharFromCoord(self._displayOffset)
+        self.redraw()
 
     @property
     def displayIndex(self):
