@@ -9,7 +9,7 @@ Settings gui.
 Settings generate fate and gfate resource files - and open in explorer/nautilus.
 Code folding.
 Drag/drop files.
-Tabs + listchars (tab display & trailing space display).
+Fix crash when it's resized too small.
 
 Ubuntu:
 - Fix on resize event.
@@ -20,9 +20,8 @@ Ubuntu:
  Todo's for fate.
 ==================
 
-Ctrl-n en Ctrl-p: Either Ctrl-n and Ctrl-N or Ctrl-Tab and Ctrl-Shift-Tab (Ctrl-Backtab). (subject: tab switching)
-jk to <Up> and <Down>, and make j and k move the current selection just one line up or down (so no modifying the selction, just sel.y++).    likewise: v as select full line.  (subject: guitar tab editing)
-Ctrl-a instead of A. (subject: support windows notepad defaults)
+Ctrl-n en Ctrl-p: Ctrl-Tab and Ctrl-Shift-Tab (Ctrl-Backtab). (subject: tab switching)
+PageUp and PageDown buttons don't work (Ctrl-b and Ctrl-f do, so why not add something for the page up and down buttons as well?)
 
 Code folding.
 Cross platform line endings
@@ -30,5 +29,8 @@ vims 'r' command
 empty lines (with spaces)
 backspace on tab/'4 spaces'
 Tabs vs spaces
-Moving up or down over empty line preserves index in line.
+Moving up or down over empty line should preserve original index in line.
+Tabs + listchars (tab display & trailing space display).
+O and o reversed?
+undo to saved undo part should remove the * in the name?
 
