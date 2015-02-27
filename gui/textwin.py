@@ -185,6 +185,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
         """Draw the scroll bars"""
         # [bg, top, middle, bottom, bg, left, middle, right, up, right, down, left]
         scrollImgs = self.app.mainWindow.scrollImgs
+        if self.app.mainWindow.updatedScrollImages:
+            for i, j in enumerate([2, 6]):
+                scrollImgs[j] = self.loadImgTk(self.app.mainWindow.scrollImgsPil[i])
+            self.updatedScrollImages = False
         imgBgV, imgTop, imgMidV, imgBottom, imgBgH, imgLeft, imgMidH, imgRight, imgN, imgE, imgS, imgW = scrollImgs
         vert, hor = self.settings.scrollbars in {'both', 'vertical'}, self.settings.scrollbars in {'both', 'horizontal'}
         barW = imgTop.width()

@@ -26,6 +26,7 @@ class MainWin(Win):
         self.gearImg = None
         self.mouseDownStartPos = Pos(-1, -1)
         self.redrawMarker = False
+        self.updatedScrollImages = False
 
         self.textWins = []
         self.docList = fate.document.documentlist
@@ -448,8 +449,8 @@ class MainWin(Win):
             return
         h1 = win.size.h * win.textRange.h // (win.textRange.h + win.nrOfLines)
         h2 = win.size.w * win.textRange.w // (win.textRange.w + 50) # TODO: use self.maxNrOfCharsOnALine
-        h1, h2 = max(self.settings.minimumscrollbarsize, h1), max(self.settings.minimumscrollbarsize, h2)
-        for i, j in enumerate([2, 6]):
-            self.scrollImgsPil[i] = self.scrollImgsPil[i].resize([(w, h1), (h2, w)][i], Image.NEAREST)
-            self.scrollImgs[j] = self.loadImgTk(self.scrollImgsPil[i])
+        h1, h2 = [max(self.settings.minimumscrollbarsize, h) for h in [h1, h2]]
+        self.scrollImgsPil[0] = self.scrollImgsPil[0].resize((w, h1), Image.NEAREST)
+        self.scrollImgsPil[1] = self.scrollImgsPil[1].resize((h2, w), Image.NEAREST)
+        self.updatedScrollImages = True
 
