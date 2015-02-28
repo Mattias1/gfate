@@ -1,5 +1,6 @@
 from .win import *
 from .commandwin import CommandWin
+from .errorwin import ErrorWin
 from .statuswin import StatusWin
 from .colors import *
 from time import sleep
@@ -17,6 +18,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         fate.userinterface.UserInterface.__init__(self, doc)
 
         self.commandWin = CommandWin(settings, app, doc, self)
+        self.errorWin = ErrorWin(settings, app, doc, self)
         self.statusWin = StatusWin(settings, app, doc, self)
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
@@ -59,9 +61,10 @@ class TextWin(Win, fate.userinterface.UserInterface):
             self.oldSelection = self.doc.selection[-1]
             self.resetCursor()
             self.redraw()
-        # Update commandWindow
+        # Update commandWindow and errorWindow (the latter even when not active)
         if self.commandWin.enabled:
             self.commandWin.loop()
+        self.errorWin.loop()
         # Update cursor
         self.flickerCountLeft -= 1
         if self.flickerCountLeft in {0, self.settings.flickercount}:
@@ -105,9 +108,11 @@ class TextWin(Win, fate.userinterface.UserInterface):
         if self.settings.statuswinenabled:
             self.statusWin.draw(selectionstext)
 
-        # Draw commandWin
+        # Draw commandWin and errorWin
         if self.commandWin.enabled:
             self.commandWin.draw()
+        if self.errorWin.enabled:
+            self.errorWin.draw()
 
     def drawCursor(self, cx, cy, lineNrW):
         """Draw a single cursor (that is, an empty selection)"""
@@ -275,6 +280,8 @@ class TextWin(Win, fate.userinterface.UserInterface):
     def onKeyDown(self, c):
         if self.commandWin.enabled:
             self.commandWin.onKeyDown(c)
+        if self.errorWin.enabled:
+            self.errorWin.onKeyDown(c)
 
     def onMouseScroll(self, p, factor, scrollVertical = True):
         self.scrollText(scrollVertical, self.settings.scrolllines * factor)
@@ -292,6 +299,7 @@ class TextWin(Win, fate.userinterface.UserInterface):
         lineNrWidth = self.calcLineNumberWidth(w)
         self.textRange = Size((s.w - lineNrWidth) // w, s.h // h)
         self.commandWin.resize(False)
+        self.errorWin.resize(False)
         self.statusWin.resize(False)
 
     def enable(self):
