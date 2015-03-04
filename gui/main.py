@@ -24,6 +24,8 @@ class Application(Frame):
         self.canvas.bind('<B2-Motion>', self.createOnMouseMove(2))
         self.canvas.bind('<B3-Motion>', self.createOnMouseMove(3))
         self.canvas.bind('<MouseWheel>', self.onMouseScroll)
+        self.canvas.bind('<4>', self.onMouseScroll) # Ubuntu scroll up - TODO TEST ON WINDOWS
+        self.canvas.bind('<5>', self.onMouseScroll) # Ubuntu scroll down - TODO TEST ON WINDOWS
         self.canvas.bind('<ButtonRelease>', self.onMouseUp)
         self.master.bind('<Key>', self.onKeyDown)
         self.master.bind('<KeyRelease>', self.onKeyUp)
