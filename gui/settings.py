@@ -68,6 +68,8 @@ class Settings():
         with suppress(KeyError):
             self.statuswinenabled = settings['statuswinenabled']
         with suppress(KeyError):
+            self.maxerrorlines = settings['maxerrorlines']
+        with suppress(KeyError):
             self.scrolllines = settings['scrolllines']
         with suppress(KeyError):
             self.scrollbars = settings['scrollbars']

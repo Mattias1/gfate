@@ -14,16 +14,15 @@ class ErrorWin(Win):
         Win.__init__(self, settings, app, Pos(0, 0))
         self.doc = doc
         self.win = win
-        # self.disable()
+        self.disable()
 
     def draw(self):
         self.clear(self.colors.tabbg)
         w, h = self.settings.userfontsize.t
-        textOffset = Pos(10, 12 + h)
 
         # Draw title
         self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), 0)
-        self.drawUIString("Error list", self.colors.text, Pos(0, 2))
+        self.drawUIString("Error list", self.colors.text, Pos(self.win.textOffset.x, 2))
         self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), h + 4)
 
         # Draw errors
@@ -36,14 +35,20 @@ class ErrorWin(Win):
         # We only want to be enabled if errormode is active.
         if isinstance(self.doc.mode, ErrorMode) and not self.enabled:
             self.enable()
+            self.resize(False)
         if not isinstance(self.doc.mode, ErrorMode) and self.enabled:
-            # self.disable()
-            pass
+            self.disable()
 
     def resize(self, draw=True):
         """Override the resize window"""
         assert draw == False
         s = self.settings
-        self.size = s.commandsize
-        self.pos = Pos(max(0, (s.size.w - s.commandsize.w) // 2), s.tabsize.h)
+        try:
+            height = min(1, min(s.maxerrorlines, len(self.doc.errorlist)))
+        except:
+            height = 1
+        height = (height + 1) * s.uifontsize.h + 5
+        self.size = Size(self.win.size.w, height)
+        scrollOffset = self.settings.scrollbarwidth if self.settings.scrollbars in {'both', 'horizontal'} else 0
+        self.pos = Pos(0, self.win.size.h + self.win.pos.y - scrollOffset - height)
 

@@ -132,6 +132,10 @@ class Application(Frame):
         elif num == 65289: c = 'Backtab' if self.shift else '\t'
         elif num == 65549: c = 'Capslock'
 
+        # Name the F-keys to 'F(#)', not sure why though (e.keysym gives me F1 - F12).
+        if 65470 <= num <= 65481:
+            c = 'F({})'.format(num - 65469)
+
         return prefix + c
 
     def showOptions(self):

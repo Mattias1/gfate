@@ -11,6 +11,7 @@
     "tabwidthextra" : 30,
     "tabname" : "filename",
     "statuswinenabled" : true,
+    "maxerrorlines" : 5,
     "scrolllines": 3,
     "scrollbars" : "both",
     "minimumscrollbarsize" : 50,
