@@ -181,7 +181,7 @@ class MainWin(Win):
     def onMouseMove(self, p, btnNr):
         # Move the tabs
         i = p.x // (self.settings.tabsize.w + self.settings.tabwidthextra)
-        if i != self.selectedTab and btnNr == 1:
+        if self.selectedTab != -1 and i != self.selectedTab and btnNr == 1:
             if i < len(self.textWins):
                 self.swapTabs(i, self.selectedTab)
                 self.selectedTab = i
