@@ -13,7 +13,6 @@ Fix crash when it's resized too small.
 
 Ubuntu:
 - Fix on resize event.
-- Scrollwheel support.
 
 
 
@@ -34,4 +33,5 @@ Tabs + listchars (tab display & trailing space display).
 O and o reversed?
 undo to saved undo part should remove the * in the name?
 Crash when input is not in keymap
+Auto scrolling when moving up or down scrolls (way) too early.
 
