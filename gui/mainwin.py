@@ -34,14 +34,14 @@ class MainWin(Win):
     @property
     def activeWin(self):
         try:
-            if fate.document.activedocument.ui:
-                return fate.document.activedocument.ui
+            if fate.document.activedocument.ui.win:
+                return fate.document.activedocument.ui.win
         except:
             return None
 
     @property
     def queue(self):
-        return self.activeWin.inputqueue
+        return self.activeWin.api.inputqueue
 
     def addWin(self, doc):
         """Open a new file"""

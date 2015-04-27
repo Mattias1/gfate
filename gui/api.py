@@ -1,4 +1,5 @@
 import fate.userinterface
+from time import sleep
 
 class API(fate.userinterface.UserInterfaceAPI):
     """
@@ -13,7 +14,7 @@ class API(fate.userinterface.UserInterfaceAPI):
     #
     def touch(self):
         # This method is called from a different thread (the one fate runs in)
-        self.redraw()
+        self.win.redraw()
 
     def notify(self, message):
         # This method is called from a different thread (the one fate runs in)
@@ -23,21 +24,21 @@ class API(fate.userinterface.UserInterfaceAPI):
         # This method is called from a different thread (the one fate runs in)
         # Block untill you have something
         while not self.inputqueue:
-            sleep(self.settings.fps_inv)
+            sleep(self.win.settings.fps_inv)
         return self.inputqueue.popleft()
     @property
     def viewport_size(self):
-        return self.textRange.t
+        return self.win.textRange.t
 
     @property
     def viewport_offset(self):
-        return self._displayIndex
+        return self.win._displayIndex
 
     @viewport_offset.setter
     def viewport_offset(self, value):
-        self._displayIndex = value
-        self._displayOffset = self.getCoordFromChar(value)
-        self.redraw()
+        self.win._displayIndex = value
+        self.win._displayOffset = self.win.getCoordFromChar(value)
+        self.win.redraw()
 
     #
     # Implement UI commands

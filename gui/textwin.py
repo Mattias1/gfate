@@ -4,8 +4,8 @@ from .errorwin import ErrorWin
 from .statuswin import StatusWin
 from .api import *
 from .colors import *
-from time import sleep
 import fate.userinterface
+import fate.navigation
 
 
 class TextWin(Win):
@@ -100,7 +100,7 @@ class TextWin(Win):
                     self.drawCursor(ex, ey, lineNrW)
 
         # Draw text
-        self.drawText(self.doc.text, self.doc.labeling, lineNrW)
+        self.drawText(self.doc.text, self.doc.highlighting, lineNrW)
 
         # Draw scrollbars
         self.drawScrollbars()
@@ -148,7 +148,7 @@ class TextWin(Win):
             i += 1
         raise Exception('Character at end of selection not found')
 
-    def drawText(self, text, labeling, lineNrW):
+    def drawText(self, text, highlighting, lineNrW):
         """Draw the part of the text that should appear on the screen"""
         settings, colors = self.settings, self.colors
         w, h = settings.userfontsize.t      # The size of one character
@@ -158,12 +158,12 @@ class TextWin(Win):
         # The length of a linenumber - Can't deal with OSX line endings or word wrap (TODO !)
         while True:
             length = 0                      # The length of the interval currently being processed (nr of characters)
-            label = '' if not i in self.doc.labeling else self.doc.labeling[i]  # The current label
+            label = '' if not i in self.doc.highlighting else self.doc.highlighting[i]  # The current label
 
             # Draw a text interval with the same label
             # Can't deal with OSX line endings or word wrap (TODO !)
             while i < maxLength:
-                tempLabel = '' if not i in self.doc.labeling else self.doc.labeling[i]
+                tempLabel = '' if not i in self.doc.highlighting else self.doc.highlighting[i]
                 if tempLabel != label or self.doc.text[i] == '\n':
                     break
                 length += 1
@@ -310,45 +310,14 @@ class TextWin(Win):
     #
     # Some helper methods
     #
-    def getCoordFromChar(self, n, start=0, startPosTuple=(0, 0)):
-        """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
-        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
-        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
-        x, y = startPosTuple
-        text = self.doc.text
-        for i in range(start, n):
-            c = text[i]
-            x += 1
-            if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
-                y += 1
-                x = 0
-        return Pos(x, y)
+    def getCoordFromChar(self, n):
+        if n == 0:
+            return Pos(0, 0)
+        return Pos(fate.navigation.position_to_coord(n, self.doc.text))
 
-    def getCharFromCoord(self, p):
+    def getCharFromCoord(self, p, crop=False):
         """Return character index from the (x, y) coordinates. This is a truly terrible method."""
-        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
-        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
-        i = 0
-        w, h = self.settings.userfontsize.t
-        offset = self.pos + self.textOffset
-        x, y = p.t
-        cx, cy = 0, 0
-        text = self.doc.text
-        try:
-            while cy < y:
-                c = text[i]
-                if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
-                    cy += 1
-                i += 1
-            while cx < x:
-                cx += 1
-                c = text[i]
-                if c == '\n':
-                    return i
-                i += 1
-            return i
-        except:
-            return i
+        return Pos(fate.navigation.coord_to_position(p.y, p.x, self.doc.text, crop))
 
     def getCharFromPixelCoord(self, p):
         """Return character index from the (x, y) coordinates (in pixels). This is a truly terrible method."""
