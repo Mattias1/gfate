@@ -50,7 +50,7 @@ class MainWin(Win):
         win = TextWin(self.settings, self.app, doc)
         self.textWins.append(win)
         win.resize(False)
-        return win
+        return win.api
 
     def enableTab(self, newWin):
         for win in self.textWins:

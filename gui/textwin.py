@@ -2,12 +2,13 @@ from .win import *
 from .commandwin import CommandWin
 from .errorwin import ErrorWin
 from .statuswin import StatusWin
+from .api import *
 from .colors import *
 from time import sleep
 import fate.userinterface
 
 
-class TextWin(Win, fate.userinterface.UserInterface):
+class TextWin(Win):
     """
     The text window class
     This class represents the window for a single file.
@@ -15,11 +16,11 @@ class TextWin(Win, fate.userinterface.UserInterface):
 
     def __init__(self, settings, app, doc):
         Win.__init__(self, settings, app, Pos(0, settings.tabsize.h))
-        fate.userinterface.UserInterface.__init__(self, doc)
 
         self.commandWin = CommandWin(settings, app, doc, self)
         self.errorWin = ErrorWin(settings, app, doc, self)
         self.statusWin = StatusWin(settings, app, doc, self)
+        self.api = API(doc, self)
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
         self.doc.OnActivate.add(self.onActivate)
@@ -360,37 +361,6 @@ class TextWin(Win, fate.userinterface.UserInterface):
         return self.getCharFromCoord(Pos(x, y))
 
     #
-    # Implement UserInterface methods
-    #
-    def touch(self):
-        # This method is called from a different thread (the one fate runs in)
-        self.redraw()
-
-    def notify(self, message):
-        # This method is called from a different thread (the one fate runs in)
-        raise NotImplementedError()
-
-    def _getuserinput(self):
-        # This method is called from a different thread (the one fate runs in)
-        # Block untill you have something
-        while not self.inputqueue:
-            sleep(self.settings.fps_inv)
-        return self.inputqueue.popleft()
-    @property
-    def viewport_size(self):
-        return self.textRange.t
-
-    @property
-    def viewport_offset(self):
-        return self._displayIndex
-
-    @viewport_offset.setter
-    def viewport_offset(self, value):
-        self._displayIndex = value
-        self._displayOffset = self.getCoordFromChar(value)
-        self.redraw()
-
-    #
     # Some event handlers
     #
     def onQuit(self, doc):
@@ -398,18 +368,11 @@ class TextWin(Win, fate.userinterface.UserInterface):
         self.app.mainWindow.closeTab(fate.document.documentlist.index(doc))
 
     def onActivate(self, doc):
-        self.app.mainWindow.enableTab(doc.ui)
+        self.app.mainWindow.enableTab(doc.ui.win)
 
     def onPrompt(self, doc):
         if 'Prompt' in str(self.doc.mode) and not self.commandWin.enabled:
             self.commandWin.enable()
         if 'Prompt' not in str(self.doc.mode) and self.commandWin.enabled:
             self.commandWin.disable()
-
-    #
-    # Implement UI commands
-    #
-    def command_mode(self, command_string=':'):
-        # This method is called from a different thread (the one fate runs in)
-        raise NotImplementedError()
 

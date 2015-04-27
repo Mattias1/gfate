@@ -34,4 +34,5 @@ O and o reversed?
 undo to saved undo part should remove the * in the name?
 Crash when input is not in keymap
 Auto scrolling when moving up or down scrolls (way) too early.
+Ctrl-Down (or J) means End, and Ctrl-Up (or K) means Home?
 
