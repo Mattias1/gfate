@@ -317,7 +317,7 @@ class TextWin(Win):
 
     def getCharFromCoord(self, p, crop=False):
         """Return character index from the (x, y) coordinates. This is a truly terrible method."""
-        return Pos(fate.navigation.coord_to_position(p.y, p.x, self.doc.text, crop))
+        return fate.navigation.coord_to_position(p.y, p.x, self.doc.text, crop)
 
     def getCharFromPixelCoord(self, p):
         """Return character index from the (x, y) coordinates (in pixels). This is a truly terrible method."""

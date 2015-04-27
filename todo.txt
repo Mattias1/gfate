@@ -10,6 +10,8 @@ Settings generate fate and gfate resource files - and open in explorer/nautilus.
 Code folding.
 Drag/drop files.
 Fix crash when it's resized too small.
+Bugfix mouse clicks (position to coord and vice versa are not that reliable)
+Use fates view file (get rid of most pos_to_coord calls and fixes the currently terrible selection displays :P)
 
 Ubuntu:
 - Fix on resize event.
