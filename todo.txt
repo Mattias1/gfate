@@ -23,7 +23,10 @@ Ubuntu:
 
 Ctrl-n en Ctrl-p: Ctrl-Tab and Ctrl-Shift-Tab (Ctrl-Backtab). (subject: tab switching)
 PageUp and PageDown buttons don't work (Ctrl-b and Ctrl-f do, so why not add something for the page up and down buttons as well?)
+0 (zero - home) should go to beginning of line with or without whitespace (as in a toggle)
+- (minus, next to 0 (zero); so next to 'home') should be 'end' (the $ in vim)
 
+vims :TOhtml command
 Code folding.
 Cross platform line endings
 vims 'r' command
