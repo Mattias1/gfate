@@ -26,12 +26,27 @@ class TextWin(Win):
         self.doc.OnActivate.add(self.onActivate)
         self.doc.OnPrompt.add(self.onPrompt)
         self.flickerCountLeft = 0
-        self.oldSelection = self.doc.selection[-1]
+        self.oldSelection = [] # self.selection[-1]
         self.textOffset = Pos(6, 4)     # Margin for the text in px (so that it doesn't hug the borders)
         self._displayOffset = Pos(0, 0) # The character with this pos (col, row) is the first one to be drawn (so it's in the top left of the text win)
-        self._displayIndex = 0          # The index of the above character in the self.doc.text string
+        self._displayIndex = 0          # The index of the above character in the self.text string
         self.textRange = Size(0, 0)     # The amount of letters that fit in the screen
-        self.nrOfLines = 0              # The total number of lines (ie. newline chars) in self.doc.text
+        self.nrOfLines = 0              # The total number of lines (ie. newline chars) in self.text
+
+    #
+    # Properties and shortcuts
+    #
+    @property
+    def text(self):
+        return self.doc.text # self.doc.view.text
+
+    @property
+    def selection(self):
+        return self.doc.selection # self.doc.view.text
+
+    @property
+    def highlighting(self):
+        return self.doc.highlighting # self.doc.view.text
 
     @property
     def displayOffset(self):
@@ -50,16 +65,19 @@ class TextWin(Win):
     def cursorRange(self):
         return self.textRange - 2 * self.settings.cursormargin - (0, 1)
 
+    #
+    # The main methods
+    #
     def loop(self):
         # Update some stats for fast access
         if self.app.mainWindow.redrawMarker:
             oldNrOfLines = self.nrOfLines
-            self.nrOfLines = self.doc.text.count('\n')
+            self.nrOfLines = self.text.count('\n')
             if self.nrOfLines != oldNrOfLines:
                 self.app.mainWindow.updateScrollImgs()
         # Adjust display offset on cursor movement
-        if self.oldSelection != self.doc.selection[-1]:
-            self.oldSelection = self.doc.selection[-1]
+        if self.oldSelection != self.selection[-1]:
+            self.oldSelection = self.selection[-1]
             self.resetCursor()
             self.redraw()
         # Update commandWindow and errorWindow (the latter even when not active)
@@ -82,7 +100,7 @@ class TextWin(Win):
         selectionstext = ''
         w, h = self.settings.userfontsize.t
         lineNrW = self.calcLineNumberWidth(w)
-        for i, (b, e) in enumerate(self.doc.selection):
+        for i, (b, e) in enumerate(self.selection):
             if b >= e:
                 bx, by = self.getCoordFromChar(b).t
                 self.drawCursor(bx, by, lineNrW)
@@ -100,7 +118,7 @@ class TextWin(Win):
                     self.drawCursor(ex, ey, lineNrW)
 
         # Draw text
-        self.drawText(self.doc.text, self.doc.highlighting, lineNrW)
+        self.drawText(self.text, self.highlighting, lineNrW)
 
         # Draw scrollbars
         self.drawScrollbars()
@@ -130,7 +148,7 @@ class TextWin(Win):
         color = self.colors.selectionbg
         i = b
         while i < e:
-            c = self.doc.text[i]
+            c = self.text[i]
             # Can't deal with OSX line endings or word wrap (TODO !)
             if i == e - 1 or c == '\n':
                 if oy <= by <= oy + self.textRange.h:
@@ -154,35 +172,35 @@ class TextWin(Win):
         w, h = settings.userfontsize.t      # The size of one character
         i = self.displayIndex               # The index of the character currently being processed
         x, y = (0, 0)                       # The coordinates of that char (relative to screen)
-        maxLength = len(self.doc.text)      # The amount of letters in a text (used as stop criterium)
+        maxLength = len(self.text)      # The amount of letters in a text (used as stop criterium)
         # The length of a linenumber - Can't deal with OSX line endings or word wrap (TODO !)
         while True:
             length = 0                      # The length of the interval currently being processed (nr of characters)
-            label = '' if not i in self.doc.highlighting else self.doc.highlighting[i]  # The current label
+            label = '' if not i in self.highlighting else self.highlighting[i]  # The current label
 
             # Draw a text interval with the same label
             # Can't deal with OSX line endings or word wrap (TODO !)
             while i < maxLength:
-                tempLabel = '' if not i in self.doc.highlighting else self.doc.highlighting[i]
-                if tempLabel != label or self.doc.text[i] == '\n':
+                tempLabel = '' if not i in self.highlighting else self.highlighting[i]
+                if tempLabel != label or self.text[i] == '\n':
                     break
                 length += 1
                 i += 1
             self.drawString(str(y + 1 + self.displayOffset.y), colors.linenumber, (lineNrW - settings.linenumbermargin, self.textOffset.y + h*y), 'ne')
-            self.drawString(self.doc.text[i - length : i], colors.fromLabel(label), self.textOffset + (lineNrW + w*x, h*y))
+            self.drawString(self.text[i - length : i], colors.fromLabel(label), self.textOffset + (lineNrW + w*x, h*y))
 
             # Stop drawing at the end of the screen or the end of the text
             if h * y > self.size.h or i >= maxLength:
                 break
 
             # Special case for the new line character - Can't deal with OSX line endings or word wrap (TODO !)
-            if self.doc.text[i] == '\n':
+            if self.text[i] == '\n':
                 y += 1
                 x = 0
                 # Now skip the first "displayOffset.x'th" characters (except with newline chars)
                 for j in range(self.displayOffset.x + 1):
                     i += 1
-                    if i >= maxLength or self.doc.text[i] == '\n':
+                    if i >= maxLength or self.text[i] == '\n':
                         break
             else:
                 x += length
@@ -249,7 +267,7 @@ class TextWin(Win):
     def scrollText(self, vert, n):
         # Scroll a window vertically (or horizontally if vert is False) down n chars
         if vert:
-            maxLines = self.doc.text.count('\n') # Can't deal with OSX line endings or word wrap (TODO !)
+            maxLines = self.text.count('\n') # Can't deal with OSX line endings or word wrap (TODO !)
             self.displayOffset = (self.displayOffset.x, min(maxLines, max(0, self.displayOffset.y + n)))
         else:
             maxChars = 50 # TODO: use self.maxNrOfCharsOnALine
@@ -315,7 +333,7 @@ class TextWin(Win):
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
         x, y = startPosTuple
-        text = self.doc.text
+        text = self.text
         for i in range(start, n):
             c = text[i]
             x += 1
@@ -333,7 +351,7 @@ class TextWin(Win):
         offset = self.pos + self.textOffset
         x, y = p.t
         cx, cy = 0, 0
-        text = self.doc.text
+        text = self.text
         try:
             while cy < y:
                 c = text[i]
