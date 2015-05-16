@@ -310,14 +310,45 @@ class TextWin(Win):
     #
     # Some helper methods
     #
-    def getCoordFromChar(self, n):
-        if n == 0:
-            return Pos(0, 0)
-        return Pos(fate.navigation.position_to_coord(n, self.doc.text))
+    def getCoordFromChar(self, n, start=0, startPosTuple=(0, 0)):
+        """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
+        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
+        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
+        x, y = startPosTuple
+        text = self.doc.text
+        for i in range(start, n):
+            c = text[i]
+            x += 1
+            if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
+                y += 1
+                x = 0
+        return Pos(x, y)
 
-    def getCharFromCoord(self, p, crop=False):
+    def getCharFromCoord(self, p):
         """Return character index from the (x, y) coordinates. This is a truly terrible method."""
-        return fate.navigation.coord_to_position(p.y, p.x, self.doc.text, crop)
+        # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
+        # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
+        i = 0
+        w, h = self.settings.userfontsize.t
+        offset = self.pos + self.textOffset
+        x, y = p.t
+        cx, cy = 0, 0
+        text = self.doc.text
+        try:
+            while cy < y:
+                c = text[i]
+                if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
+                    cy += 1
+                i += 1
+            while cx < x:
+                cx += 1
+                c = text[i]
+                if c == '\n':
+                    return i
+                i += 1
+            return i
+        except:
+            return i
 
     def getCharFromPixelCoord(self, p):
         """Return character index from the (x, y) coordinates (in pixels). This is a truly terrible method."""
