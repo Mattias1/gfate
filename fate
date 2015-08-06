@@ -1,4 +1,4 @@
-#!python
+#!python3
 """Top level script which runs fate."""
 
 import os
