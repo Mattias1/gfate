@@ -304,7 +304,7 @@ class MainWin(Win):
         if tabr.mode in ['RGB', 'RGBA']:
             for nr in [2, 5]:
                 pixr = pixs[nr]
-                tabColor = self.colors.toTuple(self.colors.bg if nr == 2 else self.colors.inactivetab)
+                tabColor = self.colors.toTuple(self.colors.activetabbg if nr == 2 else self.colors.inactivetabbg)
                 diff = [tabColor[i] - pixr[0, h-1][i] for i in range(3)]
                 temp = []
                 for y in range(h):
@@ -340,7 +340,8 @@ class MainWin(Win):
         self.drawImg(p, self.tabImgs[offset])
         self.drawImg(p + (w, 0), self.tabImgs[1 + offset])
         self.drawImg(p + (w + self.settings.tabsize.w, 0), self.tabImgs[2 + offset])
-        self.drawUIString(text, self.colors.tabtext, self.pos + p + (0, 9) + (self.settings.tabwidthextra, 0))
+        self.drawUIString(text, self.colors.activetab if active else self.colors.inactivetab,
+            self.pos + p + (0, 9) + (self.settings.tabwidthextra, 0))
 
     def drawTabs(self):
         """Manage the drawing of all the tabs"""
@@ -355,7 +356,7 @@ class MainWin(Win):
             tabname = lambda name: os.path.basename(name)
         # Draw tab background
         w = self.settings.tabsize.w + self.settings.tabwidthextra
-        self.drawRect(self.colors.tabbg, Pos(0, 0), Pos(self.size.w, y + h))
+        self.drawRect(self.colors.headerbg, Pos(0, 0), Pos(self.size.w, y + h))
         activeWin = -1
         # Draw inactive tabs
         for i, win in enumerate(self.textWins):

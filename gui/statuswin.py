@@ -17,15 +17,15 @@ class StatusWin(Win):
     def draw(self, selectionsText):
         """Draw some stats to the bottom of the text win"""
         h = self.settings.statusheight
-        self.drawHorizontalLine(self.colors.hexlerp(self.colors.tabtext, self.colors.bg, 0.75), 0)
-        self.drawRect(self.colors.tabbg, Pos(0, 1), Size(self.size.w, h - 1))
+        self.drawHorizontalLine(self.colors.hexlerp(self.colors.activetab, self.colors.activetabbg, 0.75), 0)
+        self.drawRect(self.colors.activetabbg, Pos(0, 1), Size(self.size.w, h - 1))
         h = self.size.h - h + 2
         # modestr = 'Normal' if not self.doc.mode else str(self.doc.mode)
         # selmodestr = '' if not self.doc.selectmode else str(self.doc.selectmode)
         # selpos = Pos(self.size.w - self.textOffset.x - (len(selectionsText) - 2) * self.settings.uifontsize.w, h)
-        # self.drawString(self.doc.filename + ('' if self.doc.saved else '*') + ' ' + self.doc.filetype, self.colors.tabtext, Pos(self.textOffset.x, h))
-        # self.drawString('{} {}'.format(modestr, selmodestr), self.colors.tabtext, Pos(self.size.w * 2 // 3, h))
-        # self.drawString(selectionsText[:-2], self.colors.tabtext, selpos)
+        # self.drawString(self.doc.filename + ('' if self.doc.saved else '*') + ' ' + self.doc.filetype, self.colors.activetab, Pos(self.textOffset.x, h))
+        # self.drawString('{} {}'.format(modestr, selmodestr), self.colors.activetab, Pos(self.size.w * 2 // 3, h))
+        # self.drawString(selectionsText[:-2], self.colors.activetab, selpos)
 
         status = '{} | {} | {} | {} | {}'.format(
            self.win.getTitle(),
@@ -33,7 +33,7 @@ class StatusWin(Win):
            self.doc.mode,
            self.doc.selectmode,
            selectionsText[:-2])
-        self.drawUIString(status, self.colors.tabtext, Pos(self.win.textOffset.x, h))
+        self.drawUIString(status, self.colors.activetab, Pos(self.win.textOffset.x, h))
 
     def resize(self, draw=True):
         """Override the resize window"""

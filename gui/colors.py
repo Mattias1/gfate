@@ -1,25 +1,61 @@
+from os.path import expanduser
+import json
+
+
 class Colors():
     """The colors class"""
 
     def __init__(self):
-        self.loadDefaults()
-
-    def loadDefaults(self):
-        self.bg = '#272822'
-        self.text = '#eeeeee'
-        self.linenumber = '#777777'
-        self.selectionbg = '#575852'
-        self.inactivetab = '#474842'
-        self.tabbg = '#171714'
-        self.tabtext = '#eeeeee'
-        self.scroll = '#737373'
-        self.scrollbg = '#20211b'
-        self.gear = '#737373'
-
-    def load(self):
-        """Load all the colors from json file"""
         pass
 
+    #
+    # Json loading functions
+    #
+    def load(self, colorsfile):
+        """Load all the colors from json file"""
+        try:
+            path = 'colors/' + colorsfile + '.json'
+            self.loadColors(path)
+        except (FileNotFoundError, PermissionError) as e:
+            try:
+                path = expanduser('~') + '/.fate/gfate/' + colorsfile + '.json'
+                self.loadColors(path)
+            except:
+                print('Could not open the gfate settings.json file.')
+                return
+        self.loadColors(path)
+
+    def loadColors(self, path):
+        # IO magic here
+        with open(path, 'r') as fd:
+            content = fd.read()
+
+        # JSON magic here
+        settings = json.loads(content)
+
+        self.bg = settings['bg']
+        self.linenumber = settings['linenumber']
+        self.selectionbg = settings['selectionbg']
+
+        self.text = settings['text']
+        self.string = settings['string']
+        self.number = settings['number']
+        self.keyword = settings['keyword']
+        self.comment = settings['comment']
+
+        self.activetab = settings['activetab']
+        self.activetabbg = settings['activetabbg']
+        self.inactivetab = settings['inactivetab']
+        self.inactivetabbg = settings['inactivetabbg']
+        self.headerbg = settings['headerbg']
+
+        self.scroll = settings['scroll']
+        self.scrollbg = settings['scrollbg']
+        self.gear = settings['gear']
+
+    #
+    # Helper functions
+    #
     def toTuple(self, color):
         """Convert a hexadecimal colour to a integer tuple"""
         c = int(color[1:], 16)
@@ -35,12 +71,12 @@ class Colors():
 
     def fromLabel(self, label):
         if label == 'string':
-            return '#e6db74'
+            return self.string
         if label == 'number':
-            return '#ae81ff'
+            return self.number
         if label == 'keyword':
-            return '#f92672'
+            return self.keyword
         if label == 'comment':
-            return '#75715e'
+            return self.comment
         return self.text
 

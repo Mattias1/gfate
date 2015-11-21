@@ -5,17 +5,25 @@
     "windowpos" : [50, 50],
     "windowsize" : [800, 500],
     "commandwindowsize" : [300, 58],
+
+    "colors" : "default",
+
     "uifont" : { "family" : "Courier New", "size" : 10 },
     "userfont" : { "family" : "Courier new", "size" : 10 },
+
+    "linenumbers" : true,
+
     "tabsize" : [110, 36],
     "tabwidthextra" : 30,
     "tabname" : "filename",
-    "statuswinenabled" : true,
-    "maxerrorlines" : 5,
-    "scrolllines": 3,
+
     "scrollbars" : "both",
     "minimumscrollbarsize" : 50,
-    "linenumbers" : true,
+    "scrolllines": 3,
+
+    "maxerrorlines" : 5,
+    "statuswinenabled" : true,
+
     "fps" : 30,
     "flickertime" : 0.400
 }

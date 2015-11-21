@@ -1,17 +1,24 @@
  Todo's for gfate.
 ===================
 
-Fully functional scrollbars.
+ Important todo's
+------------------
 Search support.
+The tab vs space thing - don't user fate's string directly, but it's "view string" / "display string".
+
+
+ Other todo's
+--------------
+Settings gui.
+Fully functional scrollbars.
 Undo tree support.
 Colour scheme porting (also improve fate-core's syntax highlighting).
-Settings gui.
 Settings generate fate and gfate resource files - and open in explorer/nautilus.
 Code folding.
 Drag/drop files.
 Fix crash when it's resized too small.
 Bugfix mouse clicks (position to coord and vice versa are not that reliable)
-Use fates view file (get rid of most pos_to_coord calls and fixes the currently terrible selection displays :P)
+Use fates view file (get rid of most pos_to_coord calls and fixes the currently terrible selection displays :P) (wontfix? I like my own)
 
 Ubuntu:
 - Fix on resize event.
@@ -42,4 +49,8 @@ undo to saved undo part should remove the * in the name?
 Crash when input is not in keymap
 Auto scrolling when moving up or down scrolls (way) too early.
 Ctrl-Down (or J) means End, and Ctrl-Up (or K) means Home?
+When searching, n or N doesn't wrap. So if you are at the last match, and you press n it won't go to the first match on the page.
+
+A sort of 'e' command that moves up to the next capital letter (or end of word, so also include things like _ to stop)
+same for w and others
 

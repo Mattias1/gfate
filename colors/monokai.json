@@ -1,0 +1,22 @@
+{
+    "bg" : "#272822",
+    "linenumber" : "#777777",
+    "selectionbg" : "#575852",
+
+    "text" : "#eeeeee",
+    "string" : "#e6db74",
+    "number" : "#ae81ff",
+    "keyword" : "#f92672",
+    "comment" : "#75715e",
+
+    "activetab" : "#eeeeee",
+    "activetabbg" : "#272822",
+    "inactivetab" : "#eeeeee",
+    "inactivetabbg" : "#474842",
+    "headerbg" : "#171714",
+
+    "scroll" : "#737373",
+    "scrollbg" : "#20211b",
+    "gear" : "#737373"
+}
+

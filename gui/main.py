@@ -147,7 +147,7 @@ def main():
     """The main entrypoint for this application"""
     root = Tk()
     settings = Settings()
-    root.configure(bg=settings.colors.bg)
+    root.configure(bg="#000000")
     root.geometry('{}x{}+{}+{}'.format(settings.size.w, settings.size.h, settings.pos.x, settings.pos.y))
     return Application(settings, master=root)
 

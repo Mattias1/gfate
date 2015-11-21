@@ -9,9 +9,9 @@ class Settings():
     """The settings class"""
 
     def __init__(self):
+        self.colors = colors.Colors()
         self.loadDefaults()
         self.load()
-        self.colors = colors.Colors()
 
     def loadDefaults(self):
         try:
@@ -47,7 +47,11 @@ class Settings():
             return
 
         # JSON magic here
-        settings = json.loads(content)
+        try:
+            settings = json.loads(content)
+        except:
+            print('Error parsing the json file (' + path + ')')
+            return
 
         with suppress(KeyError):
             self.pos = Pos(settings['windowpos'][0], settings['windowpos'][1])
@@ -81,6 +85,11 @@ class Settings():
             self.fps_inv = 1 / settings['fps']                                  # seconds per frame
         with suppress(KeyError):
             self.flickercount = int(settings['flickertime'] // self.fps_inv)    # frames per cursor flicker change
+        colorsfile = ''
+        with suppress(KeyError):
+            colorsfile = settings['colors']
+        if colorsfile != '':
+            self.colors.load(colorsfile)
 
         # Calculate some settings based on loaded settings
         self.calcSettings()
