@@ -139,8 +139,9 @@ class Application(Frame):
         return prefix + c
 
     def showOptions(self):
-        self.optionsWindow = Options(self.master, self, self.settings)
-        print('AFTER OPTIONS')
+        # self.optionsWindow = Options(self.master, self, self.settings)
+        # print('AFTER OPTIONS')
+        pass
 
 
 def main():
