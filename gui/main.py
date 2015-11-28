@@ -115,7 +115,7 @@ class Application(Frame):
     def getchar(self, e):
         """Convert a tkinter event (given these three different representations of the same char)"""
         # Get prefixes
-        prefix = ('Ctrl-' if self.ctrl else '') + ('Alt-' if self.alt else '') + ('Super-' if self.superkey else '')
+        prefix = ('ctrl-' if self.ctrl else '') + ('alt-' if self.alt else '') + ('super-' if self.superkey else '')
 
         # Some basic key mapping
         num = e.keysym_num
@@ -126,15 +126,15 @@ class Application(Frame):
             c = name
 
         # Some exceptopns
-        if num == 65307: c = 'Esc'
+        if num == 65307: c = 'esc'
         elif num == 65288: c = '\b'
         elif num == 65293: c = '\n'
-        elif num == 65289: c = 'Backtab' if self.shift else '\t'
-        elif num == 65549: c = 'Capslock'
+        elif num == 65289: c = 'backtab' if self.shift else '\t'
+        elif num == 65549: c = 'capslock'
 
         # Name the F-keys to 'F(#)', not sure why though (e.keysym gives me F1 - F12).
         if 65470 <= num <= 65481:
-            c = 'F({})'.format(num - 65469)
+            c = 'f{}'.format(num - 65469)
 
         return prefix + c
 

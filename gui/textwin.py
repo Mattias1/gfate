@@ -24,9 +24,9 @@ class TextWin(Win):
         self.doc = doc
         self.doc.OnQuit.add(self.onQuit)
         self.doc.OnActivate.add(self.onActivate)
-        self.doc.OnPrompt.add(self.onPrompt)
+        # self.doc.OnPrompt.add(self.onPrompt)
         self.flickerCountLeft = 0
-        self.oldSelection = [] # self.selection[-1]
+        self.oldInterval = None # self.selection[-1]
         self.textOffset = Pos(6, 4)     # Margin for the text in px (so that it doesn't hug the borders)
         self._displayOffset = Pos(0, 0) # The character with this pos (col, row) is the first one to be drawn (so it's in the top left of the text win)
         self._displayIndex = 0          # The index of the above character in the self.text string
@@ -38,15 +38,15 @@ class TextWin(Win):
     #
     @property
     def text(self):
-        return self.doc.text # self.doc.view.text
+        return self.doc.view.text
 
     @property
     def selection(self):
-        return self.doc.selection # self.doc.view.text
+        return self.doc.view.selection
 
     @property
     def highlighting(self):
-        return self.doc.highlighting # self.doc.view.text
+        return self.doc.view.highlighting
 
     @property
     def displayOffset(self):
@@ -76,8 +76,8 @@ class TextWin(Win):
             if self.nrOfLines != oldNrOfLines:
                 self.app.mainWindow.updateScrollImgs()
         # Adjust display offset on cursor movement
-        if self.oldSelection != self.selection[-1]:
-            self.oldSelection = self.selection[-1]
+        if self.oldInterval != self.selection[-1]:
+            self.oldInterval = self.selection[-1]
             self.resetCursor()
             self.redraw()
         # Update commandWindow and errorWindow (the latter even when not active)
@@ -172,16 +172,21 @@ class TextWin(Win):
         w, h = settings.userfontsize.t      # The size of one character
         i = self.displayIndex               # The index of the character currently being processed
         x, y = (0, 0)                       # The coordinates of that char (relative to screen)
-        maxLength = len(self.text)      # The amount of letters in a text (used as stop criterium)
+        maxLength = len(self.text)          # The amount of letters in a text (used as stop criterium)
         # The length of a linenumber - Can't deal with OSX line endings or word wrap (TODO !)
         while True:
             length = 0                      # The length of the interval currently being processed (nr of characters)
-            label = '' if not i in self.highlighting else self.highlighting[i]  # The current label
+            # print('DEBUG: {}, i: {}, len h: {}, len t: {}'.format(
+            #     self.highlighting, i, len(self.highlighting), len(self.text)
+            # ))
+            # assert i in self.highlighting
+            label = '' if i >= maxLength else self.highlighting[i]  # The current label
 
             # Draw a text interval with the same label
             # Can't deal with OSX line endings or word wrap (TODO !)
             while i < maxLength:
-                tempLabel = '' if not i in self.highlighting else self.highlighting[i]
+                # assert i in self.highlighting
+                tempLabel = self.highlighting[i]
                 if tempLabel != label or self.text[i] == '\n':
                     break
                 length += 1
@@ -388,9 +393,9 @@ class TextWin(Win):
     def onActivate(self, doc):
         self.app.mainWindow.enableTab(doc.ui.win)
 
-    def onPrompt(self, doc):
-        if 'Prompt' in str(self.doc.mode) and not self.commandWin.enabled:
-            self.commandWin.enable()
-        if 'Prompt' not in str(self.doc.mode) and self.commandWin.enabled:
-            self.commandWin.disable()
+    # def onPrompt(self, doc):
+    #     if 'Prompt' in str(self.doc.mode) and not self.commandWin.enabled:
+    #         self.commandWin.enable()
+    #     if 'Prompt' not in str(self.doc.mode) and self.commandWin.enabled:
+    #         self.commandWin.disable()
 

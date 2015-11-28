@@ -3,8 +3,8 @@
 
  Important todo's
 ------------------
-Search support.
-The tab vs space thing - don't user fate's string directly, but it's "view string" / "display string".
+Search support. (Note: command window event is gone, spy at tfate for ideas).
+Debug auto window offset positioning
 
 
  Other todo's
