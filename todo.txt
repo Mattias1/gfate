@@ -6,6 +6,8 @@
 Search support. (Note: command window event is gone, spy at tfate for ideas).
 Debug auto window offset positioning
 
+TODO gfate: view.selection kan leeg zijn (dus selection[-1] o.a. werkt niet (of text[i], #342)
+
 
  Other todo's
 --------------

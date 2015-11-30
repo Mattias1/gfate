@@ -135,30 +135,29 @@ class TextWin(Win):
 
     def drawCursor(self, cx, cy, lineNrW):
         """Draw a single cursor (that is, an empty selection)"""
-        ox, oy = self.displayOffset.t
-        if not oy <= cy <= oy + self.textRange.h:
+        offsetX, offsetY = self.displayOffset.t
+        if not offsetY <= cy <= offsetY + self.textRange.h:
             return
         w, h = self.settings.userfontsize.t
-        cursorVisible = self.flickerCountLeft <= self.settings.flickercount and not self.commandWin.enabled and cx >= ox
-        self.drawCursorLine(self.textOffset + (lineNrW, 0) + (w*(cx - ox), h*(cy - oy)), cursorVisible)
+        cursorVisible = self.flickerCountLeft <= self.settings.flickercount and not self.commandWin.enabled and cx >= offsetX
+        self.drawCursorLine(self.textOffset + (lineNrW, 0) + (w*(cx - offsetX), h*(cy - offsetY)), cursorVisible)
 
     def drawSelection(self, w, h, b, e, bx, by, lineNrW):
         """Draw a single selection rectangle"""
-        ox, oy = self.displayOffset.t
+        offsetX, offsetY = self.displayOffset.t
         color = self.colors.selectionbg
         i = b
         while i < e:
-            c = self.text[i]
             # Can't deal with OSX line endings or word wrap (TODO !)
-            if i == e - 1 or c == '\n':
-                if oy <= by <= oy + self.textRange.h:
-                    fromX = w*(bx - ox)
+            if i == e - 1 or i >= len(self.text) or self.text[i] == '\n':
+                if offsetY <= by <= offsetY + self.textRange.h:
+                    fromX = w*(bx - offsetX)
                     width = w*(i + 1 - b)
                     if fromX < 0:
                         width += fromX
                         fromX = 0
                     if width > 0:
-                        self.drawRect(color, self.textOffset + (lineNrW, 0) + (fromX, h*(by - oy)), Size(width, h))
+                        self.drawRect(color, self.textOffset + (lineNrW, 0) + (fromX, h*(by - offsetY)), Size(width, h))
                 if i == e - 1:
                     return (bx + i + 1 - b, by)
                 bx, by = 0, by + 1
@@ -334,21 +333,22 @@ class TextWin(Win):
     # Some helper methods
     #
     def getCoordFromChar(self, n, start=0, startPosTuple=(0, 0)):
-        """Return (x, y) coordinates of the n-th character. This is a truly terrible method."""
+        """Return (x, y) coordinates of the n-th character. This is a terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
         x, y = startPosTuple
         text = self.text
         for i in range(start, n):
-            c = text[i]
             x += 1
-            if c == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
+            if i >= len(text):
+                return Pos(x + 1, y)
+            if text[i] == '\n': # Can't deal with OSX line endings or word wrap (TODO !)
                 y += 1
                 x = 0
         return Pos(x, y)
 
     def getCharFromCoord(self, p):
-        """Return character index from the (x, y) coordinates. This is a truly terrible method."""
+        """Return character index from the (x, y) coordinates. This is a terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
         i = 0
@@ -374,7 +374,7 @@ class TextWin(Win):
             return i
 
     def getCharFromPixelCoord(self, p):
-        """Return character index from the (x, y) coordinates (in pixels). This is a truly terrible method."""
+        """Return character index from the (x, y) coordinates (in pixels). This is a terrible method."""
         # Not a very fast method, especially because it's executed often and loops O(n) in the number of characters,
         # but then Chiel's datastructure for text will probably be changed and then this method has to be changed as well.
         w, h = self.settings.userfontsize.t
