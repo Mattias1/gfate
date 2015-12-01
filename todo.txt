@@ -4,7 +4,8 @@
  Important todo's
 ------------------
 Search support. (Note: command window event is gone, spy at tfate for ideas).
-Debug auto window offset positioning
+Debug auto window offset positioning (Check logic in fate/navigation.py)
+Pagedown (scrollbar click)
 
 TODO gfate: view.selection kan leeg zijn (dus selection[-1] o.a. werkt niet (of text[i], #342)
 
@@ -37,6 +38,7 @@ PageUp and PageDown buttons don't work (Ctrl-b and Ctrl-f do, so why not add som
 0 (zero - home) should go to beginning of line with or without whitespace (as in a toggle)
 - (minus, next to 0 (zero); so next to 'home') should be 'end' (the $ in vim)
 
+Default keymap: p and P are pasteafter (P not paste before?)
 vims :TOhtml command
 Code folding.
 Cross platform line endings

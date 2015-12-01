@@ -76,10 +76,14 @@ class TextWin(Win):
             if self.nrOfLines != oldNrOfLines:
                 self.app.mainWindow.updateScrollImgs()
         # Adjust display offset on cursor movement
-        if self.oldInterval != self.selection[-1]:
-            self.oldInterval = self.selection[-1]
-            self.resetCursor()
-            self.redraw()
+
+        # TODO: if the display offset or index is changed, then we need to reset the cursor and redraw.
+        # We might already do that though.
+
+        # if self.oldInterval != self.selection[-1]:
+        #     self.oldInterval = self.selection[-1]
+        #     self.resetCursor()
+        #     self.redraw()
         # Update commandWindow and errorWindow (the latter even when not active)
         if self.commandWin.enabled:
             self.commandWin.loop()

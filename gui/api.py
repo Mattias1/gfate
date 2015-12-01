@@ -36,6 +36,15 @@ class API(fate.userinterface.UserInterfaceAPI):
 
     @viewport_offset.setter
     def viewport_offset(self, value):
+        # TODO: I am probably doing the wrong thing here.
+        # I either should:
+        #   - Make sure that the given display index (value) is the first char on the line
+        #     (but fate is not going to give me this probably)
+        #   - Make sure that the drawing is smart and only change scroll position (especially horizontally) if nescessary.
+        #     (This means that the display offset is not really the display offset, but rather the offset of the current char)
+        #   - Make a pull request for fate to do this properly :)
+        #     (I defenitely should figure out what fate does exactly with setting the viewport_offset).
+
         self.win._displayIndex = value
         self.win._displayOffset = self.win.getCoordFromChar(value)
         self.win.redraw()
