@@ -4,7 +4,6 @@ from .colors import *
 from .textwin import TextWin
 import fate
 import fate.document
-import fate.commands
 from fate.pointer import PointerClick, PointerDoubleClick, PointerTripleClick, PointerInput
 from collections import deque
 
