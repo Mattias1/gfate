@@ -5,8 +5,8 @@ import json
 class Colors():
     """The colors class"""
 
-    def __init__(self):
-        pass
+    def __init__(self, rootpath):
+        self.rootpath = rootpath
 
     #
     # Json loading functions
@@ -14,7 +14,7 @@ class Colors():
     def load(self, colorsfile):
         """Load all the colors from json file"""
         try:
-            path = 'colors/' + colorsfile + '.json'
+            path = self.rootpath + 'colors/' + colorsfile + '.json'
             self.loadColors(path)
         except (FileNotFoundError, PermissionError) as e:
             try:

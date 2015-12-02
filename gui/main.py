@@ -1,3 +1,4 @@
+import os
 from tkinter import *
 from tkinter.ttk import *
 from mattycontrols.MattyControls import *
@@ -7,10 +8,11 @@ from .options import Options
 
 
 class Application(Frame):
-    def __init__(self, settings, master):
+    def __init__(self, settings, master, rootpath):
         """The tkinter frame that manages the canvas and the keyboard and mouse interaction"""
         frame_init(self, master)
         master.title('fate - test')
+        self.rootpath = rootpath
 
         self.ctrl, self.shift, self.alt, self.superkey = False, False, False, False
 
@@ -147,8 +149,9 @@ class Application(Frame):
 def main():
     """The main entrypoint for this application"""
     root = Tk()
-    settings = Settings()
+    rootpath = os.path.dirname(os.path.abspath(__file__)) + '/../'
+    settings = Settings(rootpath)
     root.configure(bg="#000000")
     root.geometry('{}x{}+{}+{}'.format(settings.size.w, settings.size.h, settings.pos.x, settings.pos.y))
-    return Application(settings, master=root)
+    return Application(settings, root, rootpath)
 

@@ -28,7 +28,6 @@ filenames = sys.argv[1:] or ['']
 fate.document.Document.create_userinterface = app.mainWindow.addWin
 for filename in filenames:
     doc = fate.document.Document(filename)
-# fate.document.activedocument = fate.document.documentlist[0]
 fate.document.documentlist[0].activate()
 
 # Start fate

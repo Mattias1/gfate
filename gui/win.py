@@ -83,7 +83,7 @@ class Win:
         self.g.create_rectangle((self.pos + p).t, (self.pos + p + s).t, fill=c, width=borderw)
 
     def loadImgPIL(self, path):
-        return Image.open('img/' + path)
+        return Image.open(self.app.rootpath + 'img/' + path)
     def loadImgTk(self, img):
         return ImageTk.PhotoImage(img)
     def loadImg(self, path):

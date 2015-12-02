@@ -8,17 +8,15 @@ import json
 class Settings():
     """The settings class"""
 
-    def __init__(self):
-        self.colors = colors.Colors()
-        self.loadDefaults()
+    def __init__(self, rootpath):
+        self.colors = colors.Colors(rootpath)
+        self.loadDefaults(rootpath)
         self.load()
 
-    def loadDefaults(self):
-        try:
-            self.loadSettings('settings-default.json')
-        except:
-            print('FATAL ERROR: COULD NOT LOAD DEFAULT SETTINGS!!!')
-            raise
+    def loadDefaults(self, rootpath):
+        print(rootpath)
+        result = self.loadSettings(rootpath + 'settings-default.json')
+        assert result, 'Could not load default settings!'
 
     def calcSettings(self):
         # The font sizes
@@ -44,14 +42,14 @@ class Settings():
                 content = fd.read()
         except (FileNotFoundError, PermissionError) as e:
             print('Could not open the gfate settings.json file.')
-            return
+            return False
 
         # JSON magic here
         try:
             settings = json.loads(content)
         except:
             print('Error parsing the json file (' + path + ')')
-            return
+            return False
 
         with suppress(KeyError):
             self.pos = Pos(settings['windowpos'][0], settings['windowpos'][1])
@@ -93,6 +91,7 @@ class Settings():
 
         # Calculate some settings based on loaded settings
         self.calcSettings()
+        return True
 
 
 class Pos():
