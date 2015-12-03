@@ -8,6 +8,7 @@ Debug auto window offset positioning (Check logic in fate/navigation.py)
 Pagedown (scrollbar click)
 
 TODO gfate: view.selection kan leeg zijn (dus selection[-1] o.a. werkt niet (of text[i], #342)
+Remove mattycontrols debug output
 
 
  Other todo's

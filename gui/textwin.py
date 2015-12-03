@@ -179,10 +179,6 @@ class TextWin(Win):
         # The length of a linenumber - Can't deal with OSX line endings or word wrap (TODO !)
         while True:
             length = 0                      # The length of the interval currently being processed (nr of characters)
-            # print('DEBUG: {}, i: {}, len h: {}, len t: {}'.format(
-            #     self.highlighting, i, len(self.highlighting), len(self.text)
-            # ))
-            # assert i in self.highlighting
             label = '' if i >= maxLength else self.highlighting[i]  # The current label
 
             # Draw a text interval with the same label

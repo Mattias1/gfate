@@ -14,7 +14,6 @@ class Settings():
         self.load()
 
     def loadDefaults(self, rootpath):
-        print(rootpath)
         result = self.loadSettings(rootpath + 'settings-default.json')
         assert result, 'Could not load default settings!'
 
