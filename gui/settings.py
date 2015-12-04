@@ -15,7 +15,8 @@ class Settings():
 
     def loadDefaults(self, rootpath):
         result = self.loadSettings(rootpath + 'settings-default.json')
-        assert result, 'Could not load default settings!'
+        if not result:
+            raise OSError('Fatal error: could not load, read or parse the default settings file!')
 
     def calcSettings(self):
         # The font sizes
