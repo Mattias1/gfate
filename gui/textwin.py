@@ -179,7 +179,10 @@ class TextWin(Win):
         # The length of a linenumber - Can't deal with OSX line endings or word wrap (TODO !)
         while True:
             length = 0                      # The length of the interval currently being processed (nr of characters)
-            label = '' if i >= maxLength else self.highlighting[i]  # The current label
+            try:
+                label = '' if i >= maxLength else self.highlighting[i]  # The current label
+            except:
+                print("i: {}, max len: {}, text view len: {}, text view highlighting len: {}".format(i, maxLength, len(self.text), len(self.highlighting)))
 
             # Draw a text interval with the same label
             # Can't deal with OSX line endings or word wrap (TODO !)
@@ -197,17 +200,20 @@ class TextWin(Win):
             if h * y > self.size.h or i >= maxLength:
                 break
 
-            # Special case for the new line character - Can't deal with OSX line endings or word wrap (TODO !)
-            if self.text[i] == '\n':
-                y += 1
-                x = 0
-                # Now skip the first "displayOffset.x'th" characters (except with newline chars)
-                for j in range(self.displayOffset.x + 1):
-                    i += 1
-                    if i >= maxLength or self.text[i] == '\n':
-                        break
-            else:
-                x += length
+            try:
+                # Special case for the new line character - Can't deal with OSX line endings or word wrap (TODO !)
+                if self.text[i] == '\n':
+                    y += 1
+                    x = 0
+                    # Now skip the first "displayOffset.x'th" characters (except with newline chars)
+                    for j in range(self.displayOffset.x + 1):
+                        i += 1
+                        if i >= maxLength or self.text[i] == '\n':
+                            break
+                else:
+                    x += length
+            except:
+                print("i: {}, max len: {}, text view len: {}".format(i, maxLength, len(self.text)))
 
     def drawScrollbars(self):
         """Draw the scroll bars"""

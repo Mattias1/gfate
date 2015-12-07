@@ -105,9 +105,9 @@ class MainWin(Win):
                 elif p.y <= y + h - barW:
                     posY = self.activeWin.calcScrollbarPos(True) + self.activeWin.pos.y
                     if p.y < posY:
-                        self.queue.append(fate.commands.pageup)
+                        self.queue.append(fate.commands.movepageup)
                     elif p.y > posY + self.scrollImgs[2].height() + 2 * self.scrollImgs[2].width():
-                        self.queue.append(fate.commands.pagedown)
+                        self.queue.append(fate.commands.movepagedown)
                     else:
                         print('todo: drag')
                         self.selectedScrollbar = 1

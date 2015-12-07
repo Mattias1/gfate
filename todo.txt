@@ -5,10 +5,9 @@
 ------------------
 Search support. (Note: command window event is gone, spy at tfate for ideas).
 Debug auto window offset positioning (Check logic in fate/navigation.py)
-Pagedown (scrollbar click)
 
 TODO gfate: view.selection kan leeg zijn (dus selection[-1] o.a. werkt niet (of text[i], #342)
-Remove mattycontrols debug output
+TODO: sometimes self.text changes inside the drawing for loop (by amoung others random scrollbar out of range clicks).
 
 
  Other todo's
