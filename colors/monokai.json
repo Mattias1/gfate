@@ -1,4 +1,6 @@
 {
+    "NOTE" : "This is a try at a port of TextMate's monokai colour scheme, originally created by Wimer Hazenber, but probably changed on the way.",
+
     "bg" : "#272822",
     "linenumber" : "#777777",
     "selectionbg" : "#575852",

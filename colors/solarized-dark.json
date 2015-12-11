@@ -1,0 +1,24 @@
+{
+    "NOTE" : "This is a try at a port of the solarized dark theme, by Ethan Schoonover.",
+
+    "bg" : "#002B36",
+    "linenumber" : "#839496",
+    "selectionbg" : "#073642",
+
+    "text" : "#839496",
+    "string" : "#839496",
+    "number" : "#d33682",
+    "keyword" : "#859900",
+    "comment" : "#586E75",
+
+    "activetab" : "#839496",
+    "activetabbg" : "#002B36",
+    "inactivetab" : "#839496",
+    "inactivetabbg" : "#011C23",
+    "headerbg" : "#021318",
+
+    "scroll" : "#586E75",
+    "scrollbg" : "#002B36",
+    "gear" : "#586E75"
+}
+

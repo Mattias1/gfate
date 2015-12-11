@@ -1,0 +1,24 @@
+{
+    "NOTE" : "This is a try at a port of the solarized light theme, by Ethan Schoonover.",
+
+    "bg" : "#FDF6E3",
+    "linenumber" : "#657B83",
+    "selectionbg" : "#EEE8D5",
+
+    "text" : "#657B83",
+    "string" : "#657B83",
+    "number" : "#d33682",
+    "keyword" : "#859900",
+    "comment" : "#586E75",
+
+    "activetab" : "#657B83",
+    "activetabbg" : "#FDF6E3",
+    "inactivetab" : "#657B83",
+    "inactivetabbg" : "#CCC6B9",
+    "headerbg" : "#073642",
+
+    "scroll" : "#586E75",
+    "scrollbg" : "#FDF6E3",
+    "gear" : "#586E75"
+}
+
