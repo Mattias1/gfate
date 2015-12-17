@@ -30,3 +30,6 @@ root = wreg.OpenKey(reg, r'\*\shell')
 key = wreg.OpenKey(root, r'Open with gfate')
 wreg.DeleteKey(key, 'command')
 wreg.DeleteKey(root, 'Open with gfate')
+
+# tell the user that the deinstallation succeeded
+print('gfate is successfully removed.')

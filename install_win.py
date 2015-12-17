@@ -58,4 +58,5 @@ wreg.SetValue(key, None, wreg.REG_SZ, '{} %1'.format(path_to_bat))
 # shortcut.IconLocation = icon
 # shortcut.save()
 
-
+# tell the user that the installation succeeded
+print('gfate is successfully installed.')
