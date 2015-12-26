@@ -105,4 +105,3 @@ class Win:
     def drawCursorLine(self, p, cursorvisible):
         if cursorvisible:
             self.drawLine(self.colors.text, p, p + (0, self.settings.userfontsize.h))
-

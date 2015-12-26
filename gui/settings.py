@@ -172,4 +172,3 @@ class Size():
 
     def __str__(self):
         return '{}x{}'.format(self.w, self.h)
-

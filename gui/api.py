@@ -26,6 +26,7 @@ class API(fate.userinterface.UserInterfaceAPI):
         while not self.inputqueue:
             sleep(self.win.settings.fps_inv)
         return self.inputqueue.popleft()
+
     @property
     def viewport_size(self):
         return self.win.textRange.t
@@ -55,4 +56,3 @@ class API(fate.userinterface.UserInterfaceAPI):
     def command_mode(self, command_string=':'):
         # This method is called from a different thread (the one fate runs in)
         raise NotImplementedError()
-

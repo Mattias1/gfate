@@ -404,4 +404,3 @@ class TextWin(Win):
     #         self.commandWin.enable()
     #     if 'Prompt' not in str(self.doc.mode) and self.commandWin.enabled:
     #         self.commandWin.disable()
-

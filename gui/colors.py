@@ -79,4 +79,3 @@ class Colors():
         if label == 'comment':
             return self.comment
         return self.text
-

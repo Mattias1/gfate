@@ -453,4 +453,3 @@ class MainWin(Win):
         self.scrollImgsPil[0] = self.scrollImgsPil[0].resize((w, h1), Image.NEAREST)
         self.scrollImgsPil[1] = self.scrollImgsPil[1].resize((h2, w), Image.NEAREST)
         self.updatedScrollImages = True
-
