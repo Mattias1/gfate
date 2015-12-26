@@ -47,6 +47,7 @@ class Application(Frame):
         self.settings = settings
 
         self.master.after(int(self.settings.fps_inv * 1000), self.loop)
+        self.fateThread = None
 
     def quitApp(self):
         self.mainWindow.quit()
@@ -112,7 +113,12 @@ class Application(Frame):
     def loop(self):
         """Private method to manage the loop method"""
         self.mainWindow.loop()
-        self.master.after(int(self.settings.fps_inv * 1000), self.loop)
+        if not self.fateThread.isAlive() and self.mainWindow.activeWin:
+            # If fate crashed, close gfate but keep the console open for just a bit
+            self.master.quit()
+            self.quitOnFateError = True
+        else:
+            self.master.after(int(self.settings.fps_inv * 1000), self.loop)
 
     def getchar(self, e):
         """Convert a tkinter event (given these three different representations of the same char)"""
@@ -144,14 +150,3 @@ class Application(Frame):
         # self.optionsWindow = Options(self.master, self, self.settings)
         # print('AFTER OPTIONS')
         pass
-
-
-def main():
-    """The main entrypoint for this application"""
-    root = Tk()
-    rootpath = os.path.dirname(os.path.abspath(__file__)) + '/../'
-    settings = Settings(rootpath)
-    root.configure(bg="#000000")
-    root.geometry('{}x{}+{}+{}'.format(settings.size.w, settings.size.h, settings.pos.x, settings.pos.y))
-    return Application(settings, root, rootpath)
-

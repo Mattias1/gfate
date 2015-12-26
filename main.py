@@ -15,13 +15,21 @@ sys.path.insert(0, libs_path_fate)
 # - and thus easily test development source
 # - have multiple fate packages, in case we would use multiple user interfaces.
 
-import gui.main
+import tkinter
+import gui.app
+import gui.settings
 import fate
 import threading
 import logging
+import contextlib
 
 # Create gfate
-app = gui.main.main()
+root = tkinter.Tk()
+rootpath = os.path.dirname(os.path.abspath(__file__)) + '/'
+settings = gui.settings.Settings(rootpath)
+root.configure(bg="#000000")
+root.geometry('{}x{}+{}+{}'.format(settings.size.w, settings.size.h, settings.pos.x, settings.pos.y))
+app = gui.app.Application(settings, root, rootpath)
 
 # Create fate
 filenames = sys.argv[1:] or ['']
@@ -32,16 +40,24 @@ fate.document.documentlist[0].activate()
 
 # Start fate
 thread = threading.Thread(target=fate.run)
+app.fateThread = thread
 thread.start()
 
-# Forward the fate logging to the standard out
-logging.getLogger().addHandler(logging.StreamHandler())
+# Forward the fate logging to the standard out (debug)
+# logging.getLogger().addHandler(logging.StreamHandler())
 
 # Start gfate
 try:
     app.mainloop()
+    # If fate crashes, close the gfate gui and leave a message (aka, keep the console alive)
+    with contextlib.suppress(AttributeError):
+        if app.quitOnFateError:
+            root.destroy()
+            print('====================\n  UNEXPECTED ERROR\n====================')
+            print('gfate detected that the fate core thread is no longer active.\nPress enter to quit...')
+            input()
+
 except:
+    # If gfate crashes, close the fate core
     fate.commands.force_quit()
     raise
-
-# TODO: at crash close eachother (double try catch)
