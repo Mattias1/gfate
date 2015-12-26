@@ -46,9 +46,10 @@ thread.start()
 # Forward the fate logging to the standard out (debug)
 # logging.getLogger().addHandler(logging.StreamHandler())
 
-# Start gfate
 try:
+    # Start gfate
     app.mainloop()
+
     # If fate crashes, close the gfate gui and leave a message (aka, keep the console alive)
     with contextlib.suppress(AttributeError):
         if app.quitOnFateError:
@@ -56,7 +57,6 @@ try:
             print('====================\n  UNEXPECTED ERROR\n====================')
             print('gfate detected that the fate core thread is no longer active.\nPress enter to quit...')
             input()
-
 except:
     # If gfate crashes, close the fate core
     fate.commands.force_quit()
