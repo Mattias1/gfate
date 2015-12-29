@@ -20,11 +20,11 @@ except IndexError:
 # Create bat file in installation directory
 path_to_bat = installation_dir + '\\gfate.bat'
 with open(path_to_bat, 'w') as f:
-    f.write('"{}" "{}" %*'.format(path_to_python, path_to_main))
+    f.write('"{}" "{}" "%*"'.format(path_to_python, path_to_main))
 
 # Create shell file in installation directory
 with open(installation_dir + '\\gfate', 'w') as f:
-    f.write('"{}" "{}" $@'.format(path_to_python, path_to_main))
+    f.write('"{}" "{}" "$@"'.format(path_to_python, path_to_main))
 
 
 # Create registry key to open files in gfate from context menu
